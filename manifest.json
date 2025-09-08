@@ -2,7 +2,7 @@
   "name": "Gustaf Eden - Portfolio",
   "short_name": "Gustaf Eden",
   "description": "Creative Developer & Designer Portfolio",
-  "start_url": "/",
+  "start_url": "/Portfolio/",
   "display": "standalone",
   "background_color": "#FAFAFA",
   "theme_color": "#4B4BF9",
@@ -13,7 +13,7 @@
       "type": "image/png"
     },
     {
-      "src": "images/icon-512.png", 
+      "src": "images/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
