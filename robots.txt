@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://gustafeden.github.io/portfolio/sitemap.xml
+
+# Disallow common non-content directories
+Disallow: /.git/
+Disallow: /css/
+Disallow: /js/
+Disallow: /images/
+Disallow: /data/

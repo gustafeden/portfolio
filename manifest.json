@@ -1,0 +1,21 @@
+{
+  "name": "Gustaf Eden - Portfolio",
+  "short_name": "Gustaf Eden",
+  "description": "Creative Developer & Designer Portfolio",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFAFA",
+  "theme_color": "#4B4BF9",
+  "icons": [
+    {
+      "src": "images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/icon-512.png", 
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
