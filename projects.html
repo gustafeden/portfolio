@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects - Gustaf Eden</title>
+    <meta name="description" content="Browse my portfolio of web development and design projects">
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'stone-gray': '#6E6E6E',
+                        'clay-brown': '#8B5E3C',
+                        'olive-green': '#6C7A5D',
+                        'sand-beige': '#D6C7B0',
+                        'charcoal-black': '#2F2F2F',
+                        'charcoal-lighter': '#3A3A3A'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- anime.js -->
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+    
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body class="bg-charcoal-black text-sand-beige antialiased">
+    
+    <!-- Navigation -->
+    <header x-data="{ isOpen: false, scrolled: false }" 
+            @scroll.window="scrolled = (window.pageYOffset > 20)"
+            :class="{ 'bg-charcoal-black/90 backdrop-blur-md': scrolled }"
+            class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <nav class="max-w-6xl mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="/" class="text-2xl font-semibold hover:text-clay-brown transition-colors">
+                    <span class="text-clay-brown">G</span>ustaf
+                </a>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="/" class="nav-link relative text-sand-beige hover:text-clay-brown transition-colors">Home</a>
+                    <a href="projects.html" class="nav-link relative text-clay-brown transition-colors">Projects</a>
+                    <a href="about.html" class="nav-link relative text-sand-beige hover:text-clay-brown transition-colors">About</a>
+                    <a href="contact.html" class="nav-link relative text-sand-beige hover:text-clay-brown transition-colors">Contact</a>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button @click="isOpen = !isOpen" class="md:hidden text-sand-beige">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path x-show="!isOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        <path x-show="isOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div x-show="isOpen" 
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 transform -translate-y-2"
+                 x-transition:enter-end="opacity-100 transform translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 transform translate-y-0"
+                 x-transition:leave-end="opacity-0 transform -translate-y-2"
+                 class="md:hidden mt-4 pb-4">
+                <a href="/" class="block py-2 text-sand-beige hover:text-clay-brown transition-colors">Home</a>
+                <a href="projects.html" class="block py-2 text-clay-brown transition-colors">Projects</a>
+                <a href="about.html" class="block py-2 text-sand-beige hover:text-clay-brown transition-colors">About</a>
+                <a href="contact.html" class="block py-2 text-sand-beige hover:text-clay-brown transition-colors">Contact</a>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="pt-32 pb-16 px-6">
+        <div class="max-w-6xl mx-auto">
+            <h1 class="page-title text-4xl md:text-6xl font-bold mb-4 opacity-0">
+                My Projects
+            </h1>
+            <p class="page-subtitle text-xl text-stone-gray opacity-0">
+                A collection of my recent work in web development and design
+            </p>
+        </div>
+    </section>
+    
+    <!-- Filter Tabs -->
+    <section class="px-6 pb-8" x-data="{ activeFilter: 'all' }">
+        <div class="max-w-6xl mx-auto">
+            <div class="filter-tabs flex flex-wrap gap-4 opacity-0">
+                <button @click="activeFilter = 'all'" 
+                        :class="{ 'bg-clay-brown text-sand-beige': activeFilter === 'all', 'border border-stone-gray text-stone-gray hover:text-clay-brown hover:border-clay-brown': activeFilter !== 'all' }"
+                        class="px-4 py-2 rounded-lg transition-all duration-200">
+                    All Projects
+                </button>
+                <button @click="activeFilter = 'web'" 
+                        :class="{ 'bg-clay-brown text-sand-beige': activeFilter === 'web', 'border border-stone-gray text-stone-gray hover:text-clay-brown hover:border-clay-brown': activeFilter !== 'web' }"
+                        class="px-4 py-2 rounded-lg transition-all duration-200">
+                    Web Apps
+                </button>
+                <button @click="activeFilter = 'design'" 
+                        :class="{ 'bg-clay-brown text-sand-beige': activeFilter === 'design', 'border border-stone-gray text-stone-gray hover:text-clay-brown hover:border-clay-brown': activeFilter !== 'design' }"
+                        class="px-4 py-2 rounded-lg transition-all duration-200">
+                    Design
+                </button>
+                <button @click="activeFilter = 'mobile'" 
+                        :class="{ 'bg-clay-brown text-sand-beige': activeFilter === 'mobile', 'border border-stone-gray text-stone-gray hover:text-clay-brown hover:border-clay-brown': activeFilter !== 'mobile' }"
+                        class="px-4 py-2 rounded-lg transition-all duration-200">
+                    Mobile
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Projects Grid -->
+    <section class="px-6 pb-20">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- Project 1 -->
+                <article class="project-item group cursor-pointer opacity-0" data-category="web">
+                    <div class="overflow-hidden rounded-lg bg-charcoal-lighter border border-stone-gray/20 hover:border-clay-brown/40 transition-all duration-300">
+                        <div class="aspect-video bg-gradient-to-br from-clay-brown/20 to-olive-green/20 overflow-hidden">
+                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                 src="https://via.placeholder.com/600x400/2F2F2F/D6C7B0?text=E-Commerce" 
+                                 alt="E-Commerce Platform">
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2 group-hover:text-clay-brown transition-colors">
+                                E-Commerce Platform
+                            </h3>
+                            <p class="text-stone-gray mb-4">
+                                Full-featured online store with payment processing and inventory management.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="text-xs px-2 py-1 bg-olive-green/20 text-olive-green rounded">React</span>
+                                <span class="text-xs px-2 py-1 bg-olive-green/20 text-olive-green rounded">Node.js</span>
+                                <span class="text-xs px-2 py-1 bg-olive-green/20 text-olive-green rounded">Stripe</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                
+                <!-- Project 2 -->
+                <article class="project-item group cursor-pointer opacity-0" data-category="web">
+                    <div class="overflow-hidden rounded-lg bg-charcoal-lighter border border-stone-gray/20 hover:border-clay-brown/40 transition-all duration-300">
+                        <div class="aspect-video bg-gradient-to-br from-olive-green/20 to-clay-brown/20 overflow-hidden">
+                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                 src="https://via.placeholder.com/600x400/2F2F2F/D6C7B0?text=Task+Manager" 
+                                 alt="Task Management App">
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2 group-hover:text-clay-brown transition-colors">
+                                Task Management App
+                            </h3>
+                            <p class="text-stone-gray mb-4">
+                                Collaborative workspace with real-time updates and team analytics.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="text-xs px-2 py-1 bg-olive-green/20 text-olive-green rounded">Vue.js</span>
+                                <span class="text-xs px-2 py-1 bg-olive-green/20 text-olive-green rounded">Firebase</span>
+                                <span class="text-xs px-2 py-1 bg-olive-green/20 text-olive-green rounded">Chart.js</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                
+                <!-- Project 3 -->
+                <article class="project-item group cursor-pointer opacity-0" data-category="design">
+                    <div class="overflow-hidden rounded-lg bg-charcoal-lighter border border-stone-gray/20 hover:border-clay-brown/40 transition-all duration-300">
+                        <div class="aspect-video bg-gradient-to-br from-clay-brown/20 to-stone-gray/20 overflow-hidden">
+                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                 src="https://via.placeholder.com/600x400/2F2F2F/D6C7B0?text=Brand+Design" 
+                                 alt="Brand Design System">
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2 group-hover:text-clay-brown transition-colors">
+                                Brand Design System
+                            </h3>
+                            <p class="text-stone-gray mb-4">
+                                Complete design system for a startup including logo and UI components.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="text-xs px-2 py-1 bg-olive-green/20 text-olive-green rounded">Figma</span>
+                                <span class="text-xs px-2 py-1 bg-olive-green/20 text-olive-green rounded">Design Systems</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                
+                <!-- Project 4 -->
+                <article class="project-item group cursor-pointer opacity-0" data-category="mobile">
+                    <div class="overflow-hidden rounded-lg bg-charcoal-lighter border border-stone-gray/20 hover:border-clay-brown/40 transition-all duration-300">
+                        <div class="aspect-video bg-gradient-to-br from-stone-gray/20 to-olive-green/20 overflow-hidden">
+                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                 src="https://via.placeholder.com/600x400/2F2F2F/D6C7B0?text=Mobile+App" 
+                                 alt="Fitness Tracking App">
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2 group-hover:text-clay-brown transition-colors">
+                                Fitness Tracking App
+                            </h3>
+                            <p class="text-stone-gray mb-4">
+                                Cross-platform mobile app for workout tracking and progress analytics.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="text-xs px-2 py-1 bg-olive-green/20 text-olive-green rounded">React Native</span>
+                                <span class="text-xs px-2 py-1 bg-olive-green/20 text-olive-green rounded">Redux</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                
+                <!-- Project 5 -->
+                <article class="project-item group cursor-pointer opacity-0" data-category="web">
+                    <div class="overflow-hidden rounded-lg bg-charcoal-lighter border border-stone-gray/20 hover:border-clay-brown/40 transition-all duration-300">
+                        <div class="aspect-video bg-gradient-to-br from-olive-green/20 to-stone-gray/20 overflow-hidden">
+                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                 src="https://via.placeholder.com/600x400/2F2F2F/D6C7B0?text=SaaS+Dashboard" 
+                                 alt="Analytics Dashboard">
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2 group-hover:text-clay-brown transition-colors">
+                                Analytics Dashboard
+                            </h3>
+                            <p class="text-stone-gray mb-4">
+                                Real-time analytics platform with customizable widgets and reports.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="text-xs px-2 py-1 bg-olive-green/20 text-olive-green rounded">Next.js</span>
+                                <span class="text-xs px-2 py-1 bg-olive-green/20 text-olive-green rounded">D3.js</span>
+                                <span class="text-xs px-2 py-1 bg-olive-green/20 text-olive-green rounded">PostgreSQL</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                
+                <!-- Project 6 -->
+                <article class="project-item group cursor-pointer opacity-0" data-category="design">
+                    <div class="overflow-hidden rounded-lg bg-charcoal-lighter border border-stone-gray/20 hover:border-clay-brown/40 transition-all duration-300">
+                        <div class="aspect-video bg-gradient-to-br from-clay-brown/20 to-olive-green/20 overflow-hidden">
+                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                 src="https://via.placeholder.com/600x400/2F2F2F/D6C7B0?text=Portfolio+Site" 
+                                 alt="Creative Portfolio">
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2 group-hover:text-clay-brown transition-colors">
+                                Creative Portfolio
+                            </h3>
+                            <p class="text-stone-gray mb-4">
+                                Minimalist portfolio website with smooth animations and dark theme.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="text-xs px-2 py-1 bg-olive-green/20 text-olive-green rounded">Alpine.js</span>
+                                <span class="text-xs px-2 py-1 bg-olive-green/20 text-olive-green rounded">Tailwind</span>
+                                <span class="text-xs px-2 py-1 bg-olive-green/20 text-olive-green rounded">anime.js</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="py-8 px-6 border-t border-stone-gray/20">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
+            <p class="text-stone-gray text-sm mb-4 md:mb-0">
+                © 2024 Gustaf Eden. All rights reserved.
+            </p>
+            <div class="flex space-x-6">
+                <a href="#" class="text-stone-gray hover:text-clay-brown transition-colors">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+                <a href="#" class="text-stone-gray hover:text-clay-brown transition-colors">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                    </svg>
+                </a>
+                <a href="#" class="text-stone-gray hover:text-clay-brown transition-colors">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Page-specific animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate page title
+            anime({
+                targets: '.page-title',
+                translateY: [30, 0],
+                opacity: [0, 1],
+                duration: 800,
+                easing: 'easeOutExpo'
+            });
+            
+            // Animate subtitle
+            anime({
+                targets: '.page-subtitle',
+                translateY: [20, 0],
+                opacity: [0, 1],
+                duration: 600,
+                delay: 200,
+                easing: 'easeOutCubic'
+            });
+            
+            // Animate filter tabs
+            anime({
+                targets: '.filter-tabs',
+                translateY: [20, 0],
+                opacity: [0, 1],
+                duration: 600,
+                delay: 400,
+                easing: 'easeOutCubic'
+            });
+            
+            // Animate project items
+            anime({
+                targets: '.project-item',
+                translateY: [40, 0],
+                opacity: [0, 1],
+                duration: 600,
+                delay: anime.stagger(100, {start: 500}),
+                easing: 'easeOutCubic'
+            });
+        });
+    </script>
+    <script src="js/app.js"></script>
+</body>
+</html>

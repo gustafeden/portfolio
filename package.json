@@ -1,0 +1,33 @@
+{
+  "name": "personal-portfolio",
+  "version": "1.0.0",
+  "description": "A sophisticated personal portfolio website built with Tailwind CSS, Alpine.js, and anime.js",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx tailwindcss -i ./css/main.css -o ./css/output.css --watch",
+    "build": "npx tailwindcss -i ./css/main.css -o ./css/output.css --minify",
+    "serve": "npx serve ."
+  },
+  "keywords": [
+    "portfolio",
+    "tailwind",
+    "alpine",
+    "anime",
+    "static-site"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "serve": "^14.2.0"
+  },
+  "dependencies": {
+    "alpinejs": "^3.13.0",
+    "animejs": "^3.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/username/portfolio"
+  },
+  "homepage": "https://username.github.io/portfolio"
+}

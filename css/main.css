@@ -1,0 +1,56 @@
+/* Custom CSS for additional styling */
+
+/* Smooth scroll behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom selection colors */
+::selection {
+    background-color: #8B5E3C;
+    color: #D6C7B0;
+}
+
+/* Navigation link underline animation */
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: #8B5E3C;
+    transition: width 0.3s ease;
+    transform-origin: left;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #2F2F2F;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #6E6E6E;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #8B5E3C;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
