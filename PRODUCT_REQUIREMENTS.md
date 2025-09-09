@@ -1,301 +1,236 @@
-# Personal Website - Product Requirements Document
+# Personal Website - Product Requirements Document (Revised v2)
 
 ## Project Overview
 
 ### Purpose
-Build a modern, minimalist personal website showcasing projects in a blog-like format with heavy emphasis on smooth, sophisticated animations using anime.js throughout the experience.
+Build a radically simple personal website with a sophisticated dark aesthetic, showcasing projects through graceful animations that enhance rather than distract from the content.
 
 ### Inspiration
-- Primary: https://www.nunonogueira.com (minimal layout, typography-focused, clean navigation)
-- Modern designer portfolio trends: experimental typography, fluid animations, interactive elements
+- Primary: https://www.nunonogueira.com (structure and restraint)
+- Dark aesthetic: felixdorner.de, justinjay.wang
+- Animation philosophy: Subtle, purposeful, leaves room for one major interactive element
 
 ### Technical Stack
 - **Hosting**: GitHub Pages
-- **Type**: Static site (HTML, CSS, JavaScript)
-- **Animation Library**: anime.js (use extensively for all animations)
-- **Build**: Keep simple for GitHub Pages compatibility
-
-## Core Features & Functionality
-
-### 1. Navigation & Page Transitions
-- Smooth page transitions using anime.js
-- Animated navigation menu (subtle hover effects, morphing underlines)
-- Scroll-triggered animations for content reveal
-- Magnetic cursor effects on interactive elements
-
-### 2. Project Showcase
-- Blog-style project listing with animated cards
-- Each project should have:
-  - Title with animated text reveal
-  - Preview image with hover parallax effect
-  - Brief description with staggered text animation
-  - Tags/categories with animated pills
-  - Date posted
-- Filter projects by category with animated transitions
-- Individual project pages with rich media support
-
-### 3. Interactive Design Elements
-- **Live Color Palette Display**:
-  - Floating color swatches that animate on scroll
-  - Click to copy hex codes with animated feedback
-  - Color transitions throughout the site
-- **Typography Showcase**:
-  - Animated type specimens
-  - Variable font weight animations
-- **Grid System Visualization**:
-  - Subtle grid overlay toggle with anime.js fade
-
-### 4. Social Links
-- Instagram, GitHub, LinkedIn, etc.
-- Animated icon hover states (rotate, scale, color shift)
-- Possibly a creative "link tree" style section
-
-## Information Architecture
-
-### Pages Structure
-
-```
-/
-├── index.html (Home)
-├── projects/
-│   ├── index.html (All projects)
-│   └── [project-name].html (Individual projects)
-├── about.html
-└── contact.html
-```
-
-### Homepage Sections
-1. **Hero Section**:
-   - Large typographic introduction
-   - Animated text reveal on load (letter by letter or word by word)
-   - Subtle floating/breathing animation loop
-   - Scroll indicator with bounce animation
-
-2. **Featured Projects**:
-   - 3-4 latest projects
-   - Staggered entrance animations
-   - Hover effects revealing project details
-
-3. **About Snippet**:
-   - Brief introduction
-   - Link to full about page
-   - Animated appearance on scroll
-
-4. **Footer**:
-   - Social links
-   - Copyright
-   - Perhaps a fun interactive element
-
-### Projects Page
-- Grid or list layout (toggle-able with animated transition)
-- Category filter with morphing animation
-- Load more with staggered animations
-- Search functionality with live filtering
-
-### About Page
-- Personal story/background
-- Skills visualization (animated charts/bars)
-- Timeline with scroll-triggered animations
-- Contact CTA
+- **Framework**: Tailwind CSS + Alpine.js + anime.js
+- **Type**: Static site with progressive enhancement
+- **Philosophy**: Fast, accessible, subtly animated
 
 ## Design Specifications
 
-### Visual Design
-- **Style**: Ultra-minimal, lots of whitespace, typography-focused
-- **Layout**: Asymmetric layouts, breaking the grid occasionally
-- **Typography**: 
-  - Large, bold headlines (possibly variable font)
-  - High contrast between heading and body text
-  - Experimental type treatments for special sections
-
 ### Color Palette
-```
-Primary Colors:
-- Background: #FAFAFA (off-white)
-- Text: #0A0A0A (near-black)
-- Accent: #4B4BF9 (electric blue) or similar bold color
-
-Secondary Colors:
-- Gray-500: #6B7280
-- Gray-300: #D1D5DB
-- Success: #10B981
-- Warning: #F59E0B
-
-(Display these on-site with animated color cards)
+```css
+--stone-gray: #6E6E6E     /* Primary text, subtle elements */
+--clay-brown: #8B5E3C     /* Warm accents, links, highlights */
+--olive-green: #6C7A5D    /* Secondary accents, tags, states */
+--sand-beige: #D6C7B0     /* Light text, borders, dividers */
+--charcoal-black: #2F2F2F /* Background, cards, containers */
 ```
 
-### Animation Principles
-- **Easing**: Use spring physics or custom bezier curves
-- **Duration**: Keep most animations between 400-800ms
-- **Stagger**: Use delays for group animations (50-100ms between items)
-- **Interaction**: Every clickable element should have feedback
-- **Performance**: Use transform and opacity for smooth 60fps
+### Dark Theme Hierarchy
+- **Primary Background**: Charcoal Black (#2F2F2F)
+- **Secondary Background**: Slightly lighter for cards/sections
+- **Primary Text**: Sand Beige (#D6C7B0)
+- **Secondary Text**: Stone Gray (#6E6E6E)
+- **Interactive Elements**: Clay Brown (#8B5E3C)
+- **Accent Details**: Olive Green (#6C7A5D)
 
-## Detailed Animation Specifications
+## Animation Philosophy with anime.js
 
-### Global Animations
-1. **Page Load**:
-   - Fade in with slight upward movement
-   - Staggered content reveal
-   - Logo/name animation
+### Core Principles
+- **Graceful Enhancement**: Site works perfectly with animations disabled
+- **Subtle by Default**: Most animations are barely noticeable micro-interactions
+- **Performance First**: 60fps, transform/opacity only, respect reduced-motion
+- **Future-Proof**: Reserve visual space and performance budget for one major animation feature
 
-2. **Scroll Animations**:
-   - Parallax effects on images
-   - Text reveals as elements enter viewport
-   - Progress indicator
+### Animation Inventory
 
-3. **Cursor**:
-   - Custom cursor with smooth follow
-   - Grows on hover of interactive elements
-   - Changes color/shape based on context
-
-### Component-Specific Animations
-
-#### Navigation
+#### Micro-Animations (Always Present)
 ```javascript
-// Example animation concept
-- Menu items slide in from top
-- Underline grows from 0 to 100% width on hover
-- Active state with persistent underline
-- Mobile menu with curtain reveal
+// Text reveals
+- Paragraph fade-in on scroll (opacity: 0 → 1, translateY: 20px → 0)
+- Staggered list items (50ms delay between items)
+
+// Navigation
+- Hover underline growth (scaleX: 0 → 1, transform-origin: left)
+- Active page indicator slide
+
+// Interactive feedback
+- Button/link hover (subtle scale: 1 → 1.02)
+- Project card hover (slight y-movement: 0 → -2px)
 ```
 
-#### Project Cards
+#### Signature Animations (Selective Use)
 ```javascript
-// Hover state
-- Image scales 1.05
-- Overlay fades in
-- Text slides up
-- Shadow grows
+// Page load
+- Hero text: letter-by-letter reveal with slight bounce
+- Logo/name: gentle fade-in with delay
+
+// Project showcase
+- Cards: entrance from bottom with stagger (translateY: 40px → 0)
+- Images: gentle parallax on scroll (subtle translateY movement)
+
+// Page transitions
+- Fade overlay between pages (if implementing SPA-style nav)
 ```
 
-#### Color Palette Display
+#### Reserved Animation Space
+- **Major Interactive Element**: TBD - could be:
+  - Hero section with mouse-follow effects
+  - Interactive project timeline
+  - Animated skill visualization
+  - Creative contact form interaction
+  - Dynamic background element
+
+### anime.js Implementation Strategy
 ```javascript
-// Interactive behavior
-- Colors float independently
-- Click to expand with color details
-- Copy animation with checkmark morph
-- Rainbow wave effect on special trigger
+// Global animation settings
+const animationConfig = {
+  duration: 600,
+  easing: 'easeOutCubic',
+  delay: (el, i) => i * 50 // Stagger timing
+}
+
+// Respect user preferences
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 ```
 
-## Content Structure
+## Technical Architecture
 
-### Project Post Format
-```markdown
----
-title: "Project Name"
-date: "2024-MM-DD"
-category: "Web Design / Development / etc"
-thumbnail: "/images/project-thumb.jpg"
-featured: true/false
----
+### Core Stack Integration
+- **Tailwind CSS**: Utility-first styling with custom color palette
+- **Alpine.js**: Lightweight reactivity for UI states (menu toggles, theme switching)
+- **anime.js**: Graceful animations with performance focus
 
-Project description...
-```
-
-### Required Content Sections
-1. **Bio/Introduction** (2-3 sentences)
-2. **Project Descriptions** (3-5 sentences each)
-3. **Contact Information**
-4. **Social Media Links**:
-   - Instagram
-   - GitHub
-   - LinkedIn
-   - Twitter/X (optional)
-   - Dribbble/Behance (optional)
-
-## Technical Requirements
-
-### Performance
-- Lighthouse score > 90
-- Smooth 60fps animations
-- Lazy load images
-- Minimize anime.js animations on mobile for performance
-
-### Responsive Design
-- Mobile-first approach
-- Breakpoints: 640px, 768px, 1024px, 1280px
-- Touch-friendly interaction areas
-- Reduced animations on mobile (respect prefers-reduced-motion)
-
-### Browser Support
-- Modern browsers (Chrome, Firefox, Safari, Edge - last 2 versions)
-- Graceful degradation for older browsers
-- Fallbacks for CSS features
-
-### SEO & Meta
-- Semantic HTML5
-- OpenGraph tags
-- Twitter cards
-- Structured data for projects
-- Sitemap.xml
-
-## Implementation Priorities
-
-### Phase 1 (MVP)
-1. Basic site structure and navigation
-2. Homepage with hero and projects
-3. Project listing page
-4. Essential anime.js animations
-5. Mobile responsive
-
-### Phase 2 (Enhancements)
-1. Individual project pages
-2. Advanced animations (cursor, parallax)
-3. Color palette display
-4. Category filtering
-5. About page
-
-### Phase 3 (Polish)
-1. Page transitions
-2. Search functionality
-3. Dark mode toggle
-4. Performance optimizations
-5. Additional experimental features
-
-## Special Features to Consider
-
-1. **Konami Code** or similar easter egg triggering a special animation
-2. **Time-based Greetings** with animated text
-3. **Visitor Counter** with retro flip animation
-4. **Theme Switcher** with morphing animation between themes
-5. **Audio Reactive Elements** (optional, might be too much)
-
-## File Structure
+### File Structure
 ```
 /
 ├── index.html
+├── projects.html
+├── about.html
+├── contact.html
+├── project/
+│   └── [project-pages].html
 ├── css/
-│   ├── main.css
-│   └── animations.css
+│   └── main.css (Tailwind + custom properties)
 ├── js/
-│   ├── main.js
-│   ├── animations.js
-│   └── projects.js
-├── projects/
-│   └── [project-files].html
-├── images/
-│   └── [project-images]
-└── data/
-    └── projects.json
+│   ├── animations.js (anime.js implementations)
+│   └── app.js (Alpine.js components)
+└── images/
+    └── [optimized assets]
+```
+
+### Performance Targets
+- **Load time**: < 2s on 3G
+- **Animation performance**: Consistent 60fps
+- **Bundle size**: 
+  - Tailwind: ~30KB (purged)
+  - Alpine.js: ~15KB
+  - anime.js: ~17KB
+  - Total JS: < 50KB
+
+## Core Features & Functionality
+
+### 1. Navigation & Transitions
+- Fixed header with subtle background blur on scroll
+- Smooth page transitions (if SPA approach)
+- Animated navigation indicators
+- Mobile-friendly hamburger with elegant open/close
+
+### 2. Project Showcase
+```html
+<!-- Example project card structure -->
+<article x-data="projectCard" class="group cursor-pointer">
+  <div class="overflow-hidden rounded-lg bg-charcoal-black/50">
+    <img class="parallax-img" src="project-thumb.jpg" alt="">
+    <div class="p-6">
+      <h3 class="text-sand-beige group-hover:text-clay-brown">Project Name</h3>
+      <p class="text-stone-gray">Brief description...</p>
+      <span class="text-olive-green text-sm">Web Design</span>
+    </div>
+  </div>
+</article>
+```
+
+### 3. Dark Theme Advantages
+- Reduced eye strain for portfolio browsing
+- Makes colorful project images pop
+- Professional, sophisticated aesthetic
+- Distinctive in a light-theme dominated web
+
+## Content Structure
+
+### Homepage Sections
+1. **Hero**: Large typography introduction with subtle animation
+2. **Featured Work**: 3-4 projects with entrance animations
+3. **Brief About**: 2-3 sentences with fade-in on scroll
+4. **Contact CTA**: Simple, animated call-to-action
+
+### Project Pages
+- Hero image with parallax scroll effect
+- Project details with staggered text reveals
+- Image galleries with subtle hover effects
+- Next/previous project navigation with transitions
+
+## Implementation Priorities
+
+### Phase 1 (Foundation)
+1. Tailwind setup with custom color palette
+2. Basic dark theme implementation
+3. Core page structure and navigation
+4. Essential Alpine.js interactions
+
+### Phase 2 (Animation Layer)
+1. anime.js integration and configuration
+2. Micro-animations for all interactive elements
+3. Scroll-triggered content reveals
+4. Page load animations
+
+### Phase 3 (Signature Feature)
+1. Design and implement the major animation element
+2. Performance optimization and testing
+3. Accessibility enhancements
+4. Cross-browser testing
+
+## Unique Differentiators
+
+### What Makes This Special
+1. **Sophisticated Dark Aesthetic**: Professional, not gaming/hacker
+2. **Restrained Animation**: Enhances usability rather than showing off
+3. **Warm Color Accents**: Clay and olive tones humanize the dark palette
+4. **Future-Ready**: Architecture supports adding one major interactive feature
+5. **Performance Conscious**: Fast loading despite animation library
+
+### Animation Restraint Examples
+```javascript
+// DON'T: Overwhelming
+anime({
+  targets: '.project-card',
+  rotate: [0, 360],
+  scale: [1, 1.2, 1],
+  duration: 2000,
+  loop: true
+})
+
+// DO: Subtle enhancement
+anime({
+  targets: '.project-card',
+  translateY: [20, 0],
+  opacity: [0, 1],
+  duration: 600,
+  delay: (el, i) => i * 100
+})
 ```
 
 ## Success Metrics
-- Smooth animations without jank
-- Fast load times (< 3s on 3G)
-- Intuitive navigation
-- Memorable design that showcases creativity
-- Easy to update with new projects
-
-## Notes for Development
-- Use CSS custom properties for easy theming
-- Keep anime.js animations modular and reusable
-- Comment code well for future updates
-- Use semantic HTML throughout
-- Implement a simple build process if needed for GitHub Pages
-- Consider using CSS Grid and Flexbox for layouts
-- Ensure all animations can be disabled for accessibility
+- Loads fast (< 2s) despite dark background and animations
+- Animations feel natural and enhance the experience
+- Dark theme is comfortable for extended viewing
+- Leaves visitors wanting to see more work
+- Provides clear path to contact/hire
 
 ---
 
-*This document serves as the complete specification for building the personal website. The focus should be on creating a memorable, smooth experience that showcases both the projects and technical/design capabilities through thoughtful use of anime.js animations.*
+**Core Philosophy**: Sophisticated restraint. Every animation serves a purpose. The dark palette creates focus. The warm accents add humanity. The site should feel polished and professional, not flashy or gimmicky.
+
+**The Animation Test**: If removing an animation makes the site feel broken, it's essential. If removing it makes no difference, cut it.
