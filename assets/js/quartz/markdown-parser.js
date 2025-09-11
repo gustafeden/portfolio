@@ -27,8 +27,16 @@ class MarkdownParser {
         // Inline code
         html = html.replace(/`([^`]+)`/g, '<code class="bg-stone-gray/20 px-2 py-1 rounded text-sm text-sand-beige">$1</code>');
 
-        // Links
-        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-clay-brown hover:text-sand-beige transition underline">$1</a>');
+        // Links - handle both external and internal project links
+        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+            // Check if it's a project link (projects/slug format)
+            if (url.startsWith('projects/')) {
+                const projectSlug = url.replace('projects/', '');
+                return `<a href="#" onclick="router.navigateToProject('${projectSlug}')" class="text-clay-brown hover:text-sand-beige transition underline">${text}</a>`;
+            }
+            // Regular external link
+            return `<a href="${url}" class="text-clay-brown hover:text-sand-beige transition underline">${text}</a>`;
+        });
 
         // Blockquotes
         html = html.replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-clay-brown pl-6 py-2 mb-4 italic text-sand-beige bg-stone-gray/5">$1</blockquote>');

@@ -1,6 +1,6 @@
 # Work & Projects
 
-A collection of projects spanning web applications, design systems, mobile apps, and data visualization.
+<!-- A collection of projects spanning web applications, design systems, mobile apps, and data visualization.
 
 ## Featured Projects
 
@@ -19,7 +19,7 @@ A comprehensive e-commerce solution featuring personalized product recommendatio
 
 **Tech Stack:** React, Node.js, PostgreSQL, Redis, Stripe, Docker
 
-[View Project →](stuff/project1.html)
+[View Project →](projects/e-commerce-platform)
 
 ---
 
@@ -36,7 +36,7 @@ Built a comprehensive design system from scratch, including 50+ reusable compone
 
 **Tech Stack:** React, TypeScript, Storybook, Figma, Jest, Chromatic
 
-[View Project →](stuff/project2.html)
+[View Project →](projects/design-system)
 
 ---
 
@@ -53,7 +53,7 @@ Designed and developed a mobile-first banking application focusing on security a
 
 **Tech Stack:** React Native, Firebase, Figma, Biometric Auth
 
-[View Project →](stuff/project3.html)
+[View Project →](projects/mobile-banking-app)
 
 ---
 
@@ -70,7 +70,7 @@ Created an interactive dashboard for real-time business analytics, featuring cus
 
 **Tech Stack:** D3.js, Python, PostgreSQL, WebSocket, Kafka, Machine Learning
 
-[View Project →](stuff/project4.html)
+[View Project →](projects/data-visualization-dashboard)
 
 ## Process & Approach
 
@@ -110,8 +110,6 @@ I'm always exploring new technologies and methodologies. Currently interested in
 - **AI/ML Integration** - Enhancing applications with intelligent features
 - **Web3 Technologies** - Exploring decentralized application possibilities
 - **Sustainable Computing** - Reducing environmental impact of digital products
-- **Advanced Animation** - Creating more engaging user interfaces
+- **Advanced Animation** - Creating more engaging user interfaces -->
 
 ---
-
-*Interested in working together? [Get in touch](mailto:gustaf@example.com) to discuss your next project.*
