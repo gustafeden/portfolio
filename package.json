@@ -1,0 +1,23 @@
+{
+  "name": "gustaf-portfolio",
+  "version": "1.0.0",
+  "description": "Gustaf Edén's portfolio with Quartz 4 integration",
+  "main": "index.html",
+  "scripts": {
+    "quartz-setup": "npx quartz create",
+    "build": "quartz build",
+    "serve": "quartz build --serve",
+    "sync": "quartz sync",
+    "dev": "live-server --port=3000",
+    "preview": "quartz build --serve --port=8080"
+  },
+  "keywords": ["portfolio", "quartz", "markdown", "web"],
+  "author": "Gustaf Edén",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {
+    "quartz-obsidian": "latest"
+  }
+}

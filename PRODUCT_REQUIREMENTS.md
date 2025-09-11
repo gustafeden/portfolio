@@ -1,301 +1,340 @@
-# Personal Website - Product Requirements Document
+# Personal Website - Product Requirements Document (Revised v3)
 
 ## Project Overview
 
 ### Purpose
-Build a modern, minimalist personal website showcasing projects in a blog-like format with heavy emphasis on smooth, sophisticated animations using anime.js throughout the experience.
+Build a unique single-page experience with split-screen/dynamic content loading. Left side: static navigation and identity. Right side: dynamic content that loads without page refreshes.
 
-### Inspiration
-- Primary: https://www.nunonogueira.com (minimal layout, typography-focused, clean navigation)
-- Modern designer portfolio trends: experimental typography, fluid animations, interactive elements
+### Inspiration Analysis
+- **felixdorner.de/concepts**: Split screen - static left sidebar with personal info, dynamic right content area
+- **justinjay.wang**: Single scroll page with sections, but clicking items loads detailed views inline
+- **Our Approach**: Hybrid - static left identity panel, dynamic right content that can be sections OR detailed views
 
-### Technical Stack
-- **Hosting**: GitHub Pages
-- **Type**: Static site (HTML, CSS, JavaScript)
-- **Animation Library**: anime.js (use extensively for all animations)
-- **Build**: Keep simple for GitHub Pages compatibility
-
-## Core Features & Functionality
-
-### 1. Navigation & Page Transitions
-- Smooth page transitions using anime.js
-- Animated navigation menu (subtle hover effects, morphing underlines)
-- Scroll-triggered animations for content reveal
-- Magnetic cursor effects on interactive elements
-
-### 2. Project Showcase
-- Blog-style project listing with animated cards
-- Each project should have:
-  - Title with animated text reveal
-  - Preview image with hover parallax effect
-  - Brief description with staggered text animation
-  - Tags/categories with animated pills
-  - Date posted
-- Filter projects by category with animated transitions
-- Individual project pages with rich media support
-
-### 3. Interactive Design Elements
-- **Live Color Palette Display**:
-  - Floating color swatches that animate on scroll
-  - Click to copy hex codes with animated feedback
-  - Color transitions throughout the site
-- **Typography Showcase**:
-  - Animated type specimens
-  - Variable font weight animations
-- **Grid System Visualization**:
-  - Subtle grid overlay toggle with anime.js fade
-
-### 4. Social Links
-- Instagram, GitHub, LinkedIn, etc.
-- Animated icon hover states (rotate, scale, color shift)
-- Possibly a creative "link tree" style section
-
-## Information Architecture
-
-### Pages Structure
-
+### Technical Stack (CDN Only)
+```html
+<!-- All libraries via CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 ```
+
+## Unique Page Structure
+
+### Layout Concept
+```
+┌─────────────────┬──────────────────────────┐
+│                 │                          │
+│   LEFT PANEL    │     RIGHT CONTENT        │
+│   (Static)      │     (Dynamic)           │
+│                 │                          │
+│   - Name        │   - Default: About       │
+│   - Photo       │   - Projects List        │
+│   - Navigation  │   - Individual Project   │
+│   - Social      │   - Contact Form         │
+│                 │   - Photo Collections    │
+│                 │                          │
+└─────────────────┴──────────────────────────┘
+```
+
+### Left Panel (Fixed - ~35% width)
+- **Name**: Large, minimalist typography with subtle anime.js effect
+- **Portrait**: Professional photo, subtle hover animation
+- **Navigation**: About, Work, Photos, Contact
+- **Social Links**: Minimal icons
+- **Background**: Charcoal Black with subtle texture/grain
+
+### Right Panel (Dynamic - ~65% width)
+- **Default State**: About section visible on load
+- **Content Types**:
+  - About (personal story)
+  - Work overview (project grid)
+  - Individual project details
+  - Photo collections
+  - Contact information
+
+## Content Structure & Navigation Flow
+
+### Navigation States
+```javascript
+// Default state
 /
-├── index.html (Home)
-├── projects/
-│   ├── index.html (All projects)
-│   └── [project-name].html (Individual projects)
-├── about.html
-└── contact.html
+├── Left: Name + Nav + Photo
+└── Right: About section
+
+// Navigation clicks load new right content
+/work
+├── Left: (unchanged)
+└── Right: Project grid
+
+/work/project-name
+├── Left: (unchanged) 
+└── Right: Detailed project view
+
+/photos
+├── Left: (unchanged)
+└── Right: Photo collection grid
+
+/photos/collection-name
+├── Left: (unchanged)
+└── Right: Photo gallery view
+
+/contact
+├── Left: (unchanged)
+└── Right: Contact form + info
 ```
 
-### Homepage Sections
-1. **Hero Section**:
-   - Large typographic introduction
-   - Animated text reveal on load (letter by letter or word by word)
-   - Subtle floating/breathing animation loop
-   - Scroll indicator with bounce animation
+### Left Panel Content
 
-2. **Featured Projects**:
-   - 3-4 latest projects
-   - Staggered entrance animations
-   - Hover effects revealing project details
-
-3. **About Snippet**:
-   - Brief introduction
-   - Link to full about page
-   - Animated appearance on scroll
-
-4. **Footer**:
-   - Social links
-   - Copyright
-   - Perhaps a fun interactive element
-
-### Projects Page
-- Grid or list layout (toggle-able with animated transition)
-- Category filter with morphing animation
-- Load more with staggered animations
-- Search functionality with live filtering
-
-### About Page
-- Personal story/background
-- Skills visualization (animated charts/bars)
-- Timeline with scroll-triggered animations
-- Contact CTA
-
-## Design Specifications
-
-### Visual Design
-- **Style**: Ultra-minimal, lots of whitespace, typography-focused
-- **Layout**: Asymmetric layouts, breaking the grid occasionally
-- **Typography**: 
-  - Large, bold headlines (possibly variable font)
-  - High contrast between heading and body text
-  - Experimental type treatments for special sections
-
-### Color Palette
-```
-Primary Colors:
-- Background: #FAFAFA (off-white)
-- Text: #0A0A0A (near-black)
-- Accent: #4B4BF9 (electric blue) or similar bold color
-
-Secondary Colors:
-- Gray-500: #6B7280
-- Gray-300: #D1D5DB
-- Success: #10B981
-- Warning: #F59E0B
-
-(Display these on-site with animated color cards)
+#### Name Section
+```html
+<!-- Animated name reveal -->
+<div class="name-container">
+  <h1 class="text-4xl font-light text-sand-beige">
+    <span class="letter">Y</span>
+    <span class="letter">o</span>
+    <span class="letter">u</span>
+    <span class="letter">r</span>
+    <!-- etc -->
+  </h1>
+  <p class="text-stone-gray">Designer & Developer</p>
+</div>
 ```
 
-### Animation Principles
-- **Easing**: Use spring physics or custom bezier curves
-- **Duration**: Keep most animations between 400-800ms
-- **Stagger**: Use delays for group animations (50-100ms between items)
-- **Interaction**: Every clickable element should have feedback
-- **Performance**: Use transform and opacity for smooth 60fps
+#### Navigation Menu
+```html
+<nav x-data="navigation" class="space-y-4">
+  <a @click="loadSection('about')" class="nav-link active">About</a>
+  <a @click="loadSection('work')" class="nav-link">Work</a>
+  <a @click="loadSection('photos')" class="nav-link">Photos</a>
+  <a @click="loadSection('contact')" class="nav-link">Contact</a>
+</nav>
+```
 
-## Detailed Animation Specifications
+### Right Panel Content Types
 
-### Global Animations
-1. **Page Load**:
-   - Fade in with slight upward movement
-   - Staggered content reveal
-   - Logo/name animation
+#### About Section (Default)
+- Brief personal story (3-4 paragraphs)
+- Current focus/availability
+- Skills/tools (minimal list)
+- Animated text reveals on load
 
-2. **Scroll Animations**:
-   - Parallax effects on images
-   - Text reveals as elements enter viewport
-   - Progress indicator
+#### Work Section
+- Grid of project thumbnails
+- Each clickable to load detailed view
+- Filter by type (optional)
+- Hover animations with anime.js
 
-3. **Cursor**:
-   - Custom cursor with smooth follow
-   - Grows on hover of interactive elements
-   - Changes color/shape based on context
+#### Individual Project View
+- Hero image
+- Project description
+- Role, timeline, tools
+- Image gallery
+- Link to live site
+- "Back to Work" or "Next Project" navigation
 
-### Component-Specific Animations
+#### Photos Section
+- Grid of photo collections
+- Each collection has cover image
+- Click to view full collection
 
-#### Navigation
+#### Photo Collection View  
+- Large image display
+- Navigation between photos
+- Image metadata/captions
+- Back to collections link
+
+#### Contact Section
+- Contact form
+- Email, social links
+- Current availability status
+- Location (if relevant)
+
+## Animation Inventory (Enhanced)
+
+### Left Panel Animations
 ```javascript
-// Example animation concept
-- Menu items slide in from top
-- Underline grows from 0 to 100% width on hover
-- Active state with persistent underline
-- Mobile menu with curtain reveal
+// Name reveal on page load
+anime({
+  targets: '.name-container .letter',
+  translateY: [100, 0],
+  opacity: [0, 1],
+  duration: 800,
+  delay: (el, i) => i * 50,
+  easing: 'easeOutCubic'
+})
+
+// Navigation hover effects
+anime({
+  targets: '.nav-link:hover',
+  translateX: [0, 8],
+  duration: 300
+})
+
+// Photo subtle float animation
+anime({
+  targets: '.profile-photo',
+  translateY: [0, -5, 0],
+  duration: 4000,
+  loop: true,
+  easing: 'easeInOutSine'
+})
 ```
 
-#### Project Cards
+### Right Panel Transitions
 ```javascript
-// Hover state
-- Image scales 1.05
-- Overlay fades in
-- Text slides up
-- Shadow grows
+// Content switching animation
+const switchContent = (newContent) => {
+  // Fade out current
+  anime({
+    targets: '.content-area',
+    opacity: [1, 0],
+    translateX: [0, 20],
+    duration: 300,
+    complete: () => {
+      // Load new content
+      loadNewContent(newContent)
+      // Fade in new
+      anime({
+        targets: '.content-area',
+        opacity: [0, 1],
+        translateX: [-20, 0],
+        duration: 400
+      })
+    }
+  })
+}
 ```
 
-#### Color Palette Display
+### Project/Photo Grid Animations
 ```javascript
-// Interactive behavior
-- Colors float independently
-- Click to expand with color details
-- Copy animation with checkmark morph
-- Rainbow wave effect on special trigger
+// Staggered grid entrance
+anime({
+  targets: '.grid-item',
+  scale: [0.8, 1],
+  opacity: [0, 1],
+  duration: 600,
+  delay: (el, i) => i * 100
+})
+
+// Hover effects
+anime({
+  targets: '.project-card:hover .project-image',
+  scale: [1, 1.05],
+  duration: 400
+})
 ```
 
-## Content Structure
+## Technical Implementation
 
-### Project Post Format
-```markdown
----
-title: "Project Name"
-date: "2024-MM-DD"
-category: "Web Design / Development / etc"
-thumbnail: "/images/project-thumb.jpg"
-featured: true/false
----
-
-Project description...
+### Alpine.js State Management
+```javascript
+// Global app state
+document.addEventListener('alpine:init', () => {
+  Alpine.data('app', () => ({
+    currentSection: 'about',
+    currentProject: null,
+    currentPhotoCollection: null,
+    
+    loadSection(section) {
+      this.currentSection = section
+      // Trigger content switch animation
+      switchContent(section)
+    },
+    
+    loadProject(projectId) {
+      this.currentProject = projectId
+      this.currentSection = 'project-detail'
+      switchContent('project-detail')
+    }
+  }))
+})
 ```
 
-### Required Content Sections
-1. **Bio/Introduction** (2-3 sentences)
-2. **Project Descriptions** (3-5 sentences each)
-3. **Contact Information**
-4. **Social Media Links**:
-   - Instagram
-   - GitHub
-   - LinkedIn
-   - Twitter/X (optional)
-   - Dribbble/Behance (optional)
+### URL Management
+```javascript
+// Update URL without page refresh
+const updateURL = (section, detail = null) => {
+  const url = detail ? `/${section}/${detail}` : `/${section}`
+  window.history.pushState({section, detail}, '', url)
+}
 
-## Technical Requirements
-
-### Performance
-- Lighthouse score > 90
-- Smooth 60fps animations
-- Lazy load images
-- Minimize anime.js animations on mobile for performance
-
-### Responsive Design
-- Mobile-first approach
-- Breakpoints: 640px, 768px, 1024px, 1280px
-- Touch-friendly interaction areas
-- Reduced animations on mobile (respect prefers-reduced-motion)
-
-### Browser Support
-- Modern browsers (Chrome, Firefox, Safari, Edge - last 2 versions)
-- Graceful degradation for older browsers
-- Fallbacks for CSS features
-
-### SEO & Meta
-- Semantic HTML5
-- OpenGraph tags
-- Twitter cards
-- Structured data for projects
-- Sitemap.xml
-
-## Implementation Priorities
-
-### Phase 1 (MVP)
-1. Basic site structure and navigation
-2. Homepage with hero and projects
-3. Project listing page
-4. Essential anime.js animations
-5. Mobile responsive
-
-### Phase 2 (Enhancements)
-1. Individual project pages
-2. Advanced animations (cursor, parallax)
-3. Color palette display
-4. Category filtering
-5. About page
-
-### Phase 3 (Polish)
-1. Page transitions
-2. Search functionality
-3. Dark mode toggle
-4. Performance optimizations
-5. Additional experimental features
-
-## Special Features to Consider
-
-1. **Konami Code** or similar easter egg triggering a special animation
-2. **Time-based Greetings** with animated text
-3. **Visitor Counter** with retro flip animation
-4. **Theme Switcher** with morphing animation between themes
-5. **Audio Reactive Elements** (optional, might be too much)
-
-## File Structure
+// Handle browser back/forward
+window.addEventListener('popstate', (e) => {
+  if (e.state) {
+    loadContent(e.state.section, e.state.detail)
+  }
+})
 ```
-/
-├── index.html
-├── css/
-│   ├── main.css
-│   └── animations.css
-├── js/
-│   ├── main.js
-│   ├── animations.js
-│   └── projects.js
-├── projects/
-│   └── [project-files].html
-├── images/
-│   └── [project-images]
-└── data/
-    └── projects.json
+
+### Content Loading Strategy
+```javascript
+// Content templates stored in page or loaded via fetch
+const contentTemplates = {
+  about: 'about-template',
+  work: 'work-grid-template', 
+  'project-detail': 'project-detail-template',
+  photos: 'photo-collections-template',
+  'photo-collection': 'photo-gallery-template',
+  contact: 'contact-template'
+}
+```
+
+## Responsive Strategy
+
+### Desktop (1024px+)
+- Split screen layout as described
+- Full animation suite
+
+### Tablet (768px - 1023px)  
+- Left panel becomes top header (collapsed navigation)
+- Right content takes full width
+- Reduced animations
+
+### Mobile (< 768px)
+- Single column layout
+- Name + hamburger menu at top
+- Content sections stack vertically
+- Minimal animations for performance
+
+## Color Palette Integration
+```css
+:root {
+  --stone-gray: #6E6E6E;
+  --clay-brown: #8B5E3C;
+  --olive-green: #6C7A5D;
+  --sand-beige: #D6C7B0;
+  --charcoal-black: #2F2F2F;
+}
+
+/* Left panel styling */
+.left-panel {
+  background: var(--charcoal-black);
+  color: var(--sand-beige);
+}
+
+/* Navigation active state */
+.nav-link.active {
+  color: var(--clay-brown);
+  border-left: 2px solid var(--clay-brown);
+}
+
+/* Right panel */
+.content-area {
+  background: var(--charcoal-black);
+  color: var(--sand-beige);
+}
 ```
 
 ## Success Metrics
-- Smooth animations without jank
-- Fast load times (< 3s on 3G)
-- Intuitive navigation
-- Memorable design that showcases creativity
-- Easy to update with new projects
-
-## Notes for Development
-- Use CSS custom properties for easy theming
-- Keep anime.js animations modular and reusable
-- Comment code well for future updates
-- Use semantic HTML throughout
-- Implement a simple build process if needed for GitHub Pages
-- Consider using CSS Grid and Flexbox for layouts
-- Ensure all animations can be disabled for accessibility
+- Navigation feels instant and smooth
+- Content transitions are elegant
+- Layout works seamlessly across devices
+- Unique enough to be memorable
+- Professional enough for client work
+- Fast loading despite animations
 
 ---
 
-*This document serves as the complete specification for building the personal website. The focus should be on creating a memorable, smooth experience that showcases both the projects and technical/design capabilities through thoughtful use of anime.js animations.*
+**Core Philosophy**: Create a unique browsing experience that feels like a desktop application. Left side provides consistent identity and navigation. Right side becomes a canvas for dynamic content. Every interaction should feel smooth and intentional.
+
+**The Uniqueness Test**: Can someone describe your site's navigation in one sentence, and would that sentence be different from every other portfolio site they've seen?
