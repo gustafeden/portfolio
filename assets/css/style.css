@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    overflow: hidden;
+    background: #2F2F2F;
+}
+
+.nav-link {
+    position: relative;
+    transition: all 0.3s ease;
+    padding-left: 0;
+}
+
+.nav-link.active {
+    color: #8B5E3C;
+    padding-left: 1rem;
+}
+
+.nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 100%;
+    background: #8B5E3C;
+}
+
+.nav-link:hover:not(.active) {
+    transform: translateX(8px);
+    color: #D6C7B0;
+}
+
+
+.profile-photo {
+    border-radius: 8px;
+    filter: grayscale(0.3);
+    transition: filter 0.3s ease;
+}
+
+.profile-photo:hover {
+    filter: grayscale(0);
+}
+
+.project-card, .photo-card {
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.project-card:hover, .photo-card:hover {
+    transform: scale(1.02);
+}
+
+/* Scrollbar styling */
+.content-area::-webkit-scrollbar {
+    width: 8px;
+}
+
+.content-area::-webkit-scrollbar-track {
+    background: rgba(214, 199, 176, 0.1);
+}
+
+.content-area::-webkit-scrollbar-thumb {
+    background: #6E6E6E;
+    border-radius: 4px;
+}
+
+.content-area::-webkit-scrollbar-thumb:hover {
+    background: #8B5E3C;
+}
+
+/* Mobile menu */
+@media (max-width: 768px) {
+    .mobile-menu {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .mobile-menu.open {
+        transform: translateX(0);
+    }
+}
