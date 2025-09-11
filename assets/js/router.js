@@ -73,9 +73,6 @@ class Router {
 
     initializeSectionScripts(section) {
         switch(section) {
-            case 'stuff':
-                this.loadProjects();
-                break;
             case 'photos':
                 this.loadPhotoCollections();
                 break;
@@ -85,29 +82,17 @@ class Router {
             case 'about':
                 this.animateAboutSection();
                 break;
+            case 'stuff':
+                this.animateStuffSection();
+                break;
         }
     }
 
-    loadProjects() {
-        const grid = document.getElementById('projects-grid');
-        if (!grid) return;
-        
-        const projectsHTML = window.projectsData.map(project => `
-            <div class="project-card bg-stone-gray/10 rounded-lg overflow-hidden cursor-pointer" 
-                 onclick="router.navigateToProject(${project.id})">
-                <img src="${project.thumbnail}" alt="${project.title}" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <h3 class="text-xl font-light mb-2">${project.title}</h3>
-                    <p class="text-stone-gray text-sm">${project.description}</p>
-                    <div class="mt-3 flex flex-wrap gap-2">
-                        ${project.tags.map(tag => `<span class="text-xs px-2 py-1 bg-clay-brown/20 rounded">${tag}</span>`).join('')}
-                    </div>
-                </div>
-            </div>
-        `).join('');
-        
-        grid.innerHTML = projectsHTML;
-        this.animateCards('.project-card');
+    animateStuffSection() {
+        // Animate project cards if they exist
+        setTimeout(() => {
+            this.animateCards('.project-card, .work-section > *');
+        }, 100);
     }
 
     loadPhotoCollections() {
@@ -131,21 +116,9 @@ class Router {
         this.animateCards('.photo-card');
     }
 
-    async navigateToProject(projectId) {
-        const project = window.projectsData.find(p => p.id === projectId);
-        if (!project) return;
-        
-        // Map project IDs to markdown files
-        const projectFiles = {
-            1: 'e-commerce-platform',
-            2: 'design-system', 
-            3: 'mobile-banking-app',
-            4: 'data-visualization-dashboard'
-        };
-        
-        const filename = projectFiles[projectId];
-        if (filename) {
-            const html = await this.markdownParser.loadMarkdownContent(`projects/${filename}`);
+    async navigateToProject(projectSlug) {
+        try {
+            const html = await this.markdownParser.loadMarkdownContent(`projects/${projectSlug}`);
             this.contentArea.innerHTML = `
                 <div class="project-detail">
                     <button onclick="router.navigate('stuff')" class="mb-6 text-stone-gray hover:text-sand-beige transition">
@@ -155,8 +128,18 @@ class Router {
                 </div>
             `;
             this.currentSection = 'project-detail';
-            this.updateURL('stuff', projectId);
+            this.updateURL('stuff', projectSlug);
             this.animateContentSwitch();
+        } catch (error) {
+            console.error('Error loading project:', error);
+            this.contentArea.innerHTML = `
+                <div class="project-detail">
+                    <button onclick="router.navigate('stuff')" class="mb-6 text-stone-gray hover:text-sand-beige transition">
+                        ← Back to Work
+                    </button>
+                    <div class="text-red-400">Error loading project content</div>
+                </div>
+            `;
         }
     }
 
