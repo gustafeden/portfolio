@@ -407,13 +407,35 @@ class Router {
     }
 
     updateActiveNav(section) {
-        document.querySelectorAll('[data-nav]').forEach(link => {
-            link.classList.remove('active');
-            // Only add active class if it's not the front page
-            if (section !== 'front' && link.dataset.nav === section) {
-                link.classList.add('active');
+        const indicator = document.getElementById('nav-indicator');
+        const links = document.querySelectorAll('[data-nav]');
+        
+        // Remove active class from all links
+        links.forEach(link => link.classList.remove('active'));
+        
+        if (section === 'front') {
+            // Hide indicator on front page
+            indicator.classList.remove('active');
+        } else {
+            // Find the active link and add active class
+            const activeLink = document.querySelector(`[data-nav="${section}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+                
+                // Calculate position and height for the indicator
+                const nav = activeLink.parentElement;
+                const linkRect = activeLink.getBoundingClientRect();
+                const navRect = nav.getBoundingClientRect();
+                
+                const top = linkRect.top - navRect.top;
+                const height = linkRect.height;
+                
+                // Position and show the indicator
+                indicator.style.top = `${top}px`;
+                indicator.style.height = `${height}px`;
+                indicator.classList.add('active');
             }
-        });
+        }
     }
 
     updateURL(section, detail = null) {
