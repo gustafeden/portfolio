@@ -42,11 +42,16 @@ body {
 .profile-photo {
     border-radius: 8px;
     filter: grayscale(0.3);
-    transition: filter 0.3s ease;
+    transition: filter 0.3s ease, opacity 0.3s ease;
 }
 
 .profile-photo:hover {
     filter: grayscale(0);
+}
+
+.transitioning-image {
+    border-radius: 8px;
+    object-fit: cover;
 }
 
 .project-card, .photo-card {

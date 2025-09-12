@@ -2,18 +2,18 @@
 // Projects are loaded dynamically from content/markdown/projects/
 
 window.photoCollectionsData = [
-    // {
-    //     id: 1,
-    //     title: 'Urban Landscapes',
-    //     cover: 'https://via.placeholder.com/400x600/6E6E6E/D6C7B0?text=Urban',
-    //     count: 12,
-    //     photos: [
-    //         { src: 'https://via.placeholder.com/800x600/6E6E6E/D6C7B0?text=Urban+1', caption: 'City at dawn' },
-    //         { src: 'https://via.placeholder.com/800x600/6E6E6E/D6C7B0?text=Urban+2', caption: 'Street perspective' },
-    //         { src: 'https://via.placeholder.com/800x600/6E6E6E/D6C7B0?text=Urban+3', caption: 'Architecture' },
-    //         { src: 'https://via.placeholder.com/800x600/6E6E6E/D6C7B0?text=Urban+4', caption: 'Night lights' }
-    //     ]
-    // },
+    {
+        id: 1,
+        title: 'Urban Landscapes',
+        cover: 'https://via.placeholder.com/400x600/6E6E6E/D6C7B0?text=Urban',
+        count: 12,
+        photos: [
+            { src: 'https://via.placeholder.com/800x600/6E6E6E/D6C7B0?text=Urban+1', caption: 'City at dawn' },
+            { src: 'https://via.placeholder.com/800x600/6E6E6E/D6C7B0?text=Urban+2', caption: 'Street perspective' },
+            { src: 'https://via.placeholder.com/800x600/6E6E6E/D6C7B0?text=Urban+3', caption: 'Architecture' },
+            { src: 'https://via.placeholder.com/800x600/6E6E6E/D6C7B0?text=Urban+4', caption: 'Night lights' }
+        ]
+    },
     // {
     //     id: 2,
     //     title: 'Nature',

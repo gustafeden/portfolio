@@ -76,8 +76,9 @@
             </nav>
 
             <!-- Profile Photo -->
-            <div class="mb-8">
-                <img src="/assets/img/IMG_4051.jpeg" alt="Gustaf Edén" class="profile-photo w-48 h-64 object-cover">
+            <div class="mb-8" id="sidebar-photo-container">
+                <img src="/assets/img/Photo06_7.jpeg" alt="Gustaf Edén"
+                    class="profile-photo w-48 h-64 object-cover opacity-0" id="sidebar-photo">
             </div>
 
             <!-- Social Links -->
@@ -133,14 +134,7 @@
 
         // Animations on load
         window.addEventListener('DOMContentLoaded', () => {
-            // Profile photo float animation
-            anime({
-                targets: '.profile-photo',
-                translateY: [0, -5, 0],
-                duration: 4000,
-                loop: true,
-                easing: 'easeInOutSine'
-            });
+            // Animation is now handled in router.js handleInitialRoute
         });
     </script>
 </body>
