@@ -7,6 +7,13 @@ class Router {
         this.cache = {};
         this.markdownParser = new MarkdownParser();
         this.isInitialLoad = true;
+        // Define different images for each section
+        this.sectionImages = {
+            'front': '/assets/img/Photo06_7.jpeg',
+            'about': '/assets/img/IMG_4051.jpeg', 
+            'stuff': '/assets/img/Photo06_7.jpeg',
+            'photos': '/assets/img/IMG_4051.jpeg'
+        };
         this.init();
     }
 
@@ -40,6 +47,7 @@ class Router {
 
         this.updateActiveNav(section);
         this.updateBackgroundOpacity(section);
+        this.updateSidebarPhoto(section);
         await this.loadContent(section);
         this.currentSection = section;
         this.updateURL(section, subRoute);
@@ -65,6 +73,20 @@ class Router {
             } else {
                 // Reduced opacity on other pages
                 bgImage.style.opacity = '0.15';
+            }
+        }
+    }
+    
+    updateSidebarPhoto(section) {
+        const sidebarPhoto = document.getElementById('sidebar-photo');
+        if (sidebarPhoto && this.sectionImages[section]) {
+            // Add smooth transition if image changes
+            if (sidebarPhoto.src !== window.location.origin + this.sectionImages[section]) {
+                sidebarPhoto.style.opacity = '0.5';
+                setTimeout(() => {
+                    sidebarPhoto.src = this.sectionImages[section];
+                    sidebarPhoto.style.opacity = '1';
+                }, 200);
             }
         }
     }
@@ -403,9 +425,10 @@ class Router {
         const hash = window.location.hash.slice(1);
         const [section, detail] = hash.split('/');
 
-        // Set initial background opacity based on starting section
+        // Set initial background opacity and sidebar photo based on starting section
         const startSection = (section && this.sections.includes(section)) ? section : 'front';
         this.updateBackgroundOpacity(startSection);
+        this.updateSidebarPhoto(startSection);
 
         if (section && this.sections.includes(section)) {
             this.navigate(section, detail);

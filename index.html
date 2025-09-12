@@ -21,7 +21,7 @@
                         'olive-green': '#6C7A5D',
                         'sand-beige': '#D6C7B0',
                         'charcoal-black': '#2F2F2F',
-                        'deep-teal-black': '#01214',     // The dark water/sky - perfect for backgrounds
+                        'deep-teal-black': '#0d1214',     // The dark water/sky - perfect for backgrounds
                         'warm-copper': '#B45C18',          // The warm building lights - great for headings
                         'bright-gold': '#F5C563',          // Brightest lights - for active states/accents
                         'cool-pearl': '#E8E2D5',           // The cooler building tones - main text
@@ -54,7 +54,7 @@
 
         <!-- Mobile Header (Hidden on Desktop) -->
         <div
-            class="lg:hidden fixed top-0 left-0 right-0 bg-deep-teal-black z-50 p-4 flex justify-between items-center border-b border-slate-teal">
+            class="lg:hidden fixed top-0 left-0 right-0 backdrop-blur-md bg-deep-teal-black/20 z-50 p-4 flex justify-between items-center border-b border-slate-teal/30">
             <a href="#front" data-nav="front" class="hover:opacity-80 transition">
                 <h1 class="text-2xl font-light text-warm-copper">Gustaf Edén</h1>
             </a>
@@ -67,11 +67,11 @@
         </div>
 
         <!-- Left Panel -->
-        <div class="mobile-menu fixed lg:relative w-full lg:w-[35%] h-full bg-deep-teal-black p-8 lg:p-12 flex flex-col justify-between z-40 lg:z-auto"
+        <div class="mobile-menu fixed lg:relative w-full lg:w-[35%] h-full backdrop-blur-sm bg-deep-teal-black/10 lg:bg-transparent lg:backdrop-blur-none p-8 lg:p-12 flex flex-col justify-between z-40 lg:z-auto"
             id="mobile-menu">
 
-            <!-- Name Section -->
-            <div class="name-container mb-8 lg:mb-6">
+            <!-- Name Section - only show on desktop -->
+            <div class="name-container mb-8 lg:mb-6 hidden lg:block">
                 <a href="#front" data-nav="front" class="hover:opacity-80 transition">
                     <h1 class="text-4xl lg:text-5xl font-light text-warm-copper mb-2">
                         Gustaf Edén
@@ -82,26 +82,22 @@
             </div>
 
             <!-- Navigation -->
-            <nav class="space-y-4 mb-auto">
+            <nav class="space-y-4 mb-auto mt-16 lg:mt-0">
                 <a href="#about" data-nav="about" class="nav-link block text-lg text-cool-pearl">About</a>
                 <a href="#stuff" data-nav="stuff" class="nav-link block text-lg text-cool-pearl">Stuff</a>
                 <a href="#photos" data-nav="photos" class="nav-link block text-lg text-cool-pearl">Photos</a>
                 <!-- <a href="#contact" data-nav="contact" class="nav-link block text-lg text-stone-gray">Contact</a> -->
             </nav>
 
-            <!-- Profile Photo (always visible on desktop) -->
+            <!-- Dynamic Profile Photo - changes based on section -->
             <div class="mb-8 hidden lg:block" id="sidebar-photo-container">
-                <img src="/assets/img/Photo06_7.jpeg" alt="Gustaf Edén" class="profile-photo w-48 h-64 object-cover"
-                    id="sidebar-photo">
+                <img src="/assets/img/Photo06_7.jpeg" alt="Gustaf Edén" 
+                     class="profile-photo w-48 h-64 object-cover rounded-lg"
+                     id="sidebar-photo">
             </div>
 
-            <!-- Bottom section - Profile Photo (mobile), Software Engineer text (mobile) + Social Links -->
+            <!-- Bottom section - Social Links -->
             <div class="space-y-4">
-                <!-- Profile Photo - only show on mobile -->
-                <div class="lg:hidden mb-4">
-                    <img src="/assets/img/Photo06_7.jpeg" alt="Gustaf Edén"
-                        class="profile-photo w-80 h-120 object-cover rounded-lg mx-auto" id="mobile-sidebar-photo">
-                </div>
 
                 <!-- Software Engineer text - only show on mobile -->
                 <!-- <p class="text-dusty-bronze text-lg lg:hidden text-center">Software Engineer</p> -->
