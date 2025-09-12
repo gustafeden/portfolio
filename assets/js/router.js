@@ -1,8 +1,8 @@
 class Router {
     constructor() {
-        this.currentSection = 'about';
+        this.currentSection = 'front';
         this.contentArea = null;
-        this.sections = ['about', 'stuff', 'photos', 'contact'];
+        this.sections = ['front', 'about', 'stuff', 'photos', 'contact'];
         this.markdownSections = ['about', 'stuff']; // Sections that use markdown
         this.cache = {};
         this.markdownParser = new MarkdownParser();
@@ -25,6 +25,12 @@ class Router {
                 const section = link.dataset.nav;
                 this.navigate(section);
             });
+        });
+        
+        // Add click handler for name to go to front page
+        document.querySelector('a[href="#front"]')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.navigate('front');
         });
     }
 
@@ -73,6 +79,9 @@ class Router {
 
     initializeSectionScripts(section) {
         switch(section) {
+            case 'front':
+                this.animateFrontSection();
+                break;
             case 'photos':
                 this.loadPhotoCollections();
                 break;
@@ -175,6 +184,18 @@ class Router {
         });
     }
 
+    animateFrontSection() {
+        if (typeof anime === 'undefined') return;
+        
+        anime({
+            targets: '.front-image',
+            opacity: [0, 1],
+            scale: [0.95, 1],
+            duration: 800,
+            easing: 'easeOutCubic'
+        });
+    }
+
     animateAboutSection() {
         if (typeof anime === 'undefined') return;
         
@@ -242,7 +263,8 @@ class Router {
     updateActiveNav(section) {
         document.querySelectorAll('[data-nav]').forEach(link => {
             link.classList.remove('active');
-            if (link.dataset.nav === section) {
+            // Only add active class if it's not the front page
+            if (section !== 'front' && link.dataset.nav === section) {
                 link.classList.add('active');
             }
         });
@@ -260,7 +282,7 @@ class Router {
         if (section && this.sections.includes(section)) {
             this.navigate(section, detail);
         } else {
-            this.navigate('about');
+            this.navigate('front');
         }
         
         // Ensure initial active state is set
