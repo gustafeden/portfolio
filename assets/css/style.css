@@ -81,6 +81,27 @@ body {
     background: #8B5E3C;
 }
 
+/* Full-screen front image background */
+.front-image-bg {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 0 !important;
+    transition: opacity 0.4s ease, display 0s;
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+/* Ensure main container stays above background */
+.flex.h-screen {
+    position: relative;
+    z-index: 10;
+}
+
 /* Mobile menu */
 @media (max-width: 768px) {
     .mobile-menu {
@@ -93,19 +114,8 @@ body {
     }
 }
 
-/* Mobile optimizations for front image */
+/* Mobile optimizations */
 @media (max-width: 1024px) {
-    .front-image {
-        max-height: 70vh;
-        object-fit: cover;
-        object-position: center;
-        transition: all 0.3s ease;
-    }
-    
-    .front-container {
-        padding: 1rem;
-    }
-    
     /* Prevent weird animations on mobile */
     .transitioning-image {
         display: none !important;

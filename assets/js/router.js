@@ -224,84 +224,64 @@ class Router {
         // Clean up any existing transitioning images
         document.querySelectorAll('.transitioning-image').forEach(el => el.remove());
 
-        const frontImage = document.querySelector('.front-image');
+        const frontImageBg = document.querySelector('.front-image-bg');
         const sidebarPhoto = isMobile ? document.getElementById('mobile-sidebar-photo') : document.getElementById('sidebar-photo');
 
-        if (!frontImage) return;
-
-        // Cancel any ongoing animations on these elements
-        anime.remove(frontImage);
-        if (sidebarPhoto) {
-            anime.remove(sidebarPhoto);
-        }
+        // Cancel any ongoing animations
+        if (frontImageBg) anime.remove(frontImageBg);
+        if (sidebarPhoto) anime.remove(sidebarPhoto);
         anime.remove('.transitioning-image');
 
-        // On mobile, only animate the front image, keep sidebar photo always visible
-        if (isMobile) {
-            // Mobile sidebar photo should always be visible - ensure it's shown
-            if (sidebarPhoto) {
-                sidebarPhoto.style.opacity = '1';
-            }
-            
+        // On mobile, keep sidebar photo always visible
+        if (isMobile && sidebarPhoto) {
+            sidebarPhoto.style.opacity = '1';
+        }
+
+        // Handle front background image transitions
+        if (frontImageBg) {
             if (fromSection === 'front' && toSection !== 'front') {
-                // Simply fade out front image
+                // Fade out and hide background image
                 anime({
-                    targets: frontImage,
+                    targets: frontImageBg,
                     opacity: [1, 0],
-                    scale: [1, 0.95],
                     duration: 400,
-                    easing: 'easeOutCubic'
+                    easing: 'easeOutCubic',
+                    complete: () => {
+                        frontImageBg.style.display = 'none';
+                    }
                 });
             } else if (fromSection !== 'front' && toSection === 'front') {
-                // Simply fade in front image
-                frontImage.style.opacity = '0';
+                // Show and fade in background image
+                frontImageBg.style.display = 'block';
+                frontImageBg.style.opacity = '0';
                 anime({
-                    targets: frontImage,
+                    targets: frontImageBg,
                     opacity: [0, 1],
-                    scale: [0.95, 1],
                     duration: 400,
                     easing: 'easeOutCubic',
                     delay: 100
                 });
             }
-            return;
         }
+
+        // Skip desktop-specific animations on mobile
+        if (isMobile) return;
         
-        // Desktop animations continue below...
+        // Desktop animations for sidebar photo
         if (!sidebarPhoto) return;
 
-        // Desktop animations (original logic)
+        // Desktop animations - simplified for full-screen background
         if (fromSection === 'front' && toSection !== 'front') {
-            // Animate from front page to sidebar
-            const frontRect = frontImage.getBoundingClientRect();
-            const sidebarRect = sidebarPhoto.getBoundingClientRect();
-
-            // Create a clone for animation
-            const clone = frontImage.cloneNode(true);
-            clone.style.position = 'fixed';
-            clone.style.top = frontRect.top + 'px';
-            clone.style.left = frontRect.left + 'px';
-            clone.style.width = frontRect.width + 'px';
-            clone.style.height = frontRect.height + 'px';
-            clone.style.zIndex = '1000';
-            clone.classList.add('transitioning-image');
-            document.body.appendChild(clone);
-
-            // Hide original front image
-            frontImage.style.opacity = '0';
-
-            // Animate clone to sidebar position
+            // Simply fade in sidebar photo
+            sidebarPhoto.style.opacity = '0';
             anime({
-                targets: clone,
-                top: sidebarRect.top,
-                left: sidebarRect.left,
-                width: sidebarRect.width,
-                height: sidebarRect.height,
-                duration: 800,
-                easing: 'easeInOutCubic',
+                targets: sidebarPhoto,
+                opacity: [0, 1],
+                scale: [0.95, 1],
+                duration: 600,
+                delay: 200,
+                easing: 'easeOutCubic',
                 complete: () => {
-                    sidebarPhoto.style.opacity = '1';
-                    clone.remove();
                     // Start floating animation for sidebar photo
                     anime({
                         targets: '#sidebar-photo',
@@ -314,45 +294,15 @@ class Router {
             });
 
         } else if (fromSection !== 'front' && toSection === 'front') {
-            // Animate from sidebar to front page
-            const sidebarRect = sidebarPhoto.getBoundingClientRect();
-            const frontImage = document.querySelector('.front-image');
-
-            if (!frontImage) return;
-
-            const frontRect = frontImage.getBoundingClientRect();
-
-            // Create a clone for animation
-            const clone = sidebarPhoto.cloneNode(true);
-            clone.style.position = 'fixed';
-            clone.style.top = sidebarRect.top + 'px';
-            clone.style.left = sidebarRect.left + 'px';
-            clone.style.width = sidebarRect.width + 'px';
-            clone.style.height = sidebarRect.height + 'px';
-            clone.style.zIndex = '1000';
-            clone.style.opacity = '1';
-            clone.classList.add('transitioning-image');
-            document.body.appendChild(clone);
-
-            // Stop floating animation and hide sidebar photo
+            // Stop floating animation and fade out sidebar photo
             anime.remove('#sidebar-photo');
             sidebarPhoto.style.transform = 'translateY(0)';
-            sidebarPhoto.style.opacity = '0';
-            frontImage.style.opacity = '0';
-
-            // Animate clone to front position
             anime({
-                targets: clone,
-                top: frontRect.top,
-                left: frontRect.left,
-                width: frontRect.width,
-                height: frontRect.height,
-                duration: 800,
-                easing: 'easeInOutCubic',
-                complete: () => {
-                    frontImage.style.opacity = '1';
-                    clone.remove();
-                }
+                targets: sidebarPhoto,
+                opacity: [1, 0],
+                scale: [1, 0.95],
+                duration: 400,
+                easing: 'easeOutCubic'
             });
         }
     }
@@ -360,24 +310,24 @@ class Router {
     animateFrontSection() {
         if (typeof anime === 'undefined') return;
 
-        // Always keep the front image hidden initially
-        const frontImage = document.querySelector('.front-image');
-        if (frontImage) {
-            frontImage.style.opacity = '0';
-
-            // Only do the fade-in animation if this is the initial page load
-            // (not coming from another section)
+        // Handle the unified background image
+        const frontImageBg = document.querySelector('.front-image-bg');
+        if (frontImageBg) {
+            frontImageBg.style.display = 'block';
+            frontImageBg.style.opacity = '0';
+            
             if (this.isInitialLoad) {
-                const isMobile = window.innerWidth < 1024;
                 setTimeout(() => {
                     anime({
-                        targets: frontImage,
+                        targets: frontImageBg,
                         opacity: [0, 1],
-                        scale: [0.95, 1],
-                        duration: isMobile ? 600 : 800, // Faster animation on mobile
+                        duration: 600,
                         easing: 'easeOutCubic'
                     });
-                }, isMobile ? 50 : 100); // Less delay on mobile
+                }, 50);
+            } else {
+                // If not initial load, just show it immediately (coming from another page)
+                frontImageBg.style.opacity = '1';
             }
         }
     }

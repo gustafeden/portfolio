@@ -21,6 +21,11 @@
                         'olive-green': '#6C7A5D',
                         'sand-beige': '#D6C7B0',
                         'charcoal-black': '#2F2F2F',
+                        'deep-midnight-blue': '#0B0F15',  // sky and water dominate the scene with this nearly black navy tone
+                        'warm-amber': '#DFA35C',          // glowing city lights along the waterfront
+                        'golden-yellow': '#F4C96B',       // brighter highlights of the illuminated buildings
+                        'soft-white': '#EAE6DC',          // cooler light spots from buildings
+                        'muted-brick-red': '#8E4D3A',     // rooftops and subtle architectural tones
                     },
                     fontFamily: {
                         'sans': ['Inter', 'system-ui', 'sans-serif'],
@@ -36,8 +41,16 @@
 
 <body class="bg-charcoal-black text-sand-beige">
 
+    <!-- Full-screen background image (only visible on front page) -->
+    <div class="front-image-bg fixed inset-0 z-0" style="background-image: url('/assets/img/Photo06_7.jpeg'); 
+                background-size: cover; 
+                background-position: center;
+                opacity: 0;
+                display: none;">
+    </div>
+
     <!-- Main Container -->
-    <div class="flex h-screen relative">
+    <div class="flex h-screen relative z-10">
 
         <!-- Mobile Header (Hidden on Desktop) -->
         <div
