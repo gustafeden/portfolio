@@ -42,12 +42,11 @@
 
 <body class="bg-deep-teal-black text-cool-pearl">
 
-    <!-- Full-screen background image (only visible on front page) -->
+    <!-- Full-screen background image (always visible) -->
     <div class="front-image-bg fixed inset-0 z-0" style="background-image: url('/assets/img/Photo06_7.jpeg'); 
                 background-size: cover; 
                 background-position: center;
-                opacity: 0;
-                display: none;">
+                opacity: 1;">
     </div>
 
     <!-- Main Container -->
@@ -90,10 +89,10 @@
                 <!-- <a href="#contact" data-nav="contact" class="nav-link block text-lg text-stone-gray">Contact</a> -->
             </nav>
 
-            <!-- Profile Photo (hidden on desktop, shown on mobile) -->
+            <!-- Profile Photo (always visible on desktop) -->
             <div class="mb-8 hidden lg:block" id="sidebar-photo-container">
                 <img src="/assets/img/Photo06_7.jpeg" alt="Gustaf Edén"
-                    class="profile-photo w-48 h-64 object-cover opacity-0" id="sidebar-photo">
+                    class="profile-photo w-48 h-64 object-cover" id="sidebar-photo">
             </div>
 
             <!-- Bottom section - Profile Photo (mobile), Software Engineer text (mobile) + Social Links -->
@@ -161,14 +160,7 @@
 
         // Animations on load
         window.addEventListener('DOMContentLoaded', () => {
-            // Ensure mobile photo is visible on mobile devices
-            if (window.innerWidth < 1024) {
-                const mobilePhoto = document.getElementById('mobile-sidebar-photo');
-                if (mobilePhoto) {
-                    mobilePhoto.style.opacity = '1';
-                }
-            }
-            // Animation is now handled in router.js handleInitialRoute
+            // Background and photos are now always visible - no animations needed
         });
     </script>
 </body>

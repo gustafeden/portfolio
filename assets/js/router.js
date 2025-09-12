@@ -38,27 +38,12 @@ class Router {
     async navigate(section, subRoute = null) {
         if (!this.sections.includes(section)) return;
 
-        const previousSection = this.currentSection;
-
-        // Handle image animation BEFORE loading new content (for front -> other)
-        if (previousSection === 'front' && section !== 'front') {
-            this.handleImageTransition(previousSection, section);
-            // Wait for animation to start before loading content
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-
         this.updateActiveNav(section);
+        this.updateBackgroundOpacity(section);
         await this.loadContent(section);
         this.currentSection = section;
         this.updateURL(section, subRoute);
         this.animateContentSwitch();
-
-        // Handle image animation AFTER loading content (for other -> front)
-        if (previousSection !== 'front' && section === 'front') {
-            setTimeout(() => {
-                this.handleImageTransition(previousSection, section);
-            }, 50);
-        }
 
         // Clear initial load flag after first navigation
         if (this.isInitialLoad) {
@@ -68,6 +53,19 @@ class Router {
         if (window.mobileMenuOpen) {
             window.mobileMenuOpen = false;
             document.querySelector('.mobile-menu')?.classList.remove('open');
+        }
+    }
+    
+    updateBackgroundOpacity(section) {
+        const bgImage = document.querySelector('.front-image-bg');
+        if (bgImage) {
+            if (section === 'front') {
+                // Full opacity on front page
+                bgImage.style.opacity = '1';
+            } else {
+                // Reduced opacity on other pages
+                bgImage.style.opacity = '0.15';
+            }
         }
     }
 
@@ -100,19 +98,7 @@ class Router {
     }
 
     initializeSectionScripts(section) {
-        // Always ensure mobile sidebar photo is visible on mobile
-        const isMobile = window.innerWidth < 1024;
-        if (isMobile) {
-            const mobilePhoto = document.getElementById('mobile-sidebar-photo');
-            if (mobilePhoto) {
-                mobilePhoto.style.opacity = '1';
-            }
-        }
-        
         switch (section) {
-            case 'front':
-                this.animateFrontSection();
-                break;
             case 'photos':
                 this.loadPhotoCollections();
                 break;
@@ -215,7 +201,9 @@ class Router {
         });
     }
 
-    handleImageTransition(fromSection, toSection) {
+    // Image transitions removed - background is now always visible
+    
+    /*handleImageTransition(fromSection, toSection) {
         if (typeof anime === 'undefined') return;
 
         // Check if we're on mobile (screen width < 1024px for lg breakpoint)
@@ -305,9 +293,9 @@ class Router {
                 easing: 'easeOutCubic'
             });
         }
-    }
+    }*/
 
-    animateFrontSection() {
+    /*animateFrontSection() {
         if (typeof anime === 'undefined') return;
 
         // Handle the unified background image
@@ -330,7 +318,7 @@ class Router {
                 frontImageBg.style.opacity = '1';
             }
         }
-    }
+    }*/
 
     animateAboutSection() {
         if (typeof anime === 'undefined') return;
@@ -414,6 +402,10 @@ class Router {
     handleInitialRoute() {
         const hash = window.location.hash.slice(1);
         const [section, detail] = hash.split('/');
+
+        // Set initial background opacity based on starting section
+        const startSection = (section && this.sections.includes(section)) ? section : 'front';
+        this.updateBackgroundOpacity(startSection);
 
         if (section && this.sections.includes(section)) {
             this.navigate(section, detail);

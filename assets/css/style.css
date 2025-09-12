@@ -42,7 +42,13 @@ body {
 .profile-photo {
     border-radius: 8px;
     filter: grayscale(0.3);
-    transition: filter 0.3s ease, opacity 0.3s ease;
+    transition: filter 0.3s ease;
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
 }
 
 .profile-photo:hover {
@@ -91,7 +97,7 @@ body {
     width: 100vw !important;
     height: 100vh !important;
     z-index: 0 !important;
-    transition: opacity 0.4s ease, display 0s;
+    transition: opacity 0.6s ease;
     background-size: cover !important;
     background-position: center !important;
 }
