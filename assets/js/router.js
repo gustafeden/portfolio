@@ -100,6 +100,15 @@ class Router {
     }
 
     initializeSectionScripts(section) {
+        // Always ensure mobile sidebar photo is visible on mobile
+        const isMobile = window.innerWidth < 1024;
+        if (isMobile) {
+            const mobilePhoto = document.getElementById('mobile-sidebar-photo');
+            if (mobilePhoto) {
+                mobilePhoto.style.opacity = '1';
+            }
+        }
+        
         switch (section) {
             case 'front':
                 this.animateFrontSection();
@@ -209,19 +218,59 @@ class Router {
     handleImageTransition(fromSection, toSection) {
         if (typeof anime === 'undefined') return;
 
+        // Check if we're on mobile (screen width < 1024px for lg breakpoint)
+        const isMobile = window.innerWidth < 1024;
+
         // Clean up any existing transitioning images
         document.querySelectorAll('.transitioning-image').forEach(el => el.remove());
 
         const frontImage = document.querySelector('.front-image');
-        const sidebarPhoto = document.getElementById('sidebar-photo');
+        const sidebarPhoto = isMobile ? document.getElementById('mobile-sidebar-photo') : document.getElementById('sidebar-photo');
 
-        if (!frontImage || !sidebarPhoto) return;
+        if (!frontImage) return;
 
         // Cancel any ongoing animations on these elements
         anime.remove(frontImage);
-        anime.remove(sidebarPhoto);
+        if (sidebarPhoto) {
+            anime.remove(sidebarPhoto);
+        }
         anime.remove('.transitioning-image');
 
+        // On mobile, only animate the front image, keep sidebar photo always visible
+        if (isMobile) {
+            // Mobile sidebar photo should always be visible - ensure it's shown
+            if (sidebarPhoto) {
+                sidebarPhoto.style.opacity = '1';
+            }
+            
+            if (fromSection === 'front' && toSection !== 'front') {
+                // Simply fade out front image
+                anime({
+                    targets: frontImage,
+                    opacity: [1, 0],
+                    scale: [1, 0.95],
+                    duration: 400,
+                    easing: 'easeOutCubic'
+                });
+            } else if (fromSection !== 'front' && toSection === 'front') {
+                // Simply fade in front image
+                frontImage.style.opacity = '0';
+                anime({
+                    targets: frontImage,
+                    opacity: [0, 1],
+                    scale: [0.95, 1],
+                    duration: 400,
+                    easing: 'easeOutCubic',
+                    delay: 100
+                });
+            }
+            return;
+        }
+        
+        // Desktop animations continue below...
+        if (!sidebarPhoto) return;
+
+        // Desktop animations (original logic)
         if (fromSection === 'front' && toSection !== 'front') {
             // Animate from front page to sidebar
             const frontRect = frontImage.getBoundingClientRect();
@@ -319,15 +368,16 @@ class Router {
             // Only do the fade-in animation if this is the initial page load
             // (not coming from another section)
             if (this.isInitialLoad) {
+                const isMobile = window.innerWidth < 1024;
                 setTimeout(() => {
                     anime({
                         targets: frontImage,
                         opacity: [0, 1],
                         scale: [0.95, 1],
-                        duration: 800,
+                        duration: isMobile ? 600 : 800, // Faster animation on mobile
                         easing: 'easeOutCubic'
                     });
-                }, 100);
+                }, isMobile ? 50 : 100); // Less delay on mobile
             }
         }
     }
@@ -348,7 +398,7 @@ class Router {
             opacity: [0, 1],
             translateY: [20, 0],
             duration: 600,
-            delay: (el, i) => 200 + i * 100,
+            delay: (_, i) => 200 + i * 100,
             easing: 'easeOutCubic'
         });
 
@@ -379,7 +429,7 @@ class Router {
             scale: [0.9, 1],
             opacity: [0, 1],
             duration: 600,
-            delay: (el, i) => i * 100,
+            delay: (_, i) => i * 100,
             easing: 'easeOutCubic'
         });
     }

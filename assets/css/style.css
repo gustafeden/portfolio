@@ -92,3 +92,27 @@ body {
         transform: translateX(0);
     }
 }
+
+/* Mobile optimizations for front image */
+@media (max-width: 1024px) {
+    .front-image {
+        max-height: 70vh;
+        object-fit: cover;
+        object-position: center;
+        transition: all 0.3s ease;
+    }
+    
+    .front-container {
+        padding: 1rem;
+    }
+    
+    /* Prevent weird animations on mobile */
+    .transitioning-image {
+        display: none !important;
+    }
+    
+    /* Ensure smoother transitions on mobile */
+    .profile-photo {
+        transition: opacity 0.3s ease;
+    }
+}
