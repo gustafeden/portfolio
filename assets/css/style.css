@@ -34,12 +34,13 @@ nav {
 .nav-link {
     position: relative;
     transition: all 0.3s ease;
-    padding-left: 1rem;
+    padding-left: 0;
     color: #E8E2D5;
 }
 
 .nav-link.active {
     color: #F5C563;
+    padding-left: 1rem;
 }
 
 .nav-link:hover:not(.active) {

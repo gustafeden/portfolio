@@ -10,7 +10,7 @@ class Router {
         // Define different images for each section
         this.sectionImages = {
             'front': '/assets/img/Photo06_7.jpeg',
-            'about': '/assets/img/IMG_4051.jpeg', 
+            'about': '/assets/img/IMG_4051.jpeg',
             'stuff': '/assets/img/Photo06_7.jpeg',
             'photos': '/assets/img/IMG_4051.jpeg'
         };
@@ -63,7 +63,7 @@ class Router {
             document.querySelector('.mobile-menu')?.classList.remove('open');
         }
     }
-    
+
     updateBackgroundOpacity(section) {
         const bgImage = document.querySelector('.front-image-bg');
         if (bgImage) {
@@ -76,7 +76,7 @@ class Router {
             }
         }
     }
-    
+
     updateSidebarPhoto(section) {
         const sidebarPhoto = document.getElementById('sidebar-photo');
         if (sidebarPhoto && this.sectionImages[section]) {
@@ -224,7 +224,7 @@ class Router {
     }
 
     // Image transitions removed - background is now always visible
-    
+
     /*handleImageTransition(fromSection, toSection) {
         if (typeof anime === 'undefined') return;
 
@@ -408,34 +408,85 @@ class Router {
 
     updateActiveNav(section) {
         const indicator = document.getElementById('nav-indicator');
-        const links = document.querySelectorAll('[data-nav]');
-        
+        const links = Array.from(document.querySelectorAll('[data-nav]'));
+
+        // Get current active index before removing classes
+        const currentActiveIndex = this.getCurrentActiveIndex(links);
+        const newActiveIndex = links.findIndex(link => link.dataset.nav === section);
+
+        // Handle collision avoidance BEFORE changing active states
+        if (section !== 'front' && currentActiveIndex !== -1 && currentActiveIndex !== newActiveIndex) {
+            this.handleCollisionAvoidance(links, currentActiveIndex, newActiveIndex);
+        }
+
         // Remove active class from all links
         links.forEach(link => link.classList.remove('active'));
-        
+
         if (section === 'front') {
             // Hide indicator on front page
             indicator.classList.remove('active');
+            // Reset any collision animations
+            links.forEach(link => {
+                if (!link.style.transform.includes('translateX(12px)')) {
+                    link.style.transform = '';
+                }
+            });
         } else {
             // Find the active link and add active class
             const activeLink = document.querySelector(`[data-nav="${section}"]`);
             if (activeLink) {
                 activeLink.classList.add('active');
-                
+
                 // Calculate position and height for the indicator
                 const nav = activeLink.parentElement;
                 const linkRect = activeLink.getBoundingClientRect();
                 const navRect = nav.getBoundingClientRect();
-                
+
                 const top = linkRect.top - navRect.top;
                 const height = linkRect.height;
-                
+
                 // Position and show the indicator
                 indicator.style.top = `${top}px`;
                 indicator.style.height = `${height}px`;
                 indicator.classList.add('active');
             }
         }
+    }
+
+    handleCollisionAvoidance(links, currentIndex, newIndex) {
+        // Calculate which items are between current and new position
+        const start = Math.min(currentIndex, newIndex);
+        const end = Math.max(currentIndex, newIndex);
+
+        // Reset all transforms first except for items we're about to animate
+        links.forEach((link, i) => {
+            if (i < start + 1 || i >= end) {
+                link.style.transform = '';
+                link.style.transition = '';
+            }
+        });
+
+        // Move intermediate items aside temporarily
+        for (let i = start + 1; i < end; i++) {
+            const link = links[i];
+            link.style.transform = 'translateX(15px)';
+            link.style.transition = 'transform 0.15s ease-out';
+
+            // Reset after animation completes
+            setTimeout(() => {
+                link.style.transform = '';
+                link.style.transition = 'transform 0.3s ease-in';
+            }, 200);
+        }
+    }
+
+    getCurrentActiveIndex(links) {
+        for (let i = 0; i < links.length; i++) {
+            if (links[i].classList.contains('active')) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     updateURL(section, detail = null) {
