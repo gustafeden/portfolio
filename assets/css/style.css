@@ -18,7 +18,7 @@ body {
 }
 
 .nav-link.active {
-    color: #F5C563;
+    color: #B45C18;
     padding-left: 1rem;
 }
 
@@ -30,7 +30,7 @@ body {
     transform: translateY(-50%);
     width: 2px;
     height: 100%;
-    background: #F5C563;
+    background: #B45C18;
 }
 
 .nav-link:hover:not(.active) {
