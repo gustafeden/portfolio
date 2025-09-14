@@ -23,11 +23,11 @@ class MarkdownParser {
             // Headers
             if (line.match(/^#{1,3}\s/)) {
                 if (line.match(/^# (.+)$/)) {
-                    html += '<h1 class="text-3xl font-light mb-8 text-sand-beige font-mono">' + line.substring(2) + '</h1>';
+                    html += '<h1 class="text-3xl font-light mb-8 text-amber-glow font-mono">' + line.substring(2) + '</h1>';
                 } else if (line.match(/^## (.+)$/)) {
-                    html += '<h2 class="text-2xl font-light mt-12 mb-4 text-sand-beige font-mono">' + line.substring(3) + '</h2>';
+                    html += '<h2 class="text-2xl font-light mt-12 mb-4 text-amber-glow font-mono">' + line.substring(3) + '</h2>';
                 } else if (line.match(/^### (.+)$/)) {
-                    html += '<h3 class="text-xl font-light mt-8 mb-3 text-sand-beige font-mono">' + line.substring(4) + '</h3>';
+                    html += '<h3 class="text-xl font-light mt-8 mb-3 text-amber-glow font-mono">' + line.substring(4) + '</h3>';
                 }
             }
             // Lists
@@ -36,7 +36,7 @@ class MarkdownParser {
                 let item = line.substring(2);
                 // Process inline formatting in list items
                 item = this.processInlineFormatting(item);
-                listItems.push('<li class="text-stone-gray mb-2">' + item + '</li>');
+                listItems.push('<li class="text-porcelain-white mb-2">' + item + '</li>');
             }
             // Code blocks
             else if (line.startsWith('```')) {
@@ -65,7 +65,7 @@ class MarkdownParser {
             // Regular paragraphs
             else {
                 let para = this.processInlineFormatting(line);
-                html += '<p class="text-stone-gray mb-4 leading-relaxed font-body">' + para + '</p>';
+                html += '<p class="text-porcelain-white mb-4 leading-relaxed font-body">' + para + '</p>';
             }
         }
         
