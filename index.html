@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gustaf Edén - Portfolio</title>
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;400;500;600;700&family=Zilla+Slab:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Lato:wght@300;400;700;900&family=Merriweather:wght@300;400;700;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <!-- CDN Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
@@ -23,7 +28,18 @@
                         'cyan-mist': '#5FA9A8',            // Cool balancing accent
                     },
                     fontFamily: {
-                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        // Display fonts (for headers, names)
+                        'display': ['Playfair Display', 'serif'],        // Elegant serif for main headers
+                        'display-alt': ['Zilla Slab', 'serif'],          // Modern slab serif alternative
+
+                        // Body text fonts
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],    // Clean for UI elements
+                        'body': ['Lato', 'system-ui', 'sans-serif'],     // Readable for long text
+                        'reading': ['Merriweather', 'serif'],            // Comfortable for articles
+
+                        // Special purpose
+                        'mono': ['Source Code Pro', 'monospace'],        // Code blocks
+                        'nav': ['Inter', 'system-ui', 'sans-serif'],     // Navigation items
                     }
                 }
             }
@@ -50,7 +66,7 @@
         <div
             class="lg:hidden fixed top-0 left-0 right-0 backdrop-blur-md bg-shadow-black/20 z-50 p-4 flex justify-between items-center border-b border-cyan-mist/30">
             <a href="#front" data-nav="front" class="hover:opacity-80 transition">
-                <h1 class="text-2xl font-light text-amber-glow">Gustaf Edén</h1>
+                <h1 class="text-2xl font-light text-amber-glow font-mono">Gustaf Edén</h1>
             </a>
             <button onclick="toggleMobileMenu()" class="p-2">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,7 +83,7 @@
             <!-- Name Section - only show on desktop -->
             <div class="name-container mb-8 lg:mb-6 hidden lg:block">
                 <a href="#front" data-nav="front" class="hover:opacity-80 transition">
-                    <h1 class="text-4xl lg:text-5xl font-light text-amber-glow mb-2">
+                    <h1 class="text-4xl lg:text-5xl font-light text-amber-glow mb-2 font-mono">
                         Gustaf Edén
                     </h1>
                 </a>
@@ -78,9 +94,9 @@
             <!-- Navigation -->
             <nav class="space-y-4 mb-auto mt-16 lg:mt-0">
                 <div class="nav-indicator" id="nav-indicator"></div>
-                <a href="#about" data-nav="about" class="nav-link block text-lg">About</a>
-                <a href="#stuff" data-nav="stuff" class="nav-link block text-lg">Stuff</a>
-                <a href="#photos" data-nav="photos" class="nav-link block text-lg">Photos</a>
+                <a href="#about" data-nav="about" class="nav-link block text-lg font-mono">About</a>
+                <a href="#stuff" data-nav="stuff" class="nav-link block text-lg font-mono">Stuff</a>
+                <a href="#photos" data-nav="photos" class="nav-link block text-lg font-mono">Photos</a>
                 <!-- <a href="#contact" data-nav="contact" class="nav-link block text-lg text-stone-gray">Contact</a> -->
             </nav>
 
