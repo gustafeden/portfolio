@@ -8,7 +8,7 @@
 
 body {
     overflow: hidden;
-    background: #0d1214;
+    background: #0E0E0E;
 }
 
 nav {
@@ -19,7 +19,7 @@ nav {
     position: absolute;
     left: 0;
     width: 2px;
-    background: #F5C563;
+    background: #ECE7E1;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     opacity: 0;
     transform: scaleY(0);
@@ -35,17 +35,17 @@ nav {
     position: relative;
     transition: all 0.3s ease;
     padding-left: 0;
-    color: #E8E2D5;
+    color: #D9A441;
 }
 
 .nav-link.active {
-    color: #F5C563;
+    color: #ECE7E1;
     padding-left: 1rem;
 }
 
 .nav-link:hover:not(.active) {
     transform: translateX(8px);
-    color: #D4875B;
+    color: #B46C3A;
 }
 
 
@@ -58,8 +58,15 @@ nav {
 }
 
 @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 .profile-photo:hover {
@@ -71,12 +78,14 @@ nav {
     object-fit: cover;
 }
 
-.project-card, .photo-card {
+.project-card,
+.photo-card {
     transition: transform 0.3s ease;
     cursor: pointer;
 }
 
-.project-card:hover, .photo-card:hover {
+.project-card:hover,
+.photo-card:hover {
     transform: scale(1.02);
 }
 
@@ -86,16 +95,16 @@ nav {
 }
 
 .content-area::-webkit-scrollbar-track {
-    background: rgba(42, 59, 61, 0.3);
+    background: rgba(95, 169, 168, 0.1);
 }
 
 .content-area::-webkit-scrollbar-thumb {
-    background: #A66B4A;
+    background: #5C8374;
     border-radius: 4px;
 }
 
 .content-area::-webkit-scrollbar-thumb:hover {
-    background: #D4875B;
+    background: #D9A441;
 }
 
 /* Full-screen front image background */
@@ -139,7 +148,7 @@ nav {
         transform: translateX(-100%);
         transition: transform 0.3s ease;
     }
-    
+
     .mobile-menu.open {
         transform: translateX(0);
     }
@@ -147,11 +156,12 @@ nav {
 
 /* Mobile optimizations */
 @media (max-width: 1024px) {
+
     /* Prevent weird animations on mobile */
     .transitioning-image {
         display: none !important;
     }
-    
+
     /* Ensure smoother transitions on mobile */
     .profile-photo {
         transition: opacity 0.3s ease;
