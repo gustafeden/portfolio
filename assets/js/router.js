@@ -2,8 +2,8 @@ class Router {
     constructor() {
         this.currentSection = 'front';
         this.contentArea = null;
-        this.sections = ['front', 'about', 'stuff', 'photos', 'contact'];
-        this.markdownSections = ['about', 'stuff']; // Sections that use markdown
+        this.sections = ['front', 'about', 'projects', 'photos', 'contact'];
+        this.markdownSections = ['about', 'projects']; // Sections that use markdown
         this.cache = {};
         this.markdownParser = new MarkdownParser();
         this.isInitialLoad = true;

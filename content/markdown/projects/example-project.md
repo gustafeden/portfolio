@@ -1,4 +1,4 @@
-# Data Visualization Dashboard
+<!-- # Data Visualization Dashboard
 
 *Data Visualization Engineer | 2024*
 
@@ -201,4 +201,4 @@ Data Sources → Kafka → Processing Layer → Storage → Visualization
 
 ---
 
-*This project showcases how thoughtful data architecture, innovative visualization design, and user-centered development can transform raw data into actionable business intelligence.*
+*This project showcases how thoughtful data architecture, innovative visualization design, and user-centered development can transform raw data into actionable business intelligence.* -->
