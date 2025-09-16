@@ -1,6 +1,6 @@
-# Work & Projects
+<!-- # Work & Projects -->
 
-## Featured Projects
+# Featured Projects
 
 ### Vibe Coded Portfolio
 *Personal Project | 2025*

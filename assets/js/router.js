@@ -11,7 +11,7 @@ class Router {
         this.sectionImages = {
             'front': '/assets/img/Photo06_7.jpeg',
             'about': '/assets/img/IMG_4051.jpeg',
-            'stuff': '/assets/img/Photo06_7.jpeg',
+            'projects': '/assets/img/Photo06_7.jpeg',
             'photos': '/assets/img/IMG_4051.jpeg'
         };
         this.init();
@@ -169,21 +169,21 @@ class Router {
             const html = await this.markdownParser.loadMarkdownContent(`projects/${projectSlug}`);
             this.contentArea.innerHTML = `
                 <div class="project-detail">
-                    <button onclick="router.navigate('stuff')" class="mb-6 text-stone-gray hover:text-sand-beige transition">
-                        ← Back to Work
+                    <button onclick="router.navigate('projects')" class="mb-6 text-porcelain-white hover:text-amber-glow transition">
+                        ← Back to Projects
                     </button>
                     ${html}
                 </div>
             `;
             this.currentSection = 'project-detail';
-            this.updateURL('stuff', projectSlug);
+            this.updateURL('projects', projectSlug);
             this.animateContentSwitch();
         } catch (error) {
             console.error('Error loading project:', error);
             this.contentArea.innerHTML = `
                 <div class="project-detail">
-                    <button onclick="router.navigate('stuff')" class="mb-6 text-stone-gray hover:text-sand-beige transition">
-                        ← Back to Work
+                    <button onclick="router.navigate('projects')" class="mb-6 text-porcelain-white hover:text-amber-glow transition">
+                        ← Back to Projects
                     </button>
                     <div class="text-red-400">Error loading project content</div>
                 </div>

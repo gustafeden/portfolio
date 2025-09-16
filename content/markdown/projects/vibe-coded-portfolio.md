@@ -21,7 +21,6 @@ The color palette came from staring at old film stocks: Shadow Black darker than
 
 - **No framework** – Just vanilla JS because it felt right to hand-craft it
 - **Markdown for content** – Write naturally, let the code handle the rest
-- **Floating navigation indicator** – It slides past other items like a VU meter
 - **Background opacity shifts** – Full presence on landing, then fades to memory
 
 ## What's Different
@@ -39,5 +38,3 @@ Vibe coding isn't about being imprecise; it's about letting intuition guide prec
 **Tech Stack:** Vanilla JS, Tailwind CSS, Custom Markdown Parser, Anime.js, Live Server
 
 ---
-
-*Currently iterating based on feel, not roadmap.*
