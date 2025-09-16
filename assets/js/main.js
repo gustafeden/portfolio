@@ -15,18 +15,21 @@ window.addEventListener('DOMContentLoaded', () => {
     // Background and photos are now always visible - no animations needed
 });
 
-// Mode toggles (CCD, Shader, and Anime) - All combinable
+// Mode toggles (CCD, Shader, Anime, and VU) - All combinable
 document.addEventListener('DOMContentLoaded', () => {
     const ccdToggle = document.getElementById('ccd-toggle');
     const shaderToggle = document.getElementById('shader-toggle');
     const animeToggle = document.getElementById('anime-toggle');
+    const vuToggle = document.getElementById('vu-toggle');
     const body = document.body;
     const shaderCanvas = document.getElementById('shader-canvas');
+    const vuMeter = document.getElementById('vu-meter');
 
     // Three.js shader setup
     let renderer, scene, camera;
     let animationId = null;
     let animeAnimation = null;
+    let vuAnimationId = null;
 
     function initShader() {
         if (typeof THREE === 'undefined') return;
@@ -122,10 +125,123 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     }
 
+    // VU Meter with Realistic Physics
+    function createVUMeter() {
+        if (typeof anime === 'undefined') return;
+
+        const needle = document.querySelector('#vu-meter .vu-needle');
+        const segments = document.querySelectorAll('#vu-meter .vu-segment');
+
+        if (!needle || !segments.length) return;
+
+        // Realistic needle physics with overshoot
+        const animateNeedle = (targetRotation) => {
+            anime({
+                targets: needle,
+                rotate: targetRotation,
+                duration: anime.random(150, 300),
+                easing: 'easeOutElastic(1.2, .4)',
+                complete: () => {
+                    // Subtle vibration when hitting peaks
+                    if (Math.abs(targetRotation) > 25) {
+                        anime({
+                            targets: needle,
+                            rotate: [targetRotation, targetRotation - 1.5, targetRotation],
+                            duration: 120,
+                            easing: 'easeInOutSine'
+                        });
+                    }
+                }
+            });
+        };
+
+        // LED segments lighting up with stagger
+        const animateSegments = (level) => {
+            const activeSegments = Math.floor(level * segments.length);
+
+            segments.forEach((segment, i) => {
+                const isActive = i < activeSegments;
+                const ratio = i / segments.length;
+                const color = ratio < 0.6 ? '#39ff14' : // Green (0-60%)
+                             ratio < 0.85 ? '#ffff00' : // Yellow (60-85%)
+                             '#ff4444'; // Red (85-100%)
+
+                anime({
+                    targets: segment,
+                    backgroundColor: isActive ? color : '#1a1a1a',
+                    boxShadow: isActive ? `0 0 8px ${color}, inset 0 1px 0 rgba(255,255,255,0.1)` : 'inset 0 1px 2px rgba(0, 0, 0, 0.5)',
+                    scale: isActive ? [1, 1.05, 1] : 1,
+                    duration: 200,
+                    delay: i * 15,
+                    easing: 'easeOutCubic'
+                });
+            });
+        };
+
+        // Simulate realistic audio levels with multiple frequencies
+        const animateVU = () => {
+            // Combine multiple sine waves for realistic audio simulation
+            const time = Date.now() * 0.001;
+            const lowFreq = Math.sin(time * 0.7) * 0.3;
+            const midFreq = Math.sin(time * 2.1) * 0.25;
+            const highFreq = Math.sin(time * 4.3) * 0.15;
+            const noise = (Math.random() - 0.5) * 0.2;
+
+            let level = 0.3 + lowFreq + midFreq + highFreq + noise;
+            level = Math.max(0, Math.min(1, level)); // Clamp between 0-1
+
+            // Occasional peaks for realism
+            if (Math.random() < 0.05) {
+                level = Math.min(1, level + 0.3);
+            }
+
+            const rotation = (level - 0.5) * 60; // -30 to 30 degrees
+
+            animateNeedle(rotation);
+            animateSegments(level);
+
+            vuAnimationId = setTimeout(animateVU, 100);
+        };
+
+        animateVU();
+        return true;
+    }
+
+    function stopVUMeter() {
+        if (vuAnimationId) {
+            clearTimeout(vuAnimationId);
+            vuAnimationId = null;
+        }
+
+        // Reset needle position
+        const needle = document.querySelector('#vu-meter .vu-needle');
+        if (needle) {
+            anime({
+                targets: needle,
+                rotate: -30,
+                duration: 500,
+                easing: 'easeOutCubic'
+            });
+        }
+
+        // Turn off all segments
+        const segments = document.querySelectorAll('#vu-meter .vu-segment');
+        segments.forEach(segment => {
+            anime({
+                targets: segment,
+                backgroundColor: '#1a1a1a',
+                boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.5)',
+                scale: 1,
+                duration: 300
+            });
+        });
+    }
+
     // Load saved states from localStorage
     const ccdEnabled = localStorage.getItem('ccdMode') === 'true';
     const shaderEnabled = localStorage.getItem('shaderMode') === 'true';
     const animeEnabled = localStorage.getItem('animeMode') === 'true';
+    const vuEnabled = localStorage.getItem('vuMode') === 'true';
 
     // Apply saved states on load
     if (ccdEnabled) {
@@ -141,10 +257,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (animateFn) animateFn();
     }
 
-    if (animeEnabled) {
+    if (animeEnabled && animeToggle) {
         body.classList.add('anime-mode');
         animeToggle.classList.add('active');
         initAnimeEffects();
+    }
+
+    if (vuEnabled && vuToggle && vuMeter) {
+        vuMeter.style.display = 'block';
+        vuToggle.classList.add('active');
+        createVUMeter();
     }
 
     // CCD Mode Toggle - Independent
@@ -179,22 +301,43 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('shaderMode', isActive);
     });
 
-    // Anime Mode Toggle - Independent
-    animeToggle.addEventListener('click', () => {
-        const isActive = !body.classList.contains('anime-mode');
+    // Anime Mode Toggle - Independent (only if button exists)
+    if (animeToggle) {
+        animeToggle.addEventListener('click', () => {
+            const isActive = !body.classList.contains('anime-mode');
 
-        if (isActive) {
-            body.classList.add('anime-mode');
-            animeToggle.classList.add('active');
-            initAnimeEffects();
-        } else {
-            body.classList.remove('anime-mode');
-            animeToggle.classList.remove('active');
-            stopAnimeEffects();
-        }
+            if (isActive) {
+                body.classList.add('anime-mode');
+                animeToggle.classList.add('active');
+                initAnimeEffects();
+            } else {
+                body.classList.remove('anime-mode');
+                animeToggle.classList.remove('active');
+                stopAnimeEffects();
+            }
 
-        localStorage.setItem('animeMode', isActive);
-    });
+            localStorage.setItem('animeMode', isActive);
+        });
+    }
+
+    // VU Mode Toggle - Independent (only if button exists)
+    if (vuToggle) {
+        vuToggle.addEventListener('click', () => {
+            const isActive = !vuMeter.style.display || vuMeter.style.display === 'none';
+
+            if (isActive) {
+                vuMeter.style.display = 'block';
+                vuToggle.classList.add('active');
+                createVUMeter();
+            } else {
+                vuMeter.style.display = 'none';
+                vuToggle.classList.remove('active');
+                stopVUMeter();
+            }
+
+            localStorage.setItem('vuMode', isActive);
+        });
+    }
 
     // Handle window resize
     window.addEventListener('resize', () => {

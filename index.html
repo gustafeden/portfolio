@@ -114,6 +114,37 @@
             <div class="mb-8 hidden lg:block" id="sidebar-photo-container">
                 <img src="/assets/img/Photo06_7.jpeg" alt="Gustaf Edén"
                     class="profile-photo w-48 h-64 object-cover rounded-lg" id="sidebar-photo">
+
+                <!-- VU Meter -->
+                <div id="vu-meter" class="vu-meter-container mt-4 hidden">
+                    <div class="vu-meter">
+                        <!-- LED Segments -->
+                        <div class="vu-segments">
+                            <div class="vu-segment"></div>
+                            <div class="vu-segment"></div>
+                            <div class="vu-segment"></div>
+                            <div class="vu-segment"></div>
+                            <div class="vu-segment"></div>
+                            <div class="vu-segment"></div>
+                            <div class="vu-segment"></div>
+                            <div class="vu-segment"></div>
+                            <div class="vu-segment"></div>
+                            <div class="vu-segment"></div>
+                        </div>
+                        <!-- Analog Needle -->
+                        <div class="vu-needle-container">
+                            <div class="vu-needle"></div>
+                            <div class="vu-needle-pivot"></div>
+                        </div>
+                        <!-- Scale markings -->
+                        <div class="vu-scale">
+                            <span class="vu-mark">-20</span>
+                            <span class="vu-mark">-10</span>
+                            <span class="vu-mark">0</span>
+                            <span class="vu-mark">+3</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Bottom section - Social Links -->
@@ -147,6 +178,9 @@
                     </button>
                     <button id="shader-toggle" class="px-2 py-0.5 bg-shadow-black/50 border border-cyan-mist/30 text-porcelain-white text-xs font-mono rounded hover:bg-cyan-mist/10 hover:border-cyan-mist/50 transition-all">
                         SHADER
+                    </button>
+                    <button id="vu-toggle" class="px-2 py-0.5 bg-shadow-black/50 border border-porcelain-white/30 text-porcelain-white text-xs font-mono rounded hover:bg-porcelain-white/10 hover:border-porcelain-white/50 transition-all">
+                        VU
                     </button>
                     <!-- <button id="anime-toggle" class="px-2 py-0.5 bg-shadow-black/50 border border-film-burn-rose/30 text-porcelain-white text-xs font-mono rounded hover:bg-film-burn-rose/10 hover:border-film-burn-rose/50 transition-all">
                         ANIME
