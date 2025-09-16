@@ -9,11 +9,14 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;400;500;600;700&family=Zilla+Slab:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Lato:wght@300;400;700;900&family=Merriweather:wght@300;400;700;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;400;500;600;700&family=Zilla+Slab:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Lato:wght@300;400;700;900&family=Merriweather:wght@300;400;700;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
 
     <!-- CDN Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <!-- Custom Tailwind Config -->
     <script>
@@ -22,7 +25,7 @@
                 extend: {
                     colors: {
                         'shadow-black': '#0E0E0E',         // Primary background
-                        'porcelain-white': '#C7C7C7',      // Primary text
+                        'porcelain-white': '#C7C7C7',      // Primary text - warm white
                         'amber-glow': '#D9A441',           // Accent / buttons
                         'film-burn-rose': '#B46C3A',       // Secondary accents (hover states, highlights)
                         'cyan-mist': '#5FA9A8',            // Cool balancing accent
@@ -53,11 +56,18 @@
 <body class="bg-shadow-black text-porcelain-white">
 
     <!-- Full-screen background image (always visible) -->
-    <div class="front-image-bg fixed inset-0 z-0" style="background-image: url('/assets/img/Photo06_7.jpeg'); 
-                background-size: cover; 
+    <div class="front-image-bg fixed inset-0 z-0" style="background-image: url('/assets/img/Photo06_7.jpeg');
+                background-size: cover;
                 background-position: center;
                 opacity: 1;">
     </div>
+
+    <!-- CCD Mode overlays -->
+    <div class="scanlines"></div>
+    <div class="ccd-aberration"></div>
+
+    <!-- Shader Mode canvas -->
+    <canvas id="shader-canvas" class="fixed inset-0 z-7 pointer-events-none" style="display: none;"></canvas>
 
     <!-- Main Container -->
     <div class="flex h-screen relative z-10">
@@ -113,7 +123,7 @@
                 <!-- <p class="text-dusty-bronze text-lg lg:hidden text-center">Software Engineer</p> -->
 
                 <!-- Social Links -->
-                <div class="flex space-x-4 justify-center lg:justify-start">
+                <div class="flex space-x-4 justify-center lg:justify-start items-center">
                     <a href="https://github.com/gustafeden" target="_blank"
                         class="text-porcelain-white hover:text-amber-glow transition">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -128,6 +138,19 @@
                                 d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                         </svg>
                     </a>
+                </div>
+
+                <!-- Image Filter Toggles -->
+                <div class="flex flex-wrap gap-1 justify-center lg:justify-start mt-3">
+                    <button id="ccd-toggle" class="px-2 py-0.5 bg-shadow-black/50 border border-amber-glow/30 text-porcelain-white text-xs font-mono rounded hover:bg-amber-glow/10 hover:border-amber-glow/50 transition-all">
+                        CCD
+                    </button>
+                    <button id="shader-toggle" class="px-2 py-0.5 bg-shadow-black/50 border border-cyan-mist/30 text-porcelain-white text-xs font-mono rounded hover:bg-cyan-mist/10 hover:border-cyan-mist/50 transition-all">
+                        SHADER
+                    </button>
+                    <!-- <button id="anime-toggle" class="px-2 py-0.5 bg-shadow-black/50 border border-film-burn-rose/30 text-porcelain-white text-xs font-mono rounded hover:bg-film-burn-rose/10 hover:border-film-burn-rose/50 transition-all">
+                        ANIME
+                    </button> -->
                     <!-- <a href="https://twitter.com" target="_blank" class="text-cool-pearl hover:text-bright-gold transition">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                             <path
@@ -151,24 +174,7 @@
     <script src="assets/js/data.js"></script>
     <script src="assets/js/quartz/markdown-parser.js"></script>
     <script src="assets/js/router.js"></script>
-    <script>
-        // Mobile menu toggle
-        window.mobileMenuOpen = false;
-        function toggleMobileMenu() {
-            window.mobileMenuOpen = !window.mobileMenuOpen;
-            const menu = document.getElementById('mobile-menu');
-            if (window.mobileMenuOpen) {
-                menu.classList.add('open');
-            } else {
-                menu.classList.remove('open');
-            }
-        }
-
-        // Animations on load
-        window.addEventListener('DOMContentLoaded', () => {
-            // Background and photos are now always visible - no animations needed
-        });
-    </script>
+    <script src="assets/js/main.js"></script>
 </body>
 
 </html>

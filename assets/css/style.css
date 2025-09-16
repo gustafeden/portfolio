@@ -9,6 +9,135 @@
 body {
     overflow: hidden;
     background: #0E0E0E;
+    position: relative;
+}
+
+/* Film grain texture overlay */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.03;
+    z-index: 1;
+    pointer-events: none;
+    background-image:
+        repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255, 255, 255, .02) 35px, rgba(255, 255, 255, .02) 70px),
+        repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(255, 255, 255, .01) 35px, rgba(255, 255, 255, .01) 70px);
+    animation: grain 8s steps(10) infinite;
+}
+
+@keyframes grain {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    10% {
+        transform: translate(-1%, -1%);
+    }
+
+    20% {
+        transform: translate(1%, 1%);
+    }
+
+    30% {
+        transform: translate(-2%, 1%);
+    }
+
+    40% {
+        transform: translate(2%, -1%);
+    }
+
+    50% {
+        transform: translate(-1%, 2%);
+    }
+
+    60% {
+        transform: translate(1%, -2%);
+    }
+
+    70% {
+        transform: translate(-1%, -1%);
+    }
+
+    80% {
+        transform: translate(2%, 1%);
+    }
+
+    90% {
+        transform: translate(-2%, -1%);
+    }
+}
+
+/* Vignetting effect */
+/* body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 0%, transparent 40%, rgba(14, 14, 14, 0.3) 100%);
+} */
+
+/* Light leak effect - Film Burn Rose */
+/* .light-leak {
+    background: radial-gradient(ellipse at 20% 80%, rgba(180, 108, 58, 0.1) 0%, transparent 40%),
+        radial-gradient(ellipse at 80% 20%, rgba(180, 108, 58, 0.08) 0%, transparent 30%),
+        radial-gradient(ellipse at 40% 40%, rgba(217, 164, 65, 0.05) 0%, transparent 40%);
+    animation: lightLeak 20s ease-in-out infinite;
+} */
+
+/* @keyframes lightLeak {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(1) rotate(0deg);
+    }
+
+    25% {
+        opacity: 0.5;
+        transform: scale(1.1) rotate(1deg);
+    }
+
+    50% {
+        opacity: 0.2;
+        transform: scale(0.95) rotate(-1deg);
+    }
+
+    75% {
+        opacity: 0.4;
+        transform: scale(1.05) rotate(0.5deg);
+    }
+} */
+
+/* Uneven exposure zones */
+/* .exposure-variation {
+    background: linear-gradient(135deg,
+            transparent 0%,
+            rgba(236, 231, 225, 0.02) 20%,
+            transparent 40%,
+            rgba(14, 14, 14, 0.03) 60%,
+            transparent 80%,
+            rgba(236, 231, 225, 0.01) 100%);
+    animation: exposure 15s ease-in-out infinite alternate;
+} */
+
+@keyframes exposure {
+    0% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 0.8;
+    }
 }
 
 nav {
@@ -51,10 +180,11 @@ nav {
 
 .profile-photo {
     border-radius: 8px;
-    filter: grayscale(0.3);
-    transition: filter 0.3s ease, opacity 0.3s ease;
+    /* filter: grayscale(0.3) sepia(0.1); */
+    transition: filter 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
     animation: float 6s ease-in-out infinite;
     opacity: 1;
+    /* box-shadow: 0 0 20px rgba(180, 108, 58, 0.2); */
 }
 
 @keyframes float {
@@ -70,7 +200,8 @@ nav {
 }
 
 .profile-photo:hover {
-    filter: grayscale(0);
+    /* filter: grayscale(0) sepia(0.05); */
+    box-shadow: 0 0 20px rgba(180, 108, 58, 0.1), 0 0 60px rgba(217, 164, 65, 0.1);
 }
 
 .transitioning-image {
@@ -99,8 +230,9 @@ nav {
 }
 
 .content-area::-webkit-scrollbar-thumb {
-    background: #5C8374;
+    background: #B46C3A;
     border-radius: 4px;
+    box-shadow: inset 0 0 3px rgba(180, 108, 58, 0.3);
 }
 
 .content-area::-webkit-scrollbar-thumb:hover {
@@ -142,6 +274,21 @@ nav {
     }
 }
 
+/* Film burn glow for headers
+.font-mono.text-amber-glow {
+    text-shadow: 0 0 20px rgba(217, 164, 65, 0.3), 0 0 40px rgba(180, 108, 58, 0.2);
+}
+
+Subtle film burn on nav hover */
+.nav-link:hover {
+    text-shadow: 0 0 15px rgba(180, 108, 58, 0.4);
+}
+
+/* Active nav has warm glow */
+/* .nav-link.active {
+    text-shadow: 0 0 10px rgba(236, 231, 225, 0.3);
+}  */
+
 /* Mobile menu */
 @media (max-width: 768px) {
     .mobile-menu {
@@ -166,4 +313,137 @@ nav {
     .profile-photo {
         transition: opacity 0.3s ease;
     }
+}
+
+/* CCD Mode - Vintage Digital Camera Effect */
+body.ccd-mode {
+    position: relative;
+}
+
+/* CCD color filter */
+body.ccd-mode .front-image-bg,
+body.ccd-mode .profile-photo,
+body.ccd-mode img {
+    filter:
+        contrast(0.85)
+        brightness(1.05)
+        saturate(0.75)
+        hue-rotate(5deg)
+        sepia(0.08);
+}
+
+/* CCD pixel grid effect */
+body.ccd-mode::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+    background-image:
+        radial-gradient(circle, transparent 20%, rgba(255,255,255,.05) 20%, rgba(255,255,255,.05) 80%, transparent 80%),
+        linear-gradient(90deg, transparent 50%, rgba(255,255,255,.02) 50%);
+    background-size: 3px 3px, 4px 4px;
+    mix-blend-mode: overlay;
+}
+
+/* Scanlines for old LCD look */
+body.ccd-mode .scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 6;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+    );
+    animation: scanline-flicker 8s infinite;
+}
+
+@keyframes scanline-flicker {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.3; }
+}
+
+/* CCD aberration on edges */
+body.ccd-mode .ccd-aberration {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 4;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse at center, transparent 50%, rgba(255,0,100,0.03) 100%),
+        radial-gradient(ellipse at center, transparent 50%, rgba(0,255,100,0.03) 100%);
+    mix-blend-mode: screen;
+}
+
+/* Button active state */
+#ccd-toggle.active {
+    background: rgba(217, 164, 65, 0.2);
+    border-color: rgba(217, 164, 65, 0.8);
+    color: #D9A441;
+}
+
+#shader-toggle.active {
+    background: rgba(95, 169, 168, 0.2);
+    border-color: rgba(95, 169, 168, 0.8);
+    color: #5FA9A8;
+}
+
+/* Shader canvas styling */
+#shader-canvas {
+    mix-blend-mode: multiply;
+    opacity: 0.9;
+}
+
+/* Anime mode button active state */
+#anime-toggle.active {
+    background: rgba(180, 108, 58, 0.2);
+    border-color: rgba(180, 108, 58, 0.8);
+    color: #B46C3A;
+}
+
+/* Anime mode effects - 16mm film rapid breathing */
+body.anime-mode .front-image-bg,
+body.anime-mode .profile-photo {
+    animation: vintageFilter 0.8s ease-in-out infinite;
+}
+
+@keyframes vintageFilter {
+    0%, 100% {
+        filter: contrast(1) saturate(1) brightness(1);
+    }
+    20% {
+        filter: contrast(0.92) saturate(0.85) brightness(1.03) sepia(0.02);
+    }
+    40% {
+        filter: contrast(0.88) saturate(0.75) brightness(1.08) sepia(0.06);
+    }
+    60% {
+        filter: contrast(0.95) saturate(0.9) brightness(0.97) sepia(0.01);
+    }
+    80% {
+        filter: contrast(0.9) saturate(0.8) brightness(1.05) sepia(0.04);
+    }
+}
+
+/* Subtle grain breathing for anime mode */
+body.anime-mode::before {
+    animation: grainPulse 2s ease-in-out infinite;
+}
+
+@keyframes grainPulse {
+    0%, 100% { opacity: 0.025; }
+    50% { opacity: 0.04; }
 }
