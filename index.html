@@ -115,36 +115,6 @@
                 <img src="/assets/img/Photo06_7.jpeg" alt="Gustaf Edén"
                     class="profile-photo w-48 h-64 object-cover rounded-lg" id="sidebar-photo">
 
-                <!-- VU Meter -->
-                <div id="vu-meter" class="vu-meter-container mt-4 hidden">
-                    <div class="vu-meter">
-                        <!-- LED Segments -->
-                        <div class="vu-segments">
-                            <div class="vu-segment"></div>
-                            <div class="vu-segment"></div>
-                            <div class="vu-segment"></div>
-                            <div class="vu-segment"></div>
-                            <div class="vu-segment"></div>
-                            <div class="vu-segment"></div>
-                            <div class="vu-segment"></div>
-                            <div class="vu-segment"></div>
-                            <div class="vu-segment"></div>
-                            <div class="vu-segment"></div>
-                        </div>
-                        <!-- Analog Needle -->
-                        <div class="vu-needle-container">
-                            <div class="vu-needle"></div>
-                            <div class="vu-needle-pivot"></div>
-                        </div>
-                        <!-- Scale markings -->
-                        <div class="vu-scale">
-                            <span class="vu-mark">-20</span>
-                            <span class="vu-mark">-10</span>
-                            <span class="vu-mark">0</span>
-                            <span class="vu-mark">+3</span>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Bottom section - Social Links -->
@@ -180,7 +150,7 @@
                         SHADER
                     </button>
                     <button id="vu-toggle" class="px-2 py-0.5 bg-shadow-black/50 border border-porcelain-white/30 text-porcelain-white text-xs font-mono rounded hover:bg-porcelain-white/10 hover:border-porcelain-white/50 transition-all">
-                        VU
+                        RADIO
                     </button>
                     <!-- <button id="anime-toggle" class="px-2 py-0.5 bg-shadow-black/50 border border-film-burn-rose/30 text-porcelain-white text-xs font-mono rounded hover:bg-film-burn-rose/10 hover:border-film-burn-rose/50 transition-all">
                         ANIME
@@ -197,18 +167,50 @@
 
         <!-- Right Panel -->
         <div class="content-area w-full lg:w-[100%] h-full overflow-y-auto px-8 py-8 lg:px-16 lg:py-16 pt-20 lg:pt-16">
+            <!-- Technics VU Meters (hidden by default) -->
+            <div id="technics-vu" class="hidden h-full flex items-center justify-center">
+                <div class="meter-container flex gap-8">
+                    <!-- Left VU Meter -->
+                    <div class="meter-wrap">
+                        <svg id="meter-left" viewBox="-10 0 430 360" xmlns="http://www.w3.org/2000/svg">
+                            <!-- group for ticks and labels; pivot is at (205,300) -->
+                            <g id="scale-left" transform="translate(0,0)"></g>
+                            <!-- needle (a single thin black line rotated around pivot) -->
+                            <g id="needleGroup-left" transform="translate(205,300)">
+                                <line id="needle-left" class="needle" x1="0" y1="0" x2="0" y2="-210"/>
+                                <circle class="hub" cx="0" cy="0" r="3"/>
+                            </g>
+                            <!-- center label -->
+                            <text x="205" y="330" class="label">left power</text>
+                        </svg>
+                    </div>
+
+                    <!-- Right VU Meter -->
+                    <div class="meter-wrap">
+                        <svg id="meter-right" viewBox="-10 0 430 360" xmlns="http://www.w3.org/2000/svg">
+                            <!-- group for ticks and labels; pivot is at (205,300) -->
+                            <g id="scale-right" transform="translate(0,0)"></g>
+                            <!-- needle (a single thin black line rotated around pivot) -->
+                            <g id="needleGroup-right" transform="translate(205,300)">
+                                <line id="needle-right" class="needle" x1="0" y1="0" x2="0" y2="-210"/>
+                                <circle class="hub" cx="0" cy="0" r="3"/>
+                            </g>
+                            <!-- center label -->
+                            <text x="205" y="330" class="label">right power</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
             <!-- Dynamic Content Area -->
             <div id="main-content" class="max-w-4xl">
                 <!-- Content will be loaded dynamically here -->
             </div>
         </div>
     </div>
-
     <!-- JavaScript -->
     <script src="assets/js/data.js"></script>
     <script src="assets/js/quartz/markdown-parser.js"></script>
     <script src="assets/js/router.js"></script>
     <script src="assets/js/main.js"></script>
 </body>
-
 </html>

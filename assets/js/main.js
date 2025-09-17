@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const vuToggle = document.getElementById('vu-toggle');
     const body = document.body;
     const shaderCanvas = document.getElementById('shader-canvas');
-    const vuMeter = document.getElementById('vu-meter');
 
     // Three.js shader setup
     let renderer, scene, camera;
@@ -125,117 +124,341 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     }
 
-    // VU Meter with Realistic Physics
-    function createVUMeter() {
-        if (typeof anime === 'undefined') return;
-
-        const needle = document.querySelector('#vu-meter .vu-needle');
-        const segments = document.querySelectorAll('#vu-meter .vu-segment');
-
-        if (!needle || !segments.length) return;
-
-        // Realistic needle physics with overshoot
-        const animateNeedle = (targetRotation) => {
-            anime({
-                targets: needle,
-                rotate: targetRotation,
-                duration: anime.random(150, 300),
-                easing: 'easeOutElastic(1.2, .4)',
-                complete: () => {
-                    // Subtle vibration when hitting peaks
-                    if (Math.abs(targetRotation) > 25) {
-                        anime({
-                            targets: needle,
-                            rotate: [targetRotation, targetRotation - 1.5, targetRotation],
-                            duration: 120,
-                            easing: 'easeInOutSine'
-                        });
-                    }
-                }
-            });
-        };
-
-        // LED segments lighting up with stagger
-        const animateSegments = (level) => {
-            const activeSegments = Math.floor(level * segments.length);
-
-            segments.forEach((segment, i) => {
-                const isActive = i < activeSegments;
-                const ratio = i / segments.length;
-                const color = ratio < 0.6 ? '#39ff14' : // Green (0-60%)
-                             ratio < 0.85 ? '#ffff00' : // Yellow (60-85%)
-                             '#ff4444'; // Red (85-100%)
-
-                anime({
-                    targets: segment,
-                    backgroundColor: isActive ? color : '#1a1a1a',
-                    boxShadow: isActive ? `0 0 8px ${color}, inset 0 1px 0 rgba(255,255,255,0.1)` : 'inset 0 1px 2px rgba(0, 0, 0, 0.5)',
-                    scale: isActive ? [1, 1.05, 1] : 1,
-                    duration: 200,
-                    delay: i * 15,
-                    easing: 'easeOutCubic'
-                });
-            });
-        };
-
-        // Simulate realistic audio levels with multiple frequencies
-        const animateVU = () => {
-            // Combine multiple sine waves for realistic audio simulation
-            const time = Date.now() * 0.001;
-            const lowFreq = Math.sin(time * 0.7) * 0.3;
-            const midFreq = Math.sin(time * 2.1) * 0.25;
-            const highFreq = Math.sin(time * 4.3) * 0.15;
-            const noise = (Math.random() - 0.5) * 0.2;
-
-            let level = 0.3 + lowFreq + midFreq + highFreq + noise;
-            level = Math.max(0, Math.min(1, level)); // Clamp between 0-1
-
-            // Occasional peaks for realism
-            if (Math.random() < 0.05) {
-                level = Math.min(1, level + 0.3);
+    // Radio stream setup for VU meters
+    async function setupRadioStream() {
+        try {
+            // Check if we already have an audio context
+            if (window.radioAudio) {
+                return true; // Already set up
             }
 
-            const rotation = (level - 0.5) * 60; // -30 to 30 degrees
+            // Create audio element for radio stream
+            const audio = document.createElement('audio');
+            audio.crossOrigin = 'anonymous';
 
-            animateNeedle(rotation);
-            animateSegments(level);
+            // Try different stream URLs (some may work better with CORS)
+            const streamUrls = [
+                'https://stream.starfm.de/blues/mp3-192/',
+                'https://icecast.starfm.de/blues/mp3-192/',
+                'https://cors-anywhere.herokuapp.com/https://stream.starfm.de/blues/mp3-192/'
+            ];
 
-            vuAnimationId = setTimeout(animateVU, 100);
-        };
+            audio.src = streamUrls[0];
+            audio.preload = 'none';
+            audio.volume = 1.0;
 
-        animateVU();
-        return true;
+            // Append to body (sometimes needed for mobile)
+            document.body.appendChild(audio);
+            audio.style.display = 'none';
+
+            // Store reference for controls
+            window.radioAudio = audio;
+
+            // Wait for audio to be ready
+            await new Promise((resolve) => {
+                audio.addEventListener('canplay', resolve, { once: true });
+                audio.load();
+            });
+
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            // Resume context if suspended
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+
+            const source = audioContext.createMediaElementSource(audio);
+
+            window.vuAudioAnalyser = audioContext.createAnalyser();
+            window.vuAudioAnalyser.fftSize = 2048; // Higher resolution for better time domain analysis
+            window.vuAudioAnalyser.smoothingTimeConstant = 0.8; // Smoother for VU meters
+            window.vuAudioAnalyser.minDecibels = -90;
+            window.vuAudioAnalyser.maxDecibels = -10;
+
+            source.connect(window.vuAudioAnalyser);
+            source.connect(audioContext.destination);
+            // Create data array for time domain data (full FFT size for time domain)
+            window.vuDataArray = new Float32Array(window.vuAudioAnalyser.fftSize);
+
+            console.log('📻 Radio stream connected to VU meters');
+            return true;
+        } catch (error) {
+            console.log('📻 Radio stream connection failed:', error);
+            return false;
+        }
     }
 
-    function stopVUMeter() {
-        if (vuAnimationId) {
-            clearTimeout(vuAnimationId);
-            vuAnimationId = null;
+    // Start radio and show VU meters
+    async function startRadio() {
+        const technicsContainer = document.getElementById('technics-vu');
+        if (!technicsContainer) return;
+
+        // Setup radio stream
+        const radioConnected = await setupRadioStream();
+        if (!radioConnected) {
+            console.log('Failed to setup radio stream');
+            return;
         }
 
-        // Reset needle position
-        const needle = document.querySelector('#vu-meter .vu-needle');
-        if (needle) {
-            anime({
-                targets: needle,
-                rotate: -30,
-                duration: 500,
-                easing: 'easeOutCubic'
-            });
-        }
+        try {
+            // Start playing radio
+            await window.radioAudio.play();
 
-        // Turn off all segments
-        const segments = document.querySelectorAll('#vu-meter .vu-segment');
-        segments.forEach(segment => {
-            anime({
-                targets: segment,
-                backgroundColor: '#1a1a1a',
-                boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.5)',
-                scale: 1,
-                duration: 300
-            });
-        });
+            // Fade in VU meters
+            technicsContainer.classList.remove('hidden');
+            technicsContainer.style.opacity = '0';
+            technicsContainer.style.transition = 'opacity 1s ease-in-out';
+
+            setTimeout(() => {
+                technicsContainer.style.opacity = '1';
+            }, 100);
+
+            // Initialize dual VU meters
+            initializeTechnicsVU('left');
+            initializeTechnicsVU('right');
+
+            console.log('📻 Radio playing with VU meters active');
+            return true;
+        } catch (error) {
+            console.log('Failed to start radio playback:', error);
+            return false;
+        }
     }
+
+    // Stop radio and hide VU meters
+    function stopRadio() {
+        if (window.radioAudio) {
+            window.radioAudio.pause();
+            window.radioAudio.currentTime = 0;
+        }
+
+        // Stop VU animation
+        vuAnimationId = null;
+
+        // Fade out VU meters
+        const technicsContainer = document.getElementById('technics-vu');
+        if (technicsContainer) {
+            technicsContainer.style.opacity = '0';
+            setTimeout(() => {
+                technicsContainer.classList.add('hidden');
+            }, 1000);
+        }
+
+        console.log('📻 Radio stopped');
+    }
+
+    function initializeTechnicsVU(channel) {
+        // CONFIG for each meter
+        const PIVOT = { x: 205, y: 300 };            // pivot in SVG coordinates
+        const RADIUS = 210;                          // needle length
+        const MIN_DB = -60, MAX_DB = +5;             // display range
+        const SWEEP_MIN = -64, SWEEP_MAX = 64;       // degrees mapped from MIN_DB..MAX_DB
+        const TAU = 0.065;                           // seconds (≈65 ms) for envelope smoothing
+        const REF_DBFS = -12;                        // calibrate: which dBFS should show 0 dB on meter
+
+        // Helper functions
+        const deg2rad = a => a * Math.PI / 180;
+        const rad2deg = r => r * 180 / Math.PI;
+
+        // Get elements for this channel
+        const svgNS = "http://www.w3.org/2000/svg";
+        const scaleG = document.getElementById(`scale-${channel}`);
+        const needleEl = document.getElementById(`needle-${channel}`);
+
+        if (!scaleG || !needleEl) return;
+
+        function polarToCartesian(cx, cy, r, angleDeg) {
+            const a = deg2rad(angleDeg - 90);
+            return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+        }
+
+        function describeArc(x, y, radius, startAngle, endAngle) {
+            const start = polarToCartesian(x, y, radius, endAngle);
+            const end = polarToCartesian(x, y, radius, startAngle);
+            const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+            return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`;
+        }
+
+        // Map display dB (linear) to angle (degrees)
+        function dbToAngle(db) {
+            const t = (db - MIN_DB) / (MAX_DB - MIN_DB);
+            return SWEEP_MIN + t * (SWEEP_MAX - SWEEP_MIN);
+        }
+
+        // Draw ticks and scales dynamically
+        function drawTicks() {
+            // Clear any existing scales first
+            scaleG.innerHTML = '';
+
+            // Draw the main scale arc
+            const startAngle = SWEEP_MIN;
+            const endAngle = SWEEP_MAX;
+            const arcPath = describeArc(PIVOT.x, PIVOT.y, RADIUS, startAngle, endAngle);
+            const arc = document.createElementNS(svgNS, "path");
+            arc.setAttribute("d", arcPath);
+            arc.setAttribute("class", "tick");
+            arc.setAttribute("fill", "none");
+            scaleG.appendChild(arc);
+
+            // Draw many ticks between MIN_DB..MAX_DB
+            const dbStep = 2; // 2 dB small ticks for cleaner look
+            for (let db = MIN_DB; db <= MAX_DB; db += dbStep) {
+                const angle = dbToAngle(db);
+                const outer = polarToCartesian(PIVOT.x, PIVOT.y, RADIUS + 8, angle);
+                const inner = polarToCartesian(PIVOT.x, PIVOT.y, (db % 10 === 0 ? RADIUS - 25 : RADIUS - 15), angle);
+                const line = document.createElementNS(svgNS, "line");
+                line.setAttribute("x1", outer.x);
+                line.setAttribute("y1", outer.y);
+                line.setAttribute("x2", inner.x);
+                line.setAttribute("y2", inner.y);
+                line.setAttribute("class", (db % 10 === 0) ? "tick" : "tick small");
+                scaleG.appendChild(line);
+
+                if (db % 10 === 0) {
+                    // dB label inside the ring
+                    const labPos = polarToCartesian(PIVOT.x, PIVOT.y, RADIUS - 40, angle);
+                    const t = document.createElementNS(svgNS, "text");
+                    t.setAttribute("x", labPos.x);
+                    t.setAttribute("y", labPos.y + 4);
+                    t.setAttribute("class", "label dblabel");
+                    t.textContent = String(db);
+                    scaleG.appendChild(t);
+                }
+            }
+
+            // Watt labels (logarithmic) along the outer area
+            const wattAngles = [
+                { w: 0.0001, a: dbToAngle(-60) },
+                { w: 0.001, a: dbToAngle(-50) },
+                { w: 0.01, a: dbToAngle(-40) },
+                { w: 0.1, a: dbToAngle(-30) },
+                { w: 1, a: dbToAngle(-20) },
+                { w: 10, a: dbToAngle(-10) },
+                { w: 100, a: dbToAngle(0) },
+                { w: 200, a: dbToAngle(3) },
+                { w: 300, a: dbToAngle(5) }
+            ];
+
+            wattAngles.forEach(o => {
+                const angle = o.a;
+                const outer = polarToCartesian(PIVOT.x, PIVOT.y, RADIUS + 25, angle);
+                const tt = document.createElementNS(svgNS, "text");
+                tt.setAttribute("x", outer.x);
+                tt.setAttribute("y", outer.y + 5);
+                tt.setAttribute("class", "label");
+                tt.setAttribute("font-size", "9");
+                tt.setAttribute("text-anchor", "middle");
+                // Adjust positioning for extreme left and right labels
+                if (angle < -45) {
+                    tt.setAttribute("text-anchor", "start");
+                    tt.setAttribute("x", outer.x + 8);
+                } else if (angle > 45) {
+                    tt.setAttribute("text-anchor", "end");
+                    tt.setAttribute("x", outer.x - 8);
+                }
+                tt.textContent = String(o.w);
+                scaleG.appendChild(tt);
+            });
+
+            // Center labels
+            const wattsLabel = document.createElementNS(svgNS, "text");
+            wattsLabel.setAttribute("x", PIVOT.x);
+            wattsLabel.setAttribute("y", PIVOT.y - 6);
+            wattsLabel.setAttribute("class", "label");
+            wattsLabel.textContent = "watts (8Ω)";
+            scaleG.appendChild(wattsLabel);
+
+            const dbLabel = document.createElementNS(svgNS, "text");
+            dbLabel.setAttribute("x", PIVOT.x);
+            dbLabel.setAttribute("y", PIVOT.y + 10);
+            dbLabel.setAttribute("class", "label");
+            dbLabel.textContent = "dB";
+            scaleG.appendChild(dbLabel);
+        }
+
+        drawTicks();
+
+        // Animation variables for this channel
+        let env = MIN_DB;
+        let lastTime = performance.now();
+
+        function computeAlpha(dt) {
+            return 1 - Math.exp(-dt / TAU);
+        }
+
+        // Audio analysis - live radio stream (proper VU meter response)
+        function getCurrentDbFS() {
+            if (!window.vuAudioAnalyser || !window.vuDataArray) {
+                return -60; // Silent if no audio
+            }
+
+            // Use time domain data for VU meters (actual audio waveform)
+            window.vuAudioAnalyser.getFloatTimeDomainData(window.vuDataArray);
+
+            // Calculate RMS (Root Mean Square) of the audio signal
+            let sum = 0;
+            for (let i = 0; i < window.vuDataArray.length; i++) {
+                sum += window.vuDataArray[i] * window.vuDataArray[i];
+            }
+            const rms = Math.sqrt(sum / window.vuDataArray.length);
+
+            // Convert RMS to dBFS
+            let dBFS = 20 * Math.log10(rms);
+
+            // Handle silence/very quiet audio
+            if (!isFinite(dBFS) || dBFS < -80) {
+                dBFS = -80;
+            }
+
+            // Add slight channel variation for stereo effect
+            const channelVariation = channel === 'right' ?
+                0.9 + Math.random() * 0.2 :
+                1.0 + Math.random() * 0.1;
+
+            // Scale for VU meter response (boost the signal)
+            const vuLevel = dBFS + 20; // Boost signal for better VU response
+            const finalLevel = vuLevel * channelVariation;
+
+            return Math.max(-60, Math.min(5, finalLevel));
+        }
+
+        // Animation loop for this channel
+        function frame(t) {
+            const now = t || performance.now();
+            const dt = Math.max(1e-3, (now - lastTime) / 1000);
+            lastTime = now;
+
+            const alpha = computeAlpha(dt);
+            const dbfs = getCurrentDbFS();
+            let disp = dbfs - REF_DBFS;
+
+            // Clamp
+            if (disp < MIN_DB) disp = MIN_DB;
+            if (disp > MAX_DB) disp = MAX_DB;
+
+            // Smooth in dB domain (exponential)
+            env = env + alpha * (disp - env);
+
+            // Map env to angle and rotate needle
+            const ang = dbToAngle(env);
+            needleEl.parentNode.setAttribute("transform", `translate(${PIVOT.x} ${PIVOT.y}) rotate(${ang})`);
+
+            // Debug audio levels occasionally
+            if (Math.random() < 0.01) {
+                console.log(`${channel} channel: dBFS=${disp.toFixed(1)}, env=${env.toFixed(1)}, angle=${ang.toFixed(1)}`);
+            }
+
+            // Continue animation if VU meters are still active
+            if (vuAnimationId) {
+                requestAnimationFrame(frame);
+            }
+        }
+
+        vuAnimationId = true; // Both channels need animation
+        requestAnimationFrame(frame);
+    }
+
+
 
     // Load saved states from localStorage
     const ccdEnabled = localStorage.getItem('ccdMode') === 'true';
@@ -263,10 +486,9 @@ document.addEventListener('DOMContentLoaded', () => {
         initAnimeEffects();
     }
 
-    if (vuEnabled && vuToggle && vuMeter) {
-        vuMeter.style.display = 'block';
+    if (vuEnabled && vuToggle) {
         vuToggle.classList.add('active');
-        createVUMeter();
+        startRadio();
     }
 
     // CCD Mode Toggle - Independent
@@ -320,19 +542,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // VU Mode Toggle - Independent (only if button exists)
+    // Radio Mode Toggle - Independent (only if button exists)
     if (vuToggle) {
         vuToggle.addEventListener('click', () => {
-            const isActive = !vuMeter.style.display || vuMeter.style.display === 'none';
+            const isActive = !vuToggle.classList.contains('active');
 
             if (isActive) {
-                vuMeter.style.display = 'block';
                 vuToggle.classList.add('active');
-                createVUMeter();
+                startRadio();
             } else {
-                vuMeter.style.display = 'none';
                 vuToggle.classList.remove('active');
-                stopVUMeter();
+                stopRadio();
             }
 
             localStorage.setItem('vuMode', isActive);
