@@ -88,12 +88,23 @@ function initRadioDrawer() {
         radioTab.addEventListener('click', toggleRadioDrawer);
     }
 
-    // Close drawer on window resize to desktop
+    // Handle responsive behavior on window resize
     window.addEventListener('resize', () => {
+        const radioContainer = document.getElementById('radio-container');
+        if (!radioContainer) return;
+
         if (window.innerWidth >= 1024) {
-            const radioContainer = document.getElementById('radio-container');
+            // Desktop mode: show radio normally, close drawer if open
             radioContainer.classList.remove('radio-open');
+            radioContainer.style.transform = 'translateX(0)';
             radioDrawerOpen = false;
+        } else {
+            // Mobile mode: auto-collapse to drawer state
+            if (radioContainer.style.display !== 'none') {
+                radioContainer.classList.remove('radio-open');
+                radioContainer.style.transform = 'translateX(calc(100% - 39px))';
+                radioDrawerOpen = false;
+            }
         }
     });
 }
