@@ -70,7 +70,14 @@
     <canvas id="shader-canvas" class="fixed inset-0 z-7 pointer-events-none" style="display: none;"></canvas>
 
     <!-- Radio Player and Visualizer -->
-    <div id="radio-container" class="fixed bottom-4 right-4 z-20 bg-shadow-black/80 backdrop-blur-md rounded-lg p-4 border border-amber-glow/30" style="display: none;">
+    <div id="radio-container" class="fixed bottom-4 right-3 lg:right-3 z-20 bg-shadow-black/80 backdrop-blur-md rounded-lg p-4 border border-amber-glow/30" style="display: none;">
+        <!-- Mobile Toggle Tab -->
+        <div id="radio-tab" class="lg:hidden absolute bg-shadow-black/80 backdrop-blur-md border border-amber-glow/30 border-r-0 rounded-l-lg px-2 py-3 cursor-pointer" style="left: -39px; top: 50%; transform: translateY(-50%);">
+            <svg id="radio-tab-icon" class="w-4 h-4 text-amber-glow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+        </div>
+
         <audio id="radio-player" crossorigin="anonymous"></audio>
         <div id="radio-status" class="text-xs font-mono text-amber-glow mb-2">Radio: Offline</div>
         <div id="frequency-visualizer" class="w-64 h-32 relative">
