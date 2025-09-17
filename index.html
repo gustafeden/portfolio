@@ -80,10 +80,23 @@
 
         <audio id="radio-player" crossorigin="anonymous"></audio>
         <div id="radio-status" class="text-xs font-mono text-amber-glow mb-2">Radio: Offline</div>
-        <div id="frequency-visualizer" class="w-64 h-32 relative">
+
+        <!-- Control buttons -->
+        <div class="mb-2 flex gap-1">
+            <button id="visualizer-toggle" class="px-2 py-1 bg-shadow-black/50 border border-cyan-mist/30 text-porcelain-white text-xs font-mono rounded hover:bg-cyan-mist/10 hover:border-cyan-mist/50 transition-all">
+                SHOW VIZ
+            </button>
+            <button id="next-station" class="px-2 py-1 bg-shadow-black/50 border border-amber-glow/30 text-porcelain-white text-xs font-mono rounded hover:bg-amber-glow/10 hover:border-amber-glow/50 transition-all">
+                NEXT
+            </button>
+        </div>
+
+        <!-- Expandable visualizer section -->
+        <div id="frequency-visualizer" class="w-64 h-32 relative mb-2 overflow-hidden transition-all duration-300" style="height: 0; opacity: 0;">
             <canvas id="frequency-canvas" class="w-full h-full"></canvas>
         </div>
-        <div id="radio-info" class="mt-2 h-5 overflow-hidden relative bg-shadow-black/40 rounded">
+
+        <div id="radio-info" class="h-5 overflow-hidden relative bg-shadow-black/40 rounded">
             <div id="radio-ticker" class="text-xs font-mono text-porcelain-white whitespace-nowrap absolute animate-marquee">
                 Now Playing...
             </div>

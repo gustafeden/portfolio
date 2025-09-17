@@ -26,6 +26,18 @@ let microphoneStream = null;
 let microphoneSource = null;
 let usingMicrophone = false;
 let radioDrawerOpen = false;
+let visualizerEnabled = false;
+
+// Radio stations - cycling through different genres and styles
+const radioStations = [
+    { name: 'SomaFM Groove Salad', url: 'https://ice1.somafm.com/groovesalad-256-mp3' },
+    { name: 'SomaFM Deep Space One', url: 'https://ice4.somafm.com/deepspaceone-128-mp3' },
+    { name: 'SomaFM DEF CON Radio', url: 'https://ice2.somafm.com/defcon-128-mp3' },
+    { name: 'Radio Paradise', url: 'https://stream.radioparadise.com/aac-320' },
+    { name: 'Star FM Blues', url: 'https://stream.starfm.de/blues/mp3-192/' },
+    { name: 'France Inter FIP', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
+    { name: 'KEXP Seattle', url: 'https://kexp-mp3-128.streamguys1.com/kexp128.mp3' },
+];
 
 function addRadioDebug(message, type = 'info') {
     // Simplified logging - console only
@@ -109,8 +121,74 @@ function initRadioDrawer() {
     });
 }
 
+function toggleVisualizer() {
+    const visualizerContainer = document.getElementById('frequency-visualizer');
+    const visualizerToggle = document.getElementById('visualizer-toggle');
+
+    visualizerEnabled = !visualizerEnabled;
+
+    if (visualizerEnabled) {
+        // Show visualizer
+        visualizerToggle.textContent = 'HIDE VIZ';
+        visualizerToggle.classList.add('active');
+
+        anime({
+            targets: visualizerContainer,
+            height: '128px',
+            opacity: 1,
+            duration: 300,
+            easing: 'easeOutQuad'
+        });
+
+        // Show microphone option if needed, or auto-enable if radio is playing
+        if (radioIsPlaying && !usingMicrophone) {
+            showMicrophoneOption();
+        } else if (radioIsPlaying && usingMicrophone) {
+            startVisualization();
+        } else {
+            showMicrophoneOption();
+        }
+    } else {
+        // Hide visualizer
+        visualizerToggle.textContent = 'SHOW VIZ';
+        visualizerToggle.classList.remove('active');
+
+        anime({
+            targets: visualizerContainer,
+            height: '0px',
+            opacity: 0,
+            duration: 300,
+            easing: 'easeOutQuad'
+        });
+
+        // Stop visualization
+        if (radioAnimationId) {
+            cancelAnimationFrame(radioAnimationId);
+            radioAnimationId = null;
+        }
+
+        // Hide microphone button when visualizer is hidden
+        hideMicrophoneButton();
+    }
+}
+
+function startVisualization() {
+    if (!visualizerEnabled || radioAnimationId) return; // Only start if enabled and not already running
+
+    const canvas = document.getElementById('frequency-canvas');
+    if (!canvas || !radioAnalyzer) return;
+
+    // Initialize and start the visualization
+    initVisualization();
+}
+
 function showMicrophoneOption() {
-    const radioContainer = document.getElementById('radio-container');
+    // Only show if visualizer is enabled and microphone is not yet active
+    if (!visualizerEnabled || usingMicrophone) {
+        hideMicrophoneButton();
+        return;
+    }
+
     const existingButton = document.getElementById('use-mic-button');
 
     if (!existingButton) {
@@ -122,6 +200,13 @@ function showMicrophoneOption() {
 
         const statusElement = document.getElementById('radio-status');
         statusElement.insertAdjacentElement('afterend', micButton);
+    }
+}
+
+function hideMicrophoneButton() {
+    const existingButton = document.getElementById('use-mic-button');
+    if (existingButton) {
+        existingButton.remove();
     }
 }
 
@@ -162,6 +247,9 @@ async function enableMicrophoneCapture() {
 
         usingMicrophone = true;
         addRadioDebug('Microphone visualization enabled');
+
+        // Hide the microphone button since we now have access
+        hideMicrophoneButton();
 
         // Start visualization
         initVisualization();
@@ -273,6 +361,12 @@ function initVisualization() {
 
     // Animation function
     function drawFrequencyBars() {
+        // Only continue if visualizer is enabled
+        if (!visualizerEnabled) {
+            radioAnimationId = null;
+            return;
+        }
+
         radioAnimationId = requestAnimationFrame(drawFrequencyBars);
 
         radioAnalyzer.getByteFrequencyData(dataArray);
@@ -435,6 +529,38 @@ function initVisualization() {
 
 // Optional debug flags:
 // window.SHOW_FREQ_LABELS = true;  // Show frequency labels
+
+async function nextStation() {
+    if (!radioIsPlaying) return; // Only work if radio is currently playing
+
+    // Get current and next station
+    let currentStationIndex = parseInt(localStorage.getItem('radioStationIndex')) || 0;
+    currentStationIndex = (currentStationIndex + 1) % radioStations.length;
+    localStorage.setItem('radioStationIndex', currentStationIndex.toString());
+
+    const station = radioStations[currentStationIndex];
+    const audioPlayer = document.getElementById('radio-player');
+    const statusElement = document.getElementById('radio-status');
+
+    if (!audioPlayer || !statusElement) return;
+
+    try {
+        // Update UI immediately
+        statusElement.textContent = `Radio: ${station.name}`;
+        updateRadioTicker(`♫ Now Playing: ${station.name} ♫`);
+
+        // Switch station
+        audioPlayer.src = station.url;
+        await audioPlayer.play();
+
+        console.log(`[RADIO] Switched to station: ${station.name}`);
+    } catch (error) {
+        console.error('[RADIO] Failed to switch station:', error);
+        statusElement.textContent = 'Radio: Connection Failed';
+        updateRadioTicker('♫ Connection Failed ♫');
+    }
+}
+
 async function toggleRadio() {
     console.log('[RADIO] toggleRadio called, radioIsPlaying:', radioIsPlaying);
 
@@ -492,16 +618,6 @@ async function toggleRadio() {
             }, 200);
         }
 
-        // Radio stations - cycling through different genres and styles
-        const radioStations = [
-            { name: 'SomaFM Groove Salad', url: 'https://ice1.somafm.com/groovesalad-256-mp3' },
-            { name: 'SomaFM Deep Space One', url: 'https://ice4.somafm.com/deepspaceone-128-mp3' },
-            { name: 'SomaFM DEF CON Radio', url: 'https://ice2.somafm.com/defcon-128-mp3' },
-            { name: 'Radio Paradise', url: 'https://stream.radioparadise.com/aac-320' },
-            { name: 'Star FM Blues', url: 'https://stream.starfm.de/blues/mp3-192/' },
-            { name: 'France Inter FIP', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
-            { name: 'KEXP Seattle', url: 'https://kexp-mp3-128.streamguys1.com/kexp128.mp3' },
-        ];
 
         // Get current station index or start with random
         let currentStationIndex = parseInt(localStorage.getItem('radioStationIndex')) || Math.floor(Math.random() * radioStations.length);
@@ -521,13 +637,6 @@ async function toggleRadio() {
             // Try to play
             await audioPlayer.play();
             radioIsPlaying = true;
-
-            // Auto-enable microphone for visualization
-            setTimeout(async () => {
-                if (radioIsPlaying && !usingMicrophone) {
-                    await enableMicrophoneCapture();
-                }
-            }, 500);
 
         } catch (error) {
             statusElement.textContent = 'Radio: Connection Failed';
@@ -554,6 +663,9 @@ async function toggleRadio() {
             usingMicrophone = false;
         }
 
+        // Hide microphone button when radio is stopped
+        hideMicrophoneButton();
+
         // Clear visualizer
         const canvas = document.getElementById('frequency-canvas');
         const canvasCtx = canvas.getContext('2d');
@@ -573,6 +685,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const shaderToggle = document.getElementById('shader-toggle');
     const animeToggle = document.getElementById('anime-toggle');
     const radioToggle = document.getElementById('radio-toggle');
+    const visualizerToggle = document.getElementById('visualizer-toggle');
+    const nextStationButton = document.getElementById('next-station');
     const body = document.body;
     const shaderCanvas = document.getElementById('shader-canvas');
 
@@ -760,6 +874,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     } else {
         console.error('[RADIO] Radio toggle button not found!');
+    }
+
+    // Visualizer Toggle
+    if (visualizerToggle) {
+        visualizerToggle.addEventListener('click', () => {
+            toggleVisualizer();
+        });
+    }
+
+    // Next Station Toggle
+    if (nextStationButton) {
+        nextStationButton.addEventListener('click', () => {
+            nextStation();
+        });
     }
 
     // Handle window resize

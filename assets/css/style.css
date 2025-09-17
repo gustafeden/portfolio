@@ -426,6 +426,12 @@ body.ccd-mode .ccd-aberration {
     color: #5FA9A8;
 }
 
+#visualizer-toggle.active {
+    background: rgba(95, 169, 168, 0.2);
+    border-color: rgba(95, 169, 168, 0.8);
+    color: #5FA9A8;
+}
+
 /* Shader canvas styling */
 #shader-canvas {
     mix-blend-mode: multiply;
