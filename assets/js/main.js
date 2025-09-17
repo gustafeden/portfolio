@@ -22,198 +22,160 @@ let radioSource = null;
 let radioAnimationId = null;
 let radioIsPlaying = false;
 let radioDebugLog = [];
+let microphoneStream = null;
+let microphoneSource = null;
+let usingMicrophone = false;
 
 function addRadioDebug(message, type = 'info') {
-    const timestamp = new Date().toLocaleTimeString();
-    const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}`;
-    console.log(`[RADIO DEBUG] ${logEntry}`);
-    radioDebugLog.push(logEntry);
+    // Simplified logging - console only
+    console.log(`[RADIO] ${message}`);
+}
 
-    // Keep only last 10 messages
-    if (radioDebugLog.length > 10) {
-        radioDebugLog.shift();
-    }
-
-    const debugElement = document.getElementById('radio-debug');
-    if (debugElement) {
-        debugElement.innerHTML = radioDebugLog.join('<br>');
-        debugElement.scrollTop = debugElement.scrollHeight;
+function updateRadioTicker(text) {
+    const ticker = document.getElementById('radio-ticker');
+    if (ticker) {
+        ticker.textContent = text;
     }
 }
 
-async function initRadioVisualizer() {
-    try {
-        const audioPlayer = document.getElementById('radio-player');
+function showMicrophoneOption() {
+    const radioContainer = document.getElementById('radio-container');
+    const existingButton = document.getElementById('use-mic-button');
 
+    if (!existingButton) {
+        const micButton = document.createElement('button');
+        micButton.id = 'use-mic-button';
+        micButton.className = 'mt-2 px-3 py-1 bg-cyan-mist/20 border border-cyan-mist/50 text-cyan-mist text-xs font-mono rounded hover:bg-cyan-mist/30 transition-all';
+        micButton.textContent = 'USE MIC FOR VISUALIZATION';
+        micButton.onclick = enableMicrophoneCapture;
+
+        const statusElement = document.getElementById('radio-status');
+        statusElement.insertAdjacentElement('afterend', micButton);
+    }
+}
+
+async function enableMicrophoneCapture() {
+    if (usingMicrophone) return; // Already enabled
+
+    try {
+        addRadioDebug('Requesting microphone for visualization');
+
+        // Request microphone permission
+        microphoneStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                echoCancellation: false,
+                noiseSuppression: false,
+                autoGainControl: false
+            }
+        });
+
+        // Initialize audio context if needed
         if (!radioAudioContext) {
             radioAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-            addRadioDebug('Audio context created', 'success');
         }
 
-        // Resume audio context if suspended (browser security)
         if (radioAudioContext.state === 'suspended') {
             await radioAudioContext.resume();
-            addRadioDebug('Audio context resumed', 'success');
         }
 
-        // Create analyzer node
-        radioAnalyzer = radioAudioContext.createAnalyser();
-        radioAnalyzer.fftSize = 256;
-        radioAnalyzer.smoothingTimeConstant = 0.8;
-
-        // Connect audio element to analyzer
-        if (!radioSource) {
-            try {
-                radioSource = radioAudioContext.createMediaElementSource(audioPlayer);
-                radioSource.connect(radioAnalyzer);
-                radioAnalyzer.connect(radioAudioContext.destination);
-                addRadioDebug('Audio analyzer connected', 'success');
-
-                // Debug audio context state
-                console.log('[RADIO] Audio Context State:', radioAudioContext.state);
-                console.log('[RADIO] Sample Rate:', radioAudioContext.sampleRate);
-                console.log('[RADIO] Audio Element:', audioPlayer);
-                console.log('[RADIO] Audio Source URL:', audioPlayer.src);
-                console.log('[RADIO] Audio Ready State:', audioPlayer.readyState);
-
-            } catch (err) {
-                addRadioDebug(`Failed to create audio source: ${err.message}`, 'error');
-                console.error('[RADIO] Audio source creation error:', err);
-            }
-        } else {
-            addRadioDebug('Reusing existing audio source', 'info');
+        // Create analyzer
+        if (!radioAnalyzer) {
+            radioAnalyzer = radioAudioContext.createAnalyser();
+            radioAnalyzer.fftSize = 256;
+            radioAnalyzer.smoothingTimeConstant = 0.8;
         }
 
-        const bufferLength = radioAnalyzer.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
+        // Create microphone source and connect to analyzer ONLY
+        microphoneSource = radioAudioContext.createMediaStreamSource(microphoneStream);
+        microphoneSource.connect(radioAnalyzer);
 
-        const canvas = document.getElementById('frequency-canvas');
-        const canvasCtx = canvas.getContext('2d');
+        usingMicrophone = true;
+        addRadioDebug('Microphone visualization enabled');
 
-        // Set canvas size properly
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width || 256;
-        canvas.height = rect.height || 128;
-
-        addRadioDebug(`Canvas size: ${canvas.width}x${canvas.height}`, 'info');
-        addRadioDebug(`Visualizer initialized: ${bufferLength} frequency bins`, 'info');
-        console.log('[RADIO] Canvas element:', canvas);
-        console.log('[RADIO] Canvas actual size:', canvas.width, canvas.height);
-        console.log('[RADIO] Canvas CSS size:', rect.width, rect.height);
-
-        // Debug counter for logging
-        let frameCount = 0;
-        let lastDebugTime = Date.now();
-        let corsBlocked = false;
-        let checkCount = 0;
-
-        // Animation function
-        function drawFrequencyBars() {
-            radioAnimationId = requestAnimationFrame(drawFrequencyBars);
-
-            radioAnalyzer.getByteFrequencyData(dataArray);
-
-            // Check if we're getting real data or if CORS is blocking
-            if (checkCount < 60) { // Check for first 60 frames (about 1 second)
-                checkCount++;
-                const hasData = dataArray.some(v => v > 0);
-                if (checkCount === 60 && !hasData) {
-                    corsBlocked = true;
-                    addRadioDebug('CORS blocking analyzer - no visualization available', 'warning');
-                    addRadioDebug('Try a different stream or use a local proxy', 'info');
-                }
-            }
-
-            // Debug: Log frequency data every second
-            frameCount++;
-            const now = Date.now();
-            if (now - lastDebugTime > 1000) {
-                const maxFreq = Math.max(...dataArray);
-                const avgFreq = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-                const nonZeroCount = dataArray.filter(v => v > 0).length;
-
-                const dataType = corsBlocked ? 'BLOCKED' : 'REAL';
-                addRadioDebug(`[${dataType}] Frame ${frameCount}: Max=${maxFreq}, Avg=${avgFreq.toFixed(1)}, NonZero=${nonZeroCount}/${bufferLength}`, 'debug');
-                console.log('[RADIO ANALYZER] Data sample:', Array.from(dataArray).slice(0, 10));
-                console.log('[RADIO ANALYZER] Canvas size:', canvas.width, 'x', canvas.height);
-                console.log('[RADIO ANALYZER] Audio state:', audioPlayer.paused ? 'paused' : 'playing', 'Volume:', audioPlayer.volume);
-
-                lastDebugTime = now;
-                frameCount = 0;
-            }
-
-            // Clear canvas
-            canvasCtx.fillStyle = 'rgba(14, 14, 14, 0.8)';
-            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // If CORS blocked, show message
-            if (corsBlocked) {
-                canvasCtx.fillStyle = '#5FA9A8';
-                canvasCtx.font = '12px monospace';
-                canvasCtx.textAlign = 'center';
-                canvasCtx.fillText('CORS BLOCKED - Audio Only', canvas.width / 2, canvas.height / 2 - 10);
-                canvasCtx.fillText('No Visualization Available', canvas.width / 2, canvas.height / 2 + 10);
-                return; // Don't draw bars if no data
-            }
-
-            // Draw grid lines for visual reference
-            canvasCtx.strokeStyle = 'rgba(217, 164, 65, 0.1)';
-            canvasCtx.beginPath();
-            for (let i = 0; i <= 4; i++) {
-                const y = (canvas.height / 4) * i;
-                canvasCtx.moveTo(0, y);
-                canvasCtx.lineTo(canvas.width, y);
-            }
-            canvasCtx.stroke();
-
-            const barWidth = (canvas.width / bufferLength) * 2.5;
-            let barHeight;
-            let x = 0;
-
-            for (let i = 0; i < bufferLength; i++) {
-                barHeight = (dataArray[i] / 255) * canvas.height * 0.8;
-
-                // Make bars more visible - minimum height if there's any data
-                if (dataArray[i] > 0) {
-                    barHeight = Math.max(barHeight, 2);
-                }
-
-                // Simpler solid color for debugging
-                const intensity = dataArray[i] / 255;
-                canvasCtx.fillStyle = `rgba(217, 164, 65, ${0.5 + intensity * 0.5})`;
-                canvasCtx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
-
-                x += barWidth + 1;
-            }
-
-            // Draw animated frequency line using anime.js
-            if (anime && dataArray.some(val => val > 0)) {
-                const points = [];
-                for (let i = 0; i < bufferLength; i += 4) {
-                    const x = (i / bufferLength) * canvas.width;
-                    const y = canvas.height - (dataArray[i] / 255) * canvas.height * 0.6;
-                    points.push({ x, y });
-                }
-
-                canvasCtx.strokeStyle = '#5FA9A8';
-                canvasCtx.lineWidth = 2;
-                canvasCtx.beginPath();
-                points.forEach((point, index) => {
-                    if (index === 0) {
-                        canvasCtx.moveTo(point.x, point.y);
-                    } else {
-                        canvasCtx.lineTo(point.x, point.y);
-                    }
-                });
-                canvasCtx.stroke();
-            }
-        }
-
-        drawFrequencyBars();
+        // Start visualization
+        initVisualization();
 
     } catch (error) {
-        addRadioDebug(`Visualizer error: ${error.message}`, 'error');
+        addRadioDebug(`Microphone access failed: ${error.message}`);
     }
+}
+
+function initVisualization() {
+    const canvas = document.getElementById('frequency-canvas');
+    const canvasCtx = canvas.getContext('2d');
+
+    // Set canvas size properly
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width || 256;
+    canvas.height = rect.height || 128;
+
+    const bufferLength = radioAnalyzer.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    // Animation function
+    function drawFrequencyBars() {
+        radioAnimationId = requestAnimationFrame(drawFrequencyBars);
+
+        radioAnalyzer.getByteFrequencyData(dataArray);
+
+        // Clear canvas
+        canvasCtx.fillStyle = 'rgba(14, 14, 14, 0.8)';
+        canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Show MIC indicator only
+        canvasCtx.fillStyle = '#5FA9A8';
+        canvasCtx.font = '10px monospace';
+        canvasCtx.textAlign = 'right';
+        canvasCtx.fillText('MIC', canvas.width - 5, 15);
+
+        // Draw grid lines
+        canvasCtx.strokeStyle = 'rgba(217, 164, 65, 0.1)';
+        canvasCtx.beginPath();
+        for (let i = 0; i <= 4; i++) {
+            const y = (canvas.height / 4) * i;
+            canvasCtx.moveTo(0, y);
+            canvasCtx.lineTo(canvas.width, y);
+        }
+        canvasCtx.stroke();
+
+        // Draw clean frequency bars across all ranges
+        // Use first 60 bins (covers most important frequencies 0-11kHz)
+        const displayBins = 60;
+        const barWidth = canvas.width / displayBins;
+
+        for (let i = 0; i < displayBins; i++) {
+            const barHeight = (dataArray[i] / 255) * canvas.height * 0.85;
+
+            // Single gradient for all bars - like the mids section
+            const gradient = canvasCtx.createLinearGradient(0, canvas.height, 0, canvas.height - barHeight);
+            gradient.addColorStop(0, '#B46C3A'); // Film burn rose base
+            gradient.addColorStop(1, '#5FA9A8');  // Cyan top
+
+            canvasCtx.fillStyle = gradient;
+            canvasCtx.fillRect(i * barWidth, canvas.height - barHeight, barWidth - 1, barHeight);
+        }
+
+        // Draw frequency line
+        if (dataArray.some(val => val > 0)) {
+            canvasCtx.strokeStyle = '#5FA9A8';
+            canvasCtx.lineWidth = 2;
+            canvasCtx.beginPath();
+
+            for (let i = 0; i < bufferLength; i += 4) {
+                const x = (i / bufferLength) * canvas.width;
+                const y = canvas.height - (dataArray[i] / 255) * canvas.height * 0.6;
+
+                if (i === 0) {
+                    canvasCtx.moveTo(x, y);
+                } else {
+                    canvasCtx.lineTo(x, y);
+                }
+            }
+            canvasCtx.stroke();
+        }
+    }
+
+    drawFrequencyBars();
 }
 
 async function toggleRadio() {
@@ -239,67 +201,47 @@ async function toggleRadio() {
         radioContainer.style.display = 'block';
         radioToggle.classList.add('bg-amber-glow/20', 'border-amber-glow');
 
-        // Try different stream URLs - unfortunately most streams block CORS
-        // To get working visualization, you'd need to:
-        // 1. Use a local proxy server, or
-        // 2. Find streams with proper CORS headers, or
-        // 3. Host audio files on same domain
-        const streamUrls = [
-            // SomaFM streams (sometimes work with CORS)
-            'https://ice1.somafm.com/groovesalad-256-mp3',
-            'https://ice4.somafm.com/deepspaceone-128-mp3',
-            'https://ice2.somafm.com/defcon-128-mp3',
-            // Radio Paradise
-            'https://stream.radioparadise.com/aac-320',
-            // Original streams (likely CORS blocked but audio will play)
-            'https://stream.starfm.de/blues/mp3-192/',
-            'https://icecast.starfm.de/blues/mp3-192/',
-            // Public radio attempts
-            'https://icecast.radiofrance.fr/fip-midfi.mp3',
-            'https://kexp-mp3-128.streamguys1.com/kexp128.mp3'
+        // Radio stations - cycling through different genres and styles
+        const radioStations = [
+            { name: 'SomaFM Groove Salad', url: 'https://ice1.somafm.com/groovesalad-256-mp3' },
+            { name: 'SomaFM Deep Space One', url: 'https://ice4.somafm.com/deepspaceone-128-mp3' },
+            { name: 'SomaFM DEF CON Radio', url: 'https://ice2.somafm.com/defcon-128-mp3' },
+            { name: 'Radio Paradise', url: 'https://stream.radioparadise.com/aac-320' },
+            { name: 'Star FM Blues', url: 'https://stream.starfm.de/blues/mp3-192/' },
+            { name: 'France Inter FIP', url: 'https://icecast.radiofrance.fr/fip-midfi.mp3' },
+            { name: 'KEXP Seattle', url: 'https://kexp-mp3-128.streamguys1.com/kexp128.mp3' },
+            { name: 'BBC Radio 6 Music', url: 'https://stream.live.vc.bbcmedia.co.uk/bbc_6music' }
         ];
 
-        let connected = false;
+        // Get current station index or start with random
+        let currentStationIndex = parseInt(localStorage.getItem('radioStationIndex')) || Math.floor(Math.random() * radioStations.length);
+        const station = radioStations[currentStationIndex];
 
-        for (const url of streamUrls) {
-            try {
-                addRadioDebug(`Trying stream: ${url}`, 'info');
-                statusElement.textContent = 'Radio: Connecting...';
+        // Update to next station for next time
+        const nextIndex = (currentStationIndex + 1) % radioStations.length;
+        localStorage.setItem('radioStationIndex', nextIndex.toString());
 
-                audioPlayer.src = url;
-                audioPlayer.volume = 0.5;
+        try {
+            statusElement.textContent = `Radio: ${station.name}`;
+            updateRadioTicker(`♫ Now Playing: ${station.name} ♫`);
 
-                // Try to play
-                await audioPlayer.play();
+            audioPlayer.src = station.url;
+            audioPlayer.volume = 0.5;
 
-                connected = true;
-                radioIsPlaying = true;
-                statusElement.textContent = 'Radio: Online';
-                addRadioDebug(`Connected to: ${url}`, 'success');
+            // Try to play
+            await audioPlayer.play();
+            radioIsPlaying = true;
 
-                // Wait for audio to be actually playing
-                audioPlayer.addEventListener('playing', async () => {
-                    addRadioDebug('Audio is now playing, initializing visualizer', 'info');
-                    await initRadioVisualizer();
-                }, { once: true });
+            // Auto-enable microphone for visualization
+            setTimeout(async () => {
+                if (radioIsPlaying && !usingMicrophone) {
+                    await enableMicrophoneCapture();
+                }
+            }, 500);
 
-                // Also try after a delay as backup
-                setTimeout(async () => {
-                    if (radioIsPlaying && !radioAnimationId) {
-                        addRadioDebug('Backup visualizer initialization', 'info');
-                        await initRadioVisualizer();
-                    }
-                }, 1000);
-
-                break;
-            } catch (error) {
-                addRadioDebug(`Failed to connect to ${url}: ${error.message}`, 'error');
-            }
-        }
-
-        if (!connected) {
+        } catch (error) {
             statusElement.textContent = 'Radio: Connection Failed';
-            addRadioDebug('All stream URLs failed. Check CORS or network.', 'error');
+            updateRadioTicker('♫ Connection Failed ♫');
             radioContainer.style.display = 'none';
             radioToggle.classList.remove('bg-amber-glow/20', 'border-amber-glow');
         }
@@ -312,6 +254,14 @@ async function toggleRadio() {
 
         if (radioAnimationId) {
             cancelAnimationFrame(radioAnimationId);
+        }
+
+        // Stop microphone if active
+        if (microphoneStream) {
+            microphoneStream.getTracks().forEach(track => track.stop());
+            microphoneStream = null;
+            microphoneSource = null;
+            usingMicrophone = false;
         }
 
         // Clear visualizer
