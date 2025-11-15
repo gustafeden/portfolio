@@ -25,6 +25,9 @@ The app is particularly useful for families tracking books, games, vinyl records
 - **Smart Photo Management**: Automatic image compression before upload, Firebase Storage integration with 10MB limits, and cached network images for optimal performance
 - **Real-Time Multi-Device Sync**: Firestore-powered real-time database with optimistic UI updates and automatic sync across all household member devices
 
+![Item list showing books organized by type](../../assets/img/projects/ourarchive/items-list.png)
+*Household inventory view showing 43 books, 2 vinyl records, and filtering by type, container, or tag*
+
 ## Technical Implementation
 
 The architecture follows a clean separation between data, business logic, and UI using Riverpod for state management. Firebase provides the backend (Authentication, Firestore database, Cloud Storage, Crashlytics), while the offline-first approach ensures the app remains fully functional without connectivity.
@@ -36,6 +39,15 @@ The sync queue implementation uses three priority queues (high/normal/low) to en
 Book scanning leverages a triple-fallback API system. When a user scans an ISBN barcode, the app first queries Google Books API for comprehensive metadata. If that fails (rate limits, missing data, or regional restrictions), it falls back to Open Library, and finally to Libris for Swedish books. This approach provides 95%+ successful lookup rates across international book collections. Results are cached in memory to reduce API calls for duplicate scans.
 
 The role-based access control system uses Firestore Security Rules to enforce permissions at the database level. Pending members cannot read household data until approved, Members can create/edit items, Viewers have read-only access, and Owners control membership and household settings. This ensures security even if the client is compromised.
+
+![Add item type selection screen](../../assets/img/projects/ourarchive/add-item-selection.png)
+*Item type selection offering Books, Music, Games, and General Items with dedicated scanning and manual entry options*
+
+![ISBN barcode scan with duplicate detection](../../assets/img/projects/ourarchive/book-scan-duplicate.png)
+*Smart duplicate detection: scanning an existing book shows its current location and offers to add another copy or continue scanning*
+
+![Add book form pre-populated from scan](../../assets/img/projects/ourarchive/add-book-form.png)
+*Book entry form automatically populated with title, author, ISBN, publisher, and year from the triple-API fallback system*
 
 ### Code Example: Offline-First Sync Queue
 
