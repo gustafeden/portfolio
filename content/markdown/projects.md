@@ -18,3 +18,14 @@ Experimenting with the vibe coding trend to craft a portfolio that feels more li
 [View Project →](projects/vibe-coded-portfolio)
 
 ---
+
+### OurArchive
+*Personal Project | 2025 | Built with Claude Code*
+
+A collaborative household inventory management app built through human-AI collaboration. Features offline-first architecture, real-time sync, hierarchical container organization, and intelligent ISBN barcode scanning with triple-API fallback.
+
+**Tech:** Flutter, Dart, Firebase, Riverpod, Cloud Firestore, Material Design 3
+
+[View Project →](projects/ourarchive)
+
+---
