@@ -58,7 +58,7 @@ class MarkdownParser {
                 const match = line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
                 const altText = match[1];
                 const imageUrl = match[2];
-                html += `<img src="${imageUrl}" alt="${altText}" class="w-full rounded-lg shadow-lg my-6">`;
+                html += `<img src="${imageUrl}" alt="${altText}" class="max-w-sm mx-auto rounded-lg shadow-lg my-6">`;
             }
             // Image captions (italicized lines starting with *)
             else if (line.match(/^\*([^*]+)\*$/)) {
