@@ -53,6 +53,18 @@ class MarkdownParser {
             else if (line.match(/^> (.+)$/)) {
                 html += '<blockquote class="border-l-4 border-clay-brown pl-6 py-2 mb-4 italic text-sand-beige bg-stone-gray/5">' + line.substring(2) + '</blockquote>';
             }
+            // Images
+            else if (line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/)) {
+                const match = line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+                const altText = match[1];
+                const imageUrl = match[2];
+                html += `<img src="${imageUrl}" alt="${altText}" class="w-full rounded-lg shadow-lg my-6">`;
+            }
+            // Image captions (italicized lines starting with *)
+            else if (line.match(/^\*([^*]+)\*$/)) {
+                const caption = line.substring(1, line.length - 1);
+                html += `<p class="text-sm text-sand-beige/70 italic text-center -mt-4 mb-6">${caption}</p>`;
+            }
             // Horizontal rules
             else if (line === '---') {
                 html += '<hr class="border-stone-gray/20 my-8">';
