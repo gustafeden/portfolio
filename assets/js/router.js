@@ -143,9 +143,17 @@ class Router {
         }, 100);
     }
 
-    loadPhotoCollections() {
+    async loadPhotoCollections() {
         const grid = document.getElementById('photo-collections-grid');
         if (!grid) return;
+
+        // Show loading state
+        grid.innerHTML = '<p class="text-stone-gray col-span-full">Loading...</p>';
+
+        // Load from Firestore + static data
+        if (window.loadAllPhotoCollections) {
+            await window.loadAllPhotoCollections();
+        }
 
         if (!window.photoCollectionsData || window.photoCollectionsData.length === 0) {
             grid.innerHTML = '<p class="text-stone-gray col-span-full">Coming soon.</p>';
@@ -154,7 +162,7 @@ class Router {
 
         const collectionsHTML = window.photoCollectionsData.map(collection => `
             <div class="photo-card relative group cursor-pointer"
-                 onclick="router.navigateToPhotoCollection(${collection.id})">
+                 onclick="router.navigateToPhotoCollection('${collection.id}')">
                 <img src="${collection.cover}" alt="${collection.title}" class="w-full h-64 object-cover rounded-lg">
                 <div class="absolute inset-0 bg-gradient-to-t from-charcoal-black/80 to-transparent opacity-0 group-hover:opacity-100 transition rounded-lg">
                     <div class="absolute bottom-0 left-0 p-4">
@@ -197,7 +205,10 @@ class Router {
     }
 
     navigateToPhotoCollection(collectionId) {
-        const collection = window.photoCollectionsData.find(c => c.id === collectionId);
+        // Support both string IDs (Firestore) and numeric IDs (static data.js)
+        const collection = window.photoCollectionsData.find(c =>
+            c.id === collectionId || c.id === parseInt(collectionId)
+        );
         if (!collection) return;
 
         // Store current collection for lightbox navigation
