@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Firebase service account (NEVER commit this)
+scripts/service-account.json
+
+# Photo staging (optional - you may want to keep these)
+photos-to-upload/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Build
+.quartz-cache/
+public/

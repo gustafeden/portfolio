@@ -9,15 +9,23 @@
     "serve": "quartz build --serve",
     "sync": "quartz sync",
     "dev": "live-server --port=3000",
-    "preview": "quartz build --serve --port=8080"
+    "preview": "quartz build --serve --port=8080",
+    "upload-photos": "node scripts/upload-photos.js"
   },
-  "keywords": ["portfolio", "quartz", "markdown", "web"],
+  "keywords": [
+    "portfolio",
+    "quartz",
+    "markdown",
+    "web"
+  ],
   "author": "Gustaf Edén",
   "license": "MIT",
   "devDependencies": {
     "live-server": "^1.2.2"
   },
   "dependencies": {
-    "quartz-obsidian": "latest"
+    "exif-reader": "^2.0.2",
+    "firebase-admin": "^12.0.0",
+    "sharp": "^0.34.5"
   }
 }

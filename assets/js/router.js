@@ -147,8 +147,13 @@ class Router {
         const grid = document.getElementById('photo-collections-grid');
         if (!grid) return;
 
+        if (!window.photoCollectionsData || window.photoCollectionsData.length === 0) {
+            grid.innerHTML = '<p class="text-stone-gray col-span-full">Coming soon.</p>';
+            return;
+        }
+
         const collectionsHTML = window.photoCollectionsData.map(collection => `
-            <div class="photo-card relative group cursor-pointer" 
+            <div class="photo-card relative group cursor-pointer"
                  onclick="router.navigateToPhotoCollection(${collection.id})">
                 <img src="${collection.cover}" alt="${collection.title}" class="w-full h-64 object-cover rounded-lg">
                 <div class="absolute inset-0 bg-gradient-to-t from-charcoal-black/80 to-transparent opacity-0 group-hover:opacity-100 transition rounded-lg">
@@ -195,6 +200,10 @@ class Router {
         const collection = window.photoCollectionsData.find(c => c.id === collectionId);
         if (!collection) return;
 
+        // Store current collection for lightbox navigation
+        this.currentCollection = collection;
+        this.currentPhotoIndex = 0;
+
         const html = `
             <div class="photo-collection-view">
                 <button onclick="router.navigate('photos')" class="mb-6 text-stone-gray hover:text-sand-beige transition">
@@ -202,8 +211,10 @@ class Router {
                 </button>
                 <h2 class="text-3xl font-light mb-8">${collection.title}</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    ${collection.photos.map(photo => `
-                        <img src="${photo.src}" alt="${photo.caption}" class="w-full rounded-lg">
+                    ${collection.photos.map((photo, index) => `
+                        <img src="${photo.src}" alt="${photo.caption}"
+                             class="w-full rounded-lg cursor-pointer hover:opacity-90 transition"
+                             onclick="router.openLightbox(${index})">
                     `).join('')}
                 </div>
             </div>
@@ -211,6 +222,95 @@ class Router {
 
         this.contentArea.innerHTML = html;
         this.updateURL('photos', collectionId);
+    }
+
+    openLightbox(index) {
+        if (!this.currentCollection) return;
+        this.currentPhotoIndex = index;
+
+        // Create lightbox if it doesn't exist
+        let lightbox = document.getElementById('photo-lightbox');
+        if (!lightbox) {
+            lightbox = document.createElement('div');
+            lightbox.id = 'photo-lightbox';
+            lightbox.className = 'fixed inset-0 bg-black/95 z-50 hidden items-center justify-center';
+            lightbox.innerHTML = `
+                <button class="absolute top-4 right-4 text-white/70 hover:text-white text-4xl z-10" onclick="router.closeLightbox()">×</button>
+                <button class="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white text-5xl z-10 px-4" onclick="router.prevPhoto()">‹</button>
+                <button class="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white text-5xl z-10 px-4" onclick="router.nextPhoto()">›</button>
+                <img id="lightbox-image" class="max-h-[90vh] max-w-[90vw] object-contain" src="" alt="">
+                <div id="lightbox-caption" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm"></div>
+            `;
+            document.body.appendChild(lightbox);
+
+            // Close on background click
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) this.closeLightbox();
+            });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (lightbox.classList.contains('hidden')) return;
+                if (e.key === 'Escape') this.closeLightbox();
+                if (e.key === 'ArrowLeft') this.prevPhoto();
+                if (e.key === 'ArrowRight') this.nextPhoto();
+            });
+        }
+
+        this.updateLightboxImage();
+        lightbox.classList.remove('hidden');
+        lightbox.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    updateLightboxImage() {
+        const photo = this.currentCollection.photos[this.currentPhotoIndex];
+        const img = document.getElementById('lightbox-image');
+        const caption = document.getElementById('lightbox-caption');
+
+        if (img) img.src = photo.src;
+
+        if (caption) {
+            let text = photo.caption || '';
+
+            // Add EXIF info if enabled
+            if (photo.showExif && photo.exif) {
+                const exif = photo.exif;
+                const parts = [];
+                if (exif.aperture) parts.push(exif.aperture);
+                if (exif.shutter) parts.push(exif.shutter);
+                if (exif.iso) parts.push(`ISO ${exif.iso}`);
+                if (exif.focalLength) parts.push(exif.focalLength);
+
+                if (parts.length > 0) {
+                    const exifStr = parts.join(' · ');
+                    text = text ? `${text}\n${exifStr}` : exifStr;
+                }
+            }
+
+            caption.innerHTML = text.replace(/\n/g, '<br>');
+        }
+    }
+
+    closeLightbox() {
+        const lightbox = document.getElementById('photo-lightbox');
+        if (lightbox) {
+            lightbox.classList.add('hidden');
+            lightbox.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+    }
+
+    prevPhoto() {
+        if (!this.currentCollection) return;
+        this.currentPhotoIndex = (this.currentPhotoIndex - 1 + this.currentCollection.photos.length) % this.currentCollection.photos.length;
+        this.updateLightboxImage();
+    }
+
+    nextPhoto() {
+        if (!this.currentCollection) return;
+        this.currentPhotoIndex = (this.currentPhotoIndex + 1) % this.currentCollection.photos.length;
+        this.updateLightboxImage();
     }
 
     setupContactForm() {
