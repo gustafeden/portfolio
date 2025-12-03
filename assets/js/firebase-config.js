@@ -486,6 +486,43 @@ async function trackPageView(pageId) {
 // Export for router
 window.trackPageView = trackPageView;
 
+// Track a photo view (when opened in lightbox)
+async function trackPhotoView(photoSrc, collectionTitle) {
+  if (!firebaseReady || !db) {
+    initFirebase();
+    if (!firebaseReady || !db) return;
+  }
+
+  try {
+    // Create a safe document ID from the photo URL
+    const photoId = photoSrc
+      .replace(/[^a-zA-Z0-9]/g, '_')
+      .substring(0, 100); // Firestore doc ID limit
+
+    const docRef = db.collection('photo_views').doc(photoId);
+    const doc = await docRef.get();
+
+    if (doc.exists) {
+      await docRef.update({
+        views: firebase.firestore.FieldValue.increment(1),
+        lastViewed: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    } else {
+      await docRef.set({
+        src: photoSrc,
+        collection: collectionTitle || 'unknown',
+        views: 1,
+        lastViewed: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+  } catch (e) {
+    console.debug('Photo view tracking failed:', e.message);
+  }
+}
+
+// Export for router
+window.trackPhotoView = trackPhotoView;
+
 // ============ Stats History & Sparklines ============
 
 // Get stats history for sparkline (last 30 days)

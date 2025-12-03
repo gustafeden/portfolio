@@ -297,6 +297,11 @@ class Router {
         const img = document.getElementById('lightbox-image');
         const caption = document.getElementById('lightbox-caption');
 
+        // Track photo view
+        if (window.trackPhotoView && photo.src) {
+            window.trackPhotoView(photo.src, this.currentCollection?.title);
+        }
+
         if (img) img.src = photo.src;
 
         if (caption) {
