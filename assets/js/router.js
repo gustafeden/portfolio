@@ -191,6 +191,11 @@ class Router {
             this.currentSection = 'project-detail';
             this.updateURL('projects', projectSlug);
             this.animateContentSwitch();
+
+            // Load dynamic content for specific projects
+            if (projectSlug === 'atelier' && window.renderAtelierStats) {
+                window.renderAtelierStats();
+            }
         } catch (error) {
             console.error('Error loading project:', error);
             this.contentArea.innerHTML = `

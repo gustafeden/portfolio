@@ -69,6 +69,10 @@ class MarkdownParser {
             else if (line === '---') {
                 html += '<hr class="border-stone-gray/20 my-8">';
             }
+            // Pass through raw HTML (lines starting with <)
+            else if (line.trim().startsWith('<')) {
+                html += line;
+            }
             // Empty lines
             else if (line.trim() === '') {
                 // Skip empty lines

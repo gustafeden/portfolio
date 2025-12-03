@@ -19,6 +19,17 @@ Experimenting with the vibe coding trend to craft a portfolio that feels more li
 
 ---
 
+### Atelier
+*Personal Project | 2025 | Built with Claude Code*
+
+A portfolio photo CMS for photographers. Upload photos from your phone, anywhere, and they appear on your website instantly. No Git commits, no deployments—just photos to portfolio in seconds.
+
+**Tech:** Flutter, Dart, Firebase, Apple Sign-In, Riverpod, Cloud Firestore
+
+[View Project →](projects/atelier)
+
+---
+
 ### OurArchive
 *Personal Project | 2025 | Built with Claude Code*
 
