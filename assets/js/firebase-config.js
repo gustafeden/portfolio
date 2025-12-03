@@ -495,9 +495,15 @@ async function trackPhotoView(photoSrc, collectionTitle) {
 
   try {
     // Create a safe document ID from the photo URL
-    const photoId = photoSrc
+    // Extract just the object path from Firebase Storage URLs for uniqueness
+    let toClean = photoSrc;
+    const match = photoSrc.match(/\/o\/([^?]+)/);
+    if (match) {
+      toClean = decodeURIComponent(match[1]);
+    }
+    const photoId = toClean
       .replace(/[^a-zA-Z0-9]/g, '_')
-      .substring(0, 100); // Firestore doc ID limit
+      .substring(0, 100);
 
     const docRef = db.collection('photo_views').doc(photoId);
     const doc = await docRef.get();
