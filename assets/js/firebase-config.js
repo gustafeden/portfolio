@@ -2,10 +2,10 @@
 // Loads photo collections from Firestore with fallback to static data.js
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCKH3HNLpncAHpKLmO4MgqMldEgTFsQC-k",
-  authDomain: "ourarchive-7d7ba.firebaseapp.com",
-  projectId: "ourarchive-7d7ba",
-  storageBucket: "ourarchive-7d7ba.firebasestorage.app",
+  apiKey: "AIzaSyBbvGlBtJ8wPTBiBVLDBLOflEuo8H-BJwA",
+  authDomain: "atelier-cms.firebaseapp.com",
+  projectId: "atelier-cms",
+  storageBucket: "atelier-cms.firebasestorage.app",
 };
 
 // Initialize Firebase

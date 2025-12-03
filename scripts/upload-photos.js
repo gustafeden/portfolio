@@ -7,7 +7,8 @@ const sharp = require('sharp');
 const os = require('os');
 
 // Config
-const BUCKET_NAME = 'ourarchive-7d7ba.firebasestorage.app';
+// NOTE: Atelier app is now the preferred way to upload photos
+const BUCKET_NAME = 'atelier-cms.firebasestorage.app';
 const PHOTOS_DIR = path.join(__dirname, '..', 'photos-to-upload');
 const DATA_FILE = path.join(__dirname, '..', 'assets', 'js', 'data.js');
 const SERVICE_ACCOUNT_PATH = path.join(__dirname, 'service-account.json');
