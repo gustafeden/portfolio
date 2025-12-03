@@ -53,6 +53,11 @@ class Router {
         this.updateURL(section, subRoute);
         this.animateContentSwitch();
 
+        // Track page view silently
+        if (window.trackPageView) {
+            window.trackPageView(section);
+        }
+
         // Clear initial load flag after first navigation
         if (this.isInitialLoad) {
             this.isInitialLoad = false;
@@ -195,6 +200,14 @@ class Router {
             // Load dynamic content for specific projects
             if (projectSlug === 'atelier' && window.renderAtelierStats) {
                 window.renderAtelierStats();
+            }
+            if (projectSlug === 'ourarchive' && window.renderOurArchiveStats) {
+                window.renderOurArchiveStats();
+            }
+
+            // Track project page view
+            if (window.trackPageView) {
+                window.trackPageView(`projects_${projectSlug}`);
             }
         } catch (error) {
             console.error('Error loading project:', error);

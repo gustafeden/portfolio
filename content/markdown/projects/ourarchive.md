@@ -6,6 +6,8 @@
 
 A household inventory app that actually makes sense. Track your books, vinyl, games, and random stuff across rooms, shelves, and boxes. Scan a barcode, auto-fill everything, never lose track of what you own again.
 
+<div id="ourarchive-live-stats" class="live-stats-container"></div>
+
 ## The Problem
 
 "Where did I put that book?" "Do we already own this game?" "Which box has the Christmas decorations?"
