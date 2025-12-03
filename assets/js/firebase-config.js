@@ -363,33 +363,23 @@ async function renderOurArchiveStats() {
 window.getOurArchiveStats = getOurArchiveStats;
 window.renderOurArchiveStats = renderOurArchiveStats;
 
-// ============ Silent Page View Tracking ============
+// ============ Silent Page View Tracking (Privacy-Focused) ============
+// All tracking done via Cloud Functions - no direct Firestore writes
+// No persistent visitor IDs stored (GDPR compliant)
 
-// Session management
-function getOrCreateVisitorId() {
-  let visitorId = localStorage.getItem('portfolio_visitor_id');
-  if (!visitorId) {
-    visitorId = 'v_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('portfolio_visitor_id', visitorId);
-  }
-  return visitorId;
-}
+// Cloud Function endpoints
+const TRACK_VISIT_URL = 'https://europe-west1-atelier-cms.cloudfunctions.net/trackVisit';
+const TRACK_PAGE_VIEW_URL = 'https://europe-west1-atelier-cms.cloudfunctions.net/trackPageView';
+const TRACK_PHOTO_VIEW_URL = 'https://europe-west1-atelier-cms.cloudfunctions.net/trackPhotoView';
 
+// Session detection (temporary - only for this browser session)
 function isNewSession() {
-  const lastActivity = sessionStorage.getItem('portfolio_session_start');
-  if (!lastActivity) {
+  const sessionStart = sessionStorage.getItem('portfolio_session_start');
+  if (!sessionStart) {
     sessionStorage.setItem('portfolio_session_start', Date.now().toString());
     return true;
   }
   return false;
-}
-
-function isReturningVisitor() {
-  return localStorage.getItem('portfolio_visited_before') === 'true';
-}
-
-function markVisited() {
-  localStorage.setItem('portfolio_visited_before', 'true');
 }
 
 function getDeviceType() {
@@ -427,56 +417,32 @@ function getReferrerSource() {
   }
 }
 
-// Track a page view with enhanced data
+// Track a page view - all done server-side via Cloud Function
 async function trackPageView(pageId) {
-  if (!firebaseReady || !db) {
-    initFirebase();
-    if (!firebaseReady || !db) return;
-  }
-
   try {
-    // Page view counter
-    const docRef = db.collection('page_views').doc(pageId);
-    const doc = await docRef.get();
-
-    if (doc.exists) {
-      await docRef.update({
-        count: firebase.firestore.FieldValue.increment(1),
-        lastViewed: firebase.firestore.FieldValue.serverTimestamp(),
-      });
-    } else {
-      await docRef.set({
-        count: 1,
-        lastViewed: firebase.firestore.FieldValue.serverTimestamp(),
-      });
-    }
+    // Track page view via Cloud Function
+    fetch(TRACK_PAGE_VIEW_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ page: pageId }),
+    }).catch(() => {}); // Fire and forget
 
     // Track session data (only on new session)
     if (isNewSession()) {
-      const visitorId = getOrCreateVisitorId();
-      const isReturning = isReturningVisitor();
       const device = getDeviceType();
       const referrer = getReferrerSource();
 
-      // Mark as visited for future
-      markVisited();
-
       // Send to Cloud Function for aggregation
-      try {
-        await fetch('https://europe-west1-atelier-cms.cloudfunctions.net/trackVisit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            visitorId,
-            isReturning,
-            device,
-            referrer,
-            page: pageId,
-          }),
-        });
-      } catch (e) {
-        console.debug('Session tracking failed:', e.message);
-      }
+      // No visitor IDs, no personal data - just aggregated counts
+      fetch(TRACK_VISIT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          device,
+          referrer,
+          isNewSession: true,
+        }),
+      }).catch(() => {}); // Fire and forget
     }
   } catch (e) {
     console.debug('Page view tracking failed:', e.message);
@@ -486,41 +452,17 @@ async function trackPageView(pageId) {
 // Export for router
 window.trackPageView = trackPageView;
 
-// Track a photo view (when opened in lightbox)
+// Track a photo view (when opened in lightbox) - via Cloud Function
 async function trackPhotoView(photoSrc, collectionTitle) {
-  if (!firebaseReady || !db) {
-    initFirebase();
-    if (!firebaseReady || !db) return;
-  }
-
   try {
-    // Create a safe document ID from the photo URL
-    // Extract just the object path from Firebase Storage URLs for uniqueness
-    let toClean = photoSrc;
-    const match = photoSrc.match(/\/o\/([^?]+)/);
-    if (match) {
-      toClean = decodeURIComponent(match[1]);
-    }
-    const photoId = toClean
-      .replace(/[^a-zA-Z0-9]/g, '_')
-      .substring(0, 100);
-
-    const docRef = db.collection('photo_views').doc(photoId);
-    const doc = await docRef.get();
-
-    if (doc.exists) {
-      await docRef.update({
-        views: firebase.firestore.FieldValue.increment(1),
-        lastViewed: firebase.firestore.FieldValue.serverTimestamp(),
-      });
-    } else {
-      await docRef.set({
-        src: photoSrc,
+    fetch(TRACK_PHOTO_VIEW_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        photoSrc,
         collection: collectionTitle || 'unknown',
-        views: 1,
-        lastViewed: firebase.firestore.FieldValue.serverTimestamp(),
-      });
-    }
+      }),
+    }).catch(() => {}); // Fire and forget
   } catch (e) {
     console.debug('Photo view tracking failed:', e.message);
   }
