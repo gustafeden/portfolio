@@ -3,10 +3,21 @@ window.mobileMenuOpen = false;
 function toggleMobileMenu() {
     window.mobileMenuOpen = !window.mobileMenuOpen;
     const menu = document.getElementById('mobile-menu');
+    const mobileFront = document.getElementById('mobile-front-content');
+
     if (window.mobileMenuOpen) {
         menu.classList.add('open');
+        // Hide mobile front content when menu opens
+        if (mobileFront) {
+            mobileFront.style.display = 'none';
+        }
     } else {
         menu.classList.remove('open');
+        // Show mobile front content when menu closes (only on front page)
+        if (mobileFront && window.router?.currentSection === 'front' && window.innerWidth < 1024) {
+            mobileFront.style.display = 'flex';
+            mobileFront.style.opacity = '1';
+        }
     }
 }
 

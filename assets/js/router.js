@@ -14,6 +14,7 @@ class Router {
         this.currentSlideshowCollection = null;
         // Track which image element is currently showing (alternates between 'primary' and 'next')
         this.currentSlideElement = 'primary';
+        this.mobileSlideElement = 'primary'; // Separate state for mobile
         this.init();
     }
 
@@ -24,7 +25,15 @@ class Router {
             this.handleInitialRoute();
             this.initSlideshow();
             window.addEventListener('popstate', (e) => this.handlePopState(e));
+
+            // Handle window resize for mobile front content
+            window.addEventListener('resize', () => this.handleResize());
         });
+    }
+
+    handleResize() {
+        // Update mobile front content visibility on resize
+        this.updateMobilePreviewVisibility(this.currentSection);
     }
 
     setupNavigation() {
@@ -49,6 +58,7 @@ class Router {
         this.updateActiveNav(section);
         this.updateBackgroundOpacity(section);
         this.updateSidebarPhoto(section);
+        this.updateMobilePreviewVisibility(section);
 
         // Handle direct links to photo collections
         if (section === 'photos' && subRoute) {
@@ -92,6 +102,44 @@ class Router {
 
     updateSidebarPhoto(section) {
         // Sidebar photo now handled by slideshow - this method is kept for compatibility
+    }
+
+    updateMobilePreviewVisibility(section) {
+        const mobileFront = document.getElementById('mobile-front-content');
+        if (!mobileFront) return;
+
+        // Only show on mobile (< 1024px which is Tailwind's lg breakpoint)
+        const isMobile = window.innerWidth < 1024;
+
+        if (section === 'front' && isMobile) {
+            // Show on front page (mobile only)
+            mobileFront.style.display = 'flex';
+            if (typeof anime !== 'undefined') {
+                anime({
+                    targets: mobileFront,
+                    opacity: [0, 1],
+                    duration: 400,
+                    easing: 'easeOutCubic'
+                });
+            } else {
+                mobileFront.style.opacity = '1';
+            }
+        } else {
+            // Hide on other pages or desktop
+            if (typeof anime !== 'undefined' && mobileFront.style.display !== 'none') {
+                anime({
+                    targets: mobileFront,
+                    opacity: [1, 0],
+                    duration: 300,
+                    easing: 'easeInCubic',
+                    complete: () => {
+                        mobileFront.style.display = 'none';
+                    }
+                });
+            } else {
+                mobileFront.style.display = 'none';
+            }
+        }
     }
 
     async loadContent(section) {
@@ -218,6 +266,17 @@ class Router {
 
     async navigateToProject(projectSlug) {
         try {
+            // Update UI state for navigation
+            this.updateActiveNav('projects');
+            this.updateBackgroundOpacity('projects');
+            this.updateMobilePreviewVisibility('projects');
+
+            // Close mobile menu if open
+            if (window.mobileMenuOpen) {
+                window.mobileMenuOpen = false;
+                document.querySelector('.mobile-menu')?.classList.remove('open');
+            }
+
             const html = await this.markdownParser.loadMarkdownContent(`projects/${projectSlug}`);
             this.contentArea.innerHTML = `
                 <div class="project-detail">
@@ -257,6 +316,17 @@ class Router {
     }
 
     async navigateToPhotoCollection(collectionId) {
+        // Update UI state for navigation
+        this.updateActiveNav('photos');
+        this.updateBackgroundOpacity('photos');
+        this.updateMobilePreviewVisibility('photos');
+
+        // Close mobile menu if open
+        if (window.mobileMenuOpen) {
+            window.mobileMenuOpen = false;
+            document.querySelector('.mobile-menu')?.classList.remove('open');
+        }
+
         // Support both string IDs (Firestore) and numeric IDs (static data.js)
         let collection = window.photoCollectionsData?.find(c =>
             c.id === collectionId || c.id === parseInt(collectionId)
@@ -683,6 +753,18 @@ class Router {
         this.updateBackgroundOpacity(startSection);
         this.updateSidebarPhoto(startSection);
 
+        // Set initial mobile front content visibility (without animation on load)
+        const mobileFront = document.getElementById('mobile-front-content');
+        const isMobile = window.innerWidth < 1024;
+        if (mobileFront) {
+            if (startSection === 'front' && isMobile) {
+                mobileFront.style.display = 'flex';
+                mobileFront.style.opacity = '1';
+            } else {
+                mobileFront.style.display = 'none';
+            }
+        }
+
         if (section && this.sections.includes(section)) {
             this.navigate(section, detail);
         } else {
@@ -765,6 +847,21 @@ class Router {
         if (this.slideshowPhotos.length === 0) return;
 
         const photo = this.slideshowPhotos[this.slideshowIndex];
+
+        // Use thumbnail if available, otherwise full image
+        const imageSrc = photo.thumbnailSrc || photo.src;
+
+        // Update desktop sidebar
+        this.updateDesktopSlide(photo, imageSrc);
+
+        // Update mobile preview
+        this.updateMobileSlide(photo, imageSrc);
+
+        // Preload next image in background
+        this.preloadNextSlide();
+    }
+
+    updateDesktopSlide(photo, imageSrc) {
         const img = document.getElementById('sidebar-photo');
         const imgNext = document.getElementById('sidebar-photo-next');
         const loading = document.getElementById('sidebar-loading');
@@ -774,9 +871,6 @@ class Router {
 
         if (!img) return;
 
-        // Use thumbnail if available, otherwise full image
-        const imageSrc = photo.thumbnailSrc || photo.src;
-
         // Update text immediately
         if (collectionName) {
             collectionName.textContent = photo.collectionTitle;
@@ -785,8 +879,7 @@ class Router {
             caption.textContent = photo.caption || '';
         }
 
-        // Check if this is the first load (no current image)
-        // Note: empty src="" resolves to page URL, so check for that or if image has invisible class
+        // Check if this is the first load
         const isFirstLoad = !img.src ||
                            img.src === window.location.href ||
                            img.src === window.location.origin + '/' ||
@@ -794,18 +887,15 @@ class Router {
                            img.naturalWidth === 0;
 
         if (isFirstLoad) {
-            // First load - show loading and fade in when ready
             if (loading) loading.style.display = 'block';
             if (!imageSrc) return;
 
-            // Helper to show the image
             const showImage = () => {
                 if (loading) loading.style.display = 'none';
                 img.classList.remove('invisible');
                 img.style.opacity = '1';
             };
 
-            // Use preloader to ensure image is cached
             const preloader = new Image();
             preloader.onload = () => {
                 img.src = imageSrc;
@@ -816,26 +906,62 @@ class Router {
             };
             preloader.src = imageSrc;
         } else {
-            // Grain Pulse Crossfade
-            this.transitionGrainPulse(imageSrc, img, imgNext, loading, grain);
+            this.transitionGrainPulse(imageSrc, img, imgNext, loading, grain, 'desktop');
         }
-
-        // Preload next image in background
-        this.preloadNextSlide();
     }
 
-    // Option 2: Crossfade with Grain Pulse - alternates between two images, no swap back
-    transitionGrainPulse(imageSrc, img, imgNext, loading, grain) {
+    updateMobileSlide(photo, imageSrc) {
+        const img = document.getElementById('mobile-photo');
+        const imgNext = document.getElementById('mobile-photo-next');
+        const collectionName = document.getElementById('mobile-collection-name');
+        const caption = document.getElementById('mobile-photo-caption');
+
+        if (!img) return;
+
+        // Update text immediately
+        if (collectionName) {
+            collectionName.textContent = photo.collectionTitle;
+        }
+        if (caption) {
+            caption.textContent = photo.caption || '';
+        }
+
+        // Check if this is the first load
+        const isFirstLoad = !img.src ||
+                           img.src === window.location.href ||
+                           img.src === window.location.origin + '/' ||
+                           img.classList.contains('invisible') ||
+                           img.naturalWidth === 0;
+
+        if (isFirstLoad) {
+            if (!imageSrc) return;
+
+            const preloader = new Image();
+            preloader.onload = () => {
+                img.src = imageSrc;
+                img.classList.remove('invisible');
+                img.style.opacity = '1';
+            };
+            preloader.src = imageSrc;
+        } else {
+            this.transitionGrainPulse(imageSrc, img, imgNext, null, null, 'mobile');
+        }
+    }
+
+    // Crossfade with Grain Pulse - alternates between two images, no swap back
+    // target: 'desktop' or 'mobile' to use separate state tracking
+    transitionGrainPulse(imageSrc, img, imgNext, loading, grain, target = 'desktop') {
         // Determine which is current and which is next based on state
-        const currentImg = this.currentSlideElement === 'primary' ? img : imgNext;
-        const nextImg = this.currentSlideElement === 'primary' ? imgNext : img;
+        const stateKey = target === 'mobile' ? 'mobileSlideElement' : 'currentSlideElement';
+        const currentImg = this[stateKey] === 'primary' ? img : imgNext;
+        const nextImg = this[stateKey] === 'primary' ? imgNext : img;
 
         // Preload the new image
         const preloader = new Image();
         preloader.onload = () => {
             if (loading) loading.style.display = 'none';
 
-            // Trigger grain burst
+            // Trigger grain burst (desktop only)
             if (grain) {
                 grain.classList.remove('grain-burst');
                 void grain.offsetWidth;
@@ -863,7 +989,7 @@ class Router {
                     easing: 'easeInOutQuad',
                     complete: () => {
                         // Just toggle which element is current - no swap back
-                        this.currentSlideElement = this.currentSlideElement === 'primary' ? 'next' : 'primary';
+                        this[stateKey] = this[stateKey] === 'primary' ? 'next' : 'primary';
                     }
                 });
             } else {
@@ -871,7 +997,7 @@ class Router {
                 nextImg.src = imageSrc;
                 nextImg.style.opacity = '1';
                 currentImg.style.opacity = '0';
-                this.currentSlideElement = this.currentSlideElement === 'primary' ? 'next' : 'primary';
+                this[stateKey] = this[stateKey] === 'primary' ? 'next' : 'primary';
             }
         };
         preloader.onerror = () => {

@@ -50,7 +50,7 @@
     </script>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="assets/css/style.css?v=7">
+    <link rel="stylesheet" href="assets/css/style.css?v=10">
 </head>
 
 <body class="bg-shadow-black text-porcelain-white">
@@ -103,22 +103,22 @@
         </div>
     </div>
 
+    <!-- Mobile Header (Hidden on Desktop) - Outside main container for proper z-index -->
+    <div
+        class="lg:hidden fixed top-0 left-0 right-0 bg-shadow-black z-50 p-4 flex justify-between items-center border-b border-cyan-mist/30">
+        <a href="#front" data-nav="front" class="hover:opacity-80 transition">
+            <h1 class="text-2xl font-light text-amber-glow font-mono">Gustaf Edén</h1>
+        </a>
+        <button onclick="toggleMobileMenu()" class="p-2">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                </path>
+            </svg>
+        </button>
+    </div>
+
     <!-- Main Container -->
     <div class="flex h-screen relative z-10">
-
-        <!-- Mobile Header (Hidden on Desktop) -->
-        <div
-            class="lg:hidden fixed top-0 left-0 right-0 backdrop-blur-md bg-shadow-black/20 z-50 p-4 flex justify-between items-center border-b border-cyan-mist/30">
-            <a href="#front" data-nav="front" class="hover:opacity-80 transition">
-                <h1 class="text-2xl font-light text-amber-glow font-mono">Gustaf Edén</h1>
-            </a>
-            <button onclick="toggleMobileMenu()" class="p-2">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
-                    </path>
-                </svg>
-            </button>
-        </div>
 
         <!-- Left Panel -->
         <div class="mobile-menu fixed lg:relative w-full lg:w-[35%] h-full backdrop-blur-sm bg-shadow-black/10 lg:bg-transparent lg:backdrop-blur-none p-8 lg:p-12 flex flex-col justify-between z-40 lg:z-auto"
@@ -229,6 +229,28 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
+    <!-- Mobile front page content (only visible on front page) -->
+    <div id="mobile-front-content" class="lg:hidden fixed inset-0 z-10 flex flex-col justify-end pb-6 px-4" style="display: none;">
+        <!-- Featured Project -->
+        <div class="mb-6 cursor-pointer" onclick="router.navigateToProject('atelier')">
+            <p class="text-xs text-amber-glow font-mono mb-2 uppercase tracking-wider">Featured Project</p>
+            <h2 id="mobile-featured-title" class="text-2xl font-display text-porcelain-white mb-2">Atelier</h2>
+            <p id="mobile-featured-desc" class="text-sm text-porcelain-white/70 leading-relaxed line-clamp-2">A portfolio photo CMS for photographers. Manage your collections from your phone.</p>
+            <p class="text-xs text-amber-glow mt-2 font-mono">View Project →</p>
+        </div>
+
+        <!-- Photo Preview -->
+        <div class="cursor-pointer flex flex-col items-center text-center" onclick="router.navigateToSidebarCollection()">
+            <p class="text-xs text-cyan-mist font-mono mb-2 uppercase tracking-wider">Latest Photos</p>
+            <p id="mobile-collection-name" class="text-sm text-porcelain-white/70 mb-2 truncate w-1/2"></p>
+            <div class="relative w-1/2 aspect-square rounded-lg overflow-hidden bg-neutral-900">
+                <img id="mobile-photo" class="w-full h-full object-cover opacity-0 invisible" src="" alt="" />
+                <img id="mobile-photo-next" class="absolute inset-0 w-full h-full object-cover opacity-0 invisible" src="" alt="" />
+            </div>
+            <p id="mobile-photo-caption" class="text-xs text-stone-gray mt-2 truncate h-4 w-1/2"></p>
+        </div>
+    </div>
 
     <!-- JavaScript -->
     <script src="assets/js/data.js"></script>
