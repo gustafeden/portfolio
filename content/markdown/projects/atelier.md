@@ -84,7 +84,7 @@ That's the power of AI-assisted development with established patterns. The borin
 
 ## Links
 
-- [GitHub Repository →](https://github.com/gustaf-eden_elux/atelier)
+- [GitHub Repository →](https://github.com/gustafeden/atelier)
 - [OurArchive →](projects/ourarchive) - The app this was extracted from
 - [Claude Code →](https://claude.com/claude-code) - AI-assisted development
 

@@ -40,3 +40,14 @@ A collaborative household inventory management app built through human-AI collab
 [View Project →](projects/ourarchive)
 
 ---
+
+### The Great Exit
+*Personal Project | 2025 | Built with Claude Code*
+
+A real-time multiplayer stock trading game set inside a collapsing megacorp. Players join via QR code on their phones, trade fictional corporate divisions, and race to accumulate wealth before the organization implodes. Features satirical corporate events and a rich terminal UI for game administration.
+
+**Tech:** Dart, Flutter Web, WebSockets, Firebase Hosting, nocterm
+
+[View Project →](projects/the-great-exit)
+
+---
