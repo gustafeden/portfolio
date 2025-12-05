@@ -69,6 +69,7 @@ async function loadCollectionsFromFirestore() {
         const pData = p.data();
         return {
           src: pData.src,
+          thumbnailSrc: pData.thumbnailSrc || null,
           caption: pData.caption || '',
           location: pData.location || '',
           notes: pData.notes || '',
@@ -76,6 +77,10 @@ async function loadCollectionsFromFirestore() {
           exif: pData.exif || null,
         };
       });
+
+      // Get displayYear or derive from createdAt
+      const createdAt = data.createdAt?.toDate?.() || new Date();
+      const displayYear = data.displayYear || createdAt.getFullYear();
 
       collections.push({
         id: doc.id,
@@ -85,6 +90,8 @@ async function loadCollectionsFromFirestore() {
         cover: data.cover,
         count: photos.length,
         photos,
+        displayYear,
+        createdAt,
       });
     }
 
@@ -94,6 +101,99 @@ async function loadCollectionsFromFirestore() {
     return null;
   }
 }
+
+// Load a single collection by ID (works for hidden collections too - for direct links)
+async function loadCollectionById(collectionId) {
+  if (!firebaseReady || !db) {
+    initFirebase();
+    if (!firebaseReady || !db) return null;
+  }
+
+  try {
+    const doc = await db
+      .collection('portfolio_collections')
+      .doc(collectionId)
+      .get();
+
+    if (!doc.exists) return null;
+
+    const data = doc.data();
+
+    // Load photos for this collection
+    const photosSnap = await db
+      .collection('portfolio_photos')
+      .where('collectionId', '==', collectionId)
+      .orderBy('order')
+      .get();
+
+    const photos = photosSnap.docs.map(p => {
+      const pData = p.data();
+      return {
+        src: pData.src,
+        thumbnailSrc: pData.thumbnailSrc || null,
+        caption: pData.caption || '',
+        location: pData.location || '',
+        notes: pData.notes || '',
+        showExif: pData.showExif ?? true,
+        exif: pData.exif || null,
+      };
+    });
+
+    const createdAt = data.createdAt?.toDate?.() || new Date();
+    const displayYear = data.displayYear || createdAt.getFullYear();
+
+    return {
+      id: doc.id,
+      title: data.title,
+      slug: data.slug,
+      description: data.description || '',
+      cover: data.cover,
+      count: photos.length,
+      photos,
+      displayYear,
+      createdAt,
+      visible: data.visible ?? true,
+    };
+  } catch (e) {
+    console.warn('Failed to load collection:', e.message);
+    return null;
+  }
+}
+
+// Export for router
+window.loadCollectionById = loadCollectionById;
+
+// Load featured collection setting
+async function loadFeaturedSetting() {
+  if (!firebaseReady || !db) {
+    initFirebase();
+    if (!firebaseReady || !db) return null;
+  }
+
+  try {
+    const doc = await db.collection('portfolio_settings').doc('featured').get();
+    if (!doc.exists) return null;
+
+    const data = doc.data();
+    const featuredUntil = data.featuredUntil?.toDate?.();
+
+    // Check if featured has expired
+    if (featuredUntil && featuredUntil < new Date()) {
+      return null; // Expired
+    }
+
+    return {
+      collectionId: data.collectionId,
+      featuredUntil,
+    };
+  } catch (e) {
+    console.warn('Failed to load featured setting:', e.message);
+    return null;
+  }
+}
+
+// Export for router
+window.loadFeaturedSetting = loadFeaturedSetting;
 
 // Merge Firestore + static data (Firestore takes priority)
 async function loadAllPhotoCollections() {

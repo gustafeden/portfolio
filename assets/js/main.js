@@ -890,6 +890,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Transition Style Toggle (for sidebar slideshow)
+    const transitionToggle = document.getElementById('transition-toggle');
+    if (transitionToggle) {
+        // Load saved transition style
+        const savedTransition = localStorage.getItem('slideTransition') || 'grain';
+        if (window.router) {
+            window.router.slideTransition = savedTransition;
+        }
+        transitionToggle.textContent = savedTransition === 'filmstrip' ? 'FILM' : 'GRAIN';
+        if (savedTransition === 'filmstrip') {
+            transitionToggle.classList.add('active');
+        }
+
+        transitionToggle.addEventListener('click', () => {
+            const currentTransition = window.router?.slideTransition || 'grain';
+            const newTransition = currentTransition === 'grain' ? 'filmstrip' : 'grain';
+
+            // Update router
+            if (window.router) {
+                window.router.slideTransition = newTransition;
+            }
+
+            // Update button text and style
+            transitionToggle.textContent = newTransition === 'filmstrip' ? 'FILM' : 'GRAIN';
+            transitionToggle.classList.toggle('active', newTransition === 'filmstrip');
+
+            // Save preference
+            localStorage.setItem('slideTransition', newTransition);
+
+            console.log('[TRANSITION] Switched to:', newTransition);
+        });
+    }
+
     // Handle window resize
     window.addEventListener('resize', () => {
         if (renderer) {

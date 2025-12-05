@@ -50,7 +50,7 @@
     </script>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=7">
 </head>
 
 <body class="bg-shadow-black text-porcelain-white">
@@ -144,10 +144,26 @@
                 <!-- <a href="#contact" data-nav="contact" class="nav-link block text-lg text-stone-gray">Contact</a> -->
             </nav>
 
-            <!-- Dynamic Profile Photo - changes based on section -->
-            <div class="mb-8 hidden lg:block" id="sidebar-photo-container">
-                <img src="/assets/img/Photo06_7.jpeg" alt="Gustaf Edén"
-                    class="profile-photo w-48 h-64 object-cover rounded-lg" id="sidebar-photo">
+            <!-- Dynamic Photo Slideshow -->
+            <div class="mb-8 hidden lg:block cursor-pointer" id="sidebar-photo-container" onclick="router.navigateToSidebarCollection()">
+                <p class="text-sm text-porcelain-white/70 mb-2 truncate h-5" id="sidebar-collection-name"></p>
+                <div class="relative w-56 h-72 rounded-lg overflow-hidden bg-neutral-900 sidebar-frame" id="sidebar-photo-frame">
+                    <!-- Film-style loading state -->
+                    <div id="sidebar-loading" class="absolute inset-0 z-10">
+                        <div class="film-loading">
+                            <div class="sweep"></div>
+                        </div>
+                    </div>
+                    <!-- Grain overlay for grain pulse transition -->
+                    <div id="sidebar-grain" class="absolute inset-0 z-20 pointer-events-none opacity-0"></div>
+                    <!-- Primary image -->
+                    <img src="" alt=""
+                        class="sidebar-photo absolute inset-0 w-56 h-72 object-cover opacity-0 invisible" id="sidebar-photo">
+                    <!-- Secondary image for filmstrip transition -->
+                    <img src="" alt=""
+                        class="sidebar-photo absolute inset-0 w-56 h-72 object-cover opacity-0 invisible" id="sidebar-photo-next">
+                </div>
+                <p class="text-xs text-stone-gray mt-2 truncate h-4" id="sidebar-photo-caption"></p>
             </div>
 
             <!-- Bottom section - Social Links -->
@@ -184,6 +200,9 @@
                     </button>
                     <button id="radio-toggle" class="px-2 py-0.5 bg-shadow-black/50 border border-amber-glow/30 text-porcelain-white text-xs font-mono rounded hover:bg-amber-glow/10 hover:border-amber-glow/50 transition-all">
                         RADIO
+                    </button>
+                    <button id="transition-toggle" class="px-2 py-0.5 bg-shadow-black/50 border border-film-burn-rose/30 text-porcelain-white text-xs font-mono rounded hover:bg-film-burn-rose/10 hover:border-film-burn-rose/50 transition-all">
+                        GRAIN
                     </button>
                     <!-- <button id="anime-toggle" class="px-2 py-0.5 bg-shadow-black/50 border border-film-burn-rose/30 text-porcelain-white text-xs font-mono rounded hover:bg-film-burn-rose/10 hover:border-film-burn-rose/50 transition-all">
                         ANIME

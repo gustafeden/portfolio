@@ -7,13 +7,13 @@ class Router {
         this.cache = {};
         this.markdownParser = new MarkdownParser();
         this.isInitialLoad = true;
-        // Define different images for each section
-        this.sectionImages = {
-            'front': '/assets/img/Photo06_7.jpeg',
-            'about': '/assets/img/IMG_4051.jpeg',
-            'projects': '/assets/img/Photo06_7.jpeg',
-            'photos': '/assets/img/IMG_4051.jpeg'
-        };
+        // Slideshow state
+        this.slideshowPhotos = [];
+        this.slideshowIndex = 0;
+        this.slideshowInterval = null;
+        this.currentSlideshowCollection = null;
+        // Track which image element is currently showing (alternates between 'primary' and 'next')
+        this.currentSlideElement = 'primary';
         this.init();
     }
 
@@ -22,6 +22,7 @@ class Router {
             this.contentArea = document.getElementById('main-content');
             this.setupNavigation();
             this.handleInitialRoute();
+            this.initSlideshow();
             window.addEventListener('popstate', (e) => this.handlePopState(e));
         });
     }
@@ -48,6 +49,13 @@ class Router {
         this.updateActiveNav(section);
         this.updateBackgroundOpacity(section);
         this.updateSidebarPhoto(section);
+
+        // Handle direct links to photo collections
+        if (section === 'photos' && subRoute) {
+            await this.navigateToPhotoCollection(subRoute);
+            return;
+        }
+
         await this.loadContent(section);
         this.currentSection = section;
         this.updateURL(section, subRoute);
@@ -83,17 +91,7 @@ class Router {
     }
 
     updateSidebarPhoto(section) {
-        const sidebarPhoto = document.getElementById('sidebar-photo');
-        if (sidebarPhoto && this.sectionImages[section]) {
-            // Add smooth transition if image changes
-            if (sidebarPhoto.src !== window.location.origin + this.sectionImages[section]) {
-                sidebarPhoto.style.opacity = '0.5';
-                setTimeout(() => {
-                    sidebarPhoto.src = this.sectionImages[section];
-                    sidebarPhoto.style.opacity = '1';
-                }, 200);
-            }
-        }
+        // Sidebar photo now handled by slideshow - this method is kept for compatibility
     }
 
     async loadContent(section) {
@@ -149,11 +147,11 @@ class Router {
     }
 
     async loadPhotoCollections() {
-        const grid = document.getElementById('photo-collections-grid');
-        if (!grid) return;
+        const container = document.getElementById('photo-collections-grid');
+        if (!container) return;
 
         // Show loading state
-        grid.innerHTML = '<p class="text-stone-gray col-span-full">Loading...</p>';
+        container.innerHTML = '<p class="text-stone-gray col-span-full">Loading...</p>';
 
         // Load from Firestore + static data
         if (window.loadAllPhotoCollections) {
@@ -161,24 +159,60 @@ class Router {
         }
 
         if (!window.photoCollectionsData || window.photoCollectionsData.length === 0) {
-            grid.innerHTML = '<p class="text-stone-gray col-span-full">Coming soon.</p>';
+            container.innerHTML = '<p class="text-stone-gray col-span-full">Coming soon.</p>';
             return;
         }
 
-        const collectionsHTML = window.photoCollectionsData.map(collection => `
-            <div class="photo-card relative group cursor-pointer"
-                 onclick="router.navigateToPhotoCollection('${collection.id}')">
-                <img src="${collection.cover}" alt="${collection.title}" class="w-full h-64 object-cover rounded-lg">
-                <div class="absolute inset-0 bg-gradient-to-t from-charcoal-black/80 to-transparent opacity-0 group-hover:opacity-100 transition rounded-lg">
-                    <div class="absolute bottom-0 left-0 p-4">
-                        <h3 class="text-xl font-light">${collection.title}</h3>
-                        <p class="text-sm text-stone-gray">${collection.count} photos</p>
-                    </div>
-                </div>
-            </div>
-        `).join('');
+        // Group collections by year
+        const collectionsByYear = {};
+        window.photoCollectionsData.forEach(collection => {
+            const year = collection.displayYear || new Date().getFullYear();
+            if (!collectionsByYear[year]) {
+                collectionsByYear[year] = [];
+            }
+            collectionsByYear[year].push(collection);
+        });
 
-        grid.innerHTML = collectionsHTML;
+        // Sort years newest first
+        const sortedYears = Object.keys(collectionsByYear).sort((a, b) => b - a);
+
+        // Sort collections within each year by createdAt (Jan→Dec, oldest first)
+        sortedYears.forEach(year => {
+            collectionsByYear[year].sort((a, b) => {
+                const dateA = a.createdAt ? new Date(a.createdAt) : new Date();
+                const dateB = b.createdAt ? new Date(b.createdAt) : new Date();
+                return dateA - dateB; // Oldest first within year
+            });
+        });
+
+        // Build HTML with year headings
+        let html = '';
+        sortedYears.forEach(year => {
+            // Year heading
+            html += `<h3 class="col-span-full text-2xl font-light text-porcelain-white/80 mt-8 mb-4 first:mt-0">${year}</h3>`;
+
+            // Collections for this year
+            collectionsByYear[year].forEach(collection => {
+                const descHtml = collection.description
+                    ? `<p class="text-xs text-stone-gray/80 mt-1 line-clamp-2">${collection.description}</p>`
+                    : '';
+                html += `
+                    <div class="photo-card relative group cursor-pointer"
+                         onclick="router.navigateToPhotoCollection('${collection.id}')">
+                        <img src="${collection.cover}" alt="${collection.title}" class="w-full h-64 object-cover rounded-lg">
+                        <div class="absolute inset-0 bg-gradient-to-t from-charcoal-black/80 to-transparent opacity-0 group-hover:opacity-100 transition rounded-lg">
+                            <div class="absolute bottom-0 left-0 p-4">
+                                <h3 class="text-xl font-light">${collection.title}</h3>
+                                <p class="text-sm text-stone-gray">${collection.count} photos</p>
+                                ${descHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+
+        container.innerHTML = html;
         this.animateCards('.photo-card');
     }
 
@@ -222,12 +256,22 @@ class Router {
         }
     }
 
-    navigateToPhotoCollection(collectionId) {
+    async navigateToPhotoCollection(collectionId) {
         // Support both string IDs (Firestore) and numeric IDs (static data.js)
-        const collection = window.photoCollectionsData.find(c =>
+        let collection = window.photoCollectionsData?.find(c =>
             c.id === collectionId || c.id === parseInt(collectionId)
         );
-        if (!collection) return;
+
+        // If not found in cached data, try loading directly (works for hidden collections)
+        if (!collection && window.loadCollectionById) {
+            collection = await window.loadCollectionById(collectionId);
+        }
+
+        if (!collection) {
+            // Collection not found - show error or redirect to photos
+            this.navigate('photos');
+            return;
+        }
 
         // Store current collection for lightbox navigation
         this.currentCollection = collection;
@@ -250,7 +294,9 @@ class Router {
         `;
 
         this.contentArea.innerHTML = html;
+        this.currentSection = 'photos';
         this.updateURL('photos', collectionId);
+        this.animateContentSwitch();
     }
 
     openLightbox(index) {
@@ -654,6 +700,212 @@ class Router {
             this.navigate(e.state.section, e.state.detail);
         }
     }
+
+    // ============ Sidebar Slideshow ============
+
+    async initSlideshow() {
+        // Load collections first
+        if (window.loadAllPhotoCollections) {
+            await window.loadAllPhotoCollections();
+        }
+
+        // Check for featured collection
+        let featuredSetting = null;
+        if (window.loadFeaturedSetting) {
+            featuredSetting = await window.loadFeaturedSetting();
+        }
+
+        if (featuredSetting?.collectionId) {
+            // Featured mode - load that collection's photos
+            const collection = window.photoCollectionsData?.find(c => c.id === featuredSetting.collectionId);
+            if (collection && collection.photos?.length > 0) {
+                this.slideshowPhotos = collection.photos.map(photo => ({
+                    src: photo.src,
+                    thumbnailSrc: photo.thumbnailSrc || null,
+                    caption: photo.caption || '',
+                    collectionId: collection.id,
+                    collectionTitle: collection.title,
+                }));
+                this.currentSlideshowCollection = collection;
+            }
+        }
+
+        // Random mode - gather all photos from all visible collections
+        if (this.slideshowPhotos.length === 0 && window.photoCollectionsData?.length > 0) {
+            this.slideshowPhotos = [];
+            window.photoCollectionsData.forEach(collection => {
+                if (collection.photos?.length > 0) {
+                    collection.photos.forEach(photo => {
+                        this.slideshowPhotos.push({
+                            src: photo.src,
+                            thumbnailSrc: photo.thumbnailSrc || null,
+                            caption: photo.caption || '',
+                            collectionId: collection.id,
+                            collectionTitle: collection.title,
+                        });
+                    });
+                }
+            });
+            // Shuffle for random mode
+            this.slideshowPhotos = this.shuffleArray(this.slideshowPhotos);
+        }
+
+        // Start slideshow if we have photos
+        if (this.slideshowPhotos.length > 0) {
+            this.slideshowIndex = 0;
+            this.updateSidebarSlide();
+            this.slideshowInterval = setInterval(() => {
+                this.slideshowIndex = (this.slideshowIndex + 1) % this.slideshowPhotos.length;
+                this.updateSidebarSlide();
+            }, 10000); // 10 seconds
+        }
+    }
+
+    updateSidebarSlide() {
+        if (this.slideshowPhotos.length === 0) return;
+
+        const photo = this.slideshowPhotos[this.slideshowIndex];
+        const img = document.getElementById('sidebar-photo');
+        const imgNext = document.getElementById('sidebar-photo-next');
+        const loading = document.getElementById('sidebar-loading');
+        const grain = document.getElementById('sidebar-grain');
+        const collectionName = document.getElementById('sidebar-collection-name');
+        const caption = document.getElementById('sidebar-photo-caption');
+
+        if (!img) return;
+
+        // Use thumbnail if available, otherwise full image
+        const imageSrc = photo.thumbnailSrc || photo.src;
+
+        // Update text immediately
+        if (collectionName) {
+            collectionName.textContent = photo.collectionTitle;
+        }
+        if (caption) {
+            caption.textContent = photo.caption || '';
+        }
+
+        // Check if this is the first load (no current image)
+        // Note: empty src="" resolves to page URL, so check for that or if image has invisible class
+        const isFirstLoad = !img.src ||
+                           img.src === window.location.href ||
+                           img.src === window.location.origin + '/' ||
+                           img.classList.contains('invisible') ||
+                           img.naturalWidth === 0;
+
+        if (isFirstLoad) {
+            // First load - show loading and fade in when ready
+            if (loading) loading.style.display = 'block';
+            if (!imageSrc) return;
+
+            // Helper to show the image
+            const showImage = () => {
+                if (loading) loading.style.display = 'none';
+                img.classList.remove('invisible');
+                img.style.opacity = '1';
+            };
+
+            // Use preloader to ensure image is cached
+            const preloader = new Image();
+            preloader.onload = () => {
+                img.src = imageSrc;
+                setTimeout(showImage, 50);
+            };
+            preloader.onerror = () => {
+                if (loading) loading.style.display = 'none';
+            };
+            preloader.src = imageSrc;
+        } else {
+            // Grain Pulse Crossfade
+            this.transitionGrainPulse(imageSrc, img, imgNext, loading, grain);
+        }
+
+        // Preload next image in background
+        this.preloadNextSlide();
+    }
+
+    // Option 2: Crossfade with Grain Pulse - alternates between two images, no swap back
+    transitionGrainPulse(imageSrc, img, imgNext, loading, grain) {
+        // Determine which is current and which is next based on state
+        const currentImg = this.currentSlideElement === 'primary' ? img : imgNext;
+        const nextImg = this.currentSlideElement === 'primary' ? imgNext : img;
+
+        // Preload the new image
+        const preloader = new Image();
+        preloader.onload = () => {
+            if (loading) loading.style.display = 'none';
+
+            // Trigger grain burst
+            if (grain) {
+                grain.classList.remove('grain-burst');
+                void grain.offsetWidth;
+                grain.classList.add('grain-burst');
+            }
+
+            if (typeof anime !== 'undefined') {
+                // Set up next image
+                nextImg.src = imageSrc;
+                nextImg.classList.remove('invisible');
+                nextImg.style.opacity = '0';
+
+                // True crossfade - fade out current while fading in next
+                anime({
+                    targets: currentImg,
+                    opacity: [1, 0],
+                    duration: 400,
+                    easing: 'easeInOutQuad'
+                });
+
+                anime({
+                    targets: nextImg,
+                    opacity: [0, 1],
+                    duration: 400,
+                    easing: 'easeInOutQuad',
+                    complete: () => {
+                        // Just toggle which element is current - no swap back
+                        this.currentSlideElement = this.currentSlideElement === 'primary' ? 'next' : 'primary';
+                    }
+                });
+            } else {
+                // Fallback - simple src swap
+                nextImg.src = imageSrc;
+                nextImg.style.opacity = '1';
+                currentImg.style.opacity = '0';
+                this.currentSlideElement = this.currentSlideElement === 'primary' ? 'next' : 'primary';
+            }
+        };
+        preloader.onerror = () => {
+            if (loading) loading.style.display = 'none';
+        };
+        preloader.src = imageSrc;
+    }
+
+    preloadNextSlide() {
+        if (this.slideshowPhotos.length <= 1) return;
+        const nextIndex = (this.slideshowIndex + 1) % this.slideshowPhotos.length;
+        const nextPhoto = this.slideshowPhotos[nextIndex];
+        // Preload thumbnail if available, otherwise full image
+        const preloader = new Image();
+        preloader.src = nextPhoto.thumbnailSrc || nextPhoto.src;
+    }
+
+    navigateToSidebarCollection() {
+        if (this.slideshowPhotos.length === 0) return;
+        const photo = this.slideshowPhotos[this.slideshowIndex];
+        if (photo?.collectionId) {
+            this.navigateToPhotoCollection(photo.collectionId);
+        }
+    }
+
+    shuffleArray(array) {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
 }
 
 const router = new Router();
+window.router = router;

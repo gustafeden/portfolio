@@ -445,6 +445,12 @@ body.ccd-mode .ccd-aberration {
     color: #B46C3A;
 }
 
+#transition-toggle.active {
+    background: rgba(180, 108, 58, 0.2);
+    border-color: rgba(180, 108, 58, 0.8);
+    color: #B46C3A;
+}
+
 /* Anime mode effects - 16mm film rapid breathing */
 body.anime-mode .front-image-bg,
 body.anime-mode .profile-photo {
@@ -477,4 +483,109 @@ body.anime-mode::before {
 @keyframes grainPulse {
     0%, 100% { opacity: 0.025; }
     50% { opacity: 0.04; }
+}
+
+/* Film-style loading animation for sidebar slideshow */
+.film-loading {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: #111;
+    overflow: visible;
+}
+
+/* Film sprocket holes */
+.film-loading::before,
+.film-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 16px;
+    background: repeating-linear-gradient(
+        to bottom,
+        #1a1a1a 0px,
+        #1a1a1a 4px,
+        #333 4px,
+        #333 16px,
+        #1a1a1a 16px,
+        #1a1a1a 20px
+    );
+}
+
+.film-loading::before {
+    left: 8px;
+}
+
+.film-loading::after {
+    right: 8px;
+}
+
+/* Developing light sweep */
+.film-loading .sweep {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(217, 164, 65, 0.15) 45%,
+        rgba(217, 164, 65, 0.25) 50%,
+        rgba(217, 164, 65, 0.15) 55%,
+        transparent 100%
+    );
+    animation: filmSweep 1.5s ease-in-out infinite;
+}
+
+@keyframes filmSweep {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Simple pulsing for loading */
+#sidebar-loading {
+    background: #111;
+    z-index: 50;
+}
+
+#sidebar-loading .film-loading {
+    animation: filmPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes filmPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+/* Grain overlay for sidebar transitions */
+#sidebar-grain {
+    background-image:
+        repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255, 255, 255, .04) 35px, rgba(255, 255, 255, .04) 70px),
+        repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(255, 255, 255, .02) 35px, rgba(255, 255, 255, .02) 70px);
+    mix-blend-mode: overlay;
+}
+
+/* === TRANSITION OPTION 2: Grain Pulse Crossfade === */
+@keyframes grainBurst {
+    0% { opacity: 0; }
+    40% { opacity: 0.6; }
+    60% { opacity: 0.8; }
+    100% { opacity: 0; }
+}
+
+#sidebar-grain.grain-burst {
+    animation: grainBurst 0.8s ease-in-out forwards;
+}
+
+/* Floating animation for sidebar photo frame */
+.sidebar-frame {
+    animation: sidebarFloat 6s ease-in-out infinite;
+}
+
+@keyframes sidebarFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
 }
