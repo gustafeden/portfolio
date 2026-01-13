@@ -55,6 +55,11 @@ class Router {
     async navigate(section, subRoute = null) {
         if (!this.sections.includes(section)) return;
 
+        // Cleanup camera scene when leaving front page
+        if (this.currentSection === 'front' && section !== 'front') {
+            this.cleanupCameraScene();
+        }
+
         this.updateActiveNav(section);
         this.updateBackgroundOpacity(section);
         this.updateSidebarPhoto(section);
@@ -91,8 +96,8 @@ class Router {
         const bgImage = document.querySelector('.front-image-bg');
         if (bgImage) {
             if (section === 'front') {
-                // Full opacity on front page
-                bgImage.style.opacity = '1';
+                // Hide background on front page to show 3D camera scene
+                bgImage.style.opacity = '0';
             } else {
                 // Reduced opacity on other pages
                 bgImage.style.opacity = '0.15';
@@ -172,6 +177,9 @@ class Router {
 
     initializeSectionScripts(section) {
         switch (section) {
+            case 'front':
+                this.initializeCameraScene();
+                break;
             case 'photos':
                 this.loadPhotoCollections();
                 break;
@@ -184,6 +192,21 @@ class Router {
             case 'stuff':
                 this.animateStuffSection();
                 break;
+        }
+    }
+
+    initializeCameraScene() {
+        const container = document.getElementById('camera-scene-container');
+        if (!container) {
+            console.error('Camera scene container not found');
+            return;
+        }
+
+        console.log('Initializing camera scene from router...');
+
+        // Initialize Three.js scene (entry animation plays automatically)
+        if (window.cameraScene && !window.cameraScene.isInitialized) {
+            window.cameraScene.init(container);
         }
     }
 
@@ -1030,6 +1053,14 @@ class Router {
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
         return shuffled;
+    }
+
+    // Clean up camera scene when leaving front page
+    cleanupCameraScene() {
+        // Destroy the camera scene
+        if (window.cameraScene && window.cameraScene.isInitialized) {
+            window.cameraScene.destroy();
+        }
     }
 }
 
