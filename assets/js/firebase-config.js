@@ -464,13 +464,24 @@ window.getOurArchiveStats = getOurArchiveStats;
 window.renderOurArchiveStats = renderOurArchiveStats;
 
 // ============ Silent Page View Tracking (Privacy-Focused) ============
-// All tracking done via Cloud Functions - no direct Firestore writes
+// All tracking done via Bifrost functions - no direct Firestore writes
 // No persistent visitor IDs stored (GDPR compliant)
 
-// Cloud Function endpoints
-const TRACK_VISIT_URL = 'https://europe-west1-atelier-cms.cloudfunctions.net/trackVisit';
-const TRACK_PAGE_VIEW_URL = 'https://europe-west1-atelier-cms.cloudfunctions.net/trackPageView';
-const TRACK_PHOTO_VIEW_URL = 'https://europe-west1-atelier-cms.cloudfunctions.net/trackPhotoView';
+// Bifrost configuration
+const BIFROST_URL = 'https://europe-west1-atelier-cms.cloudfunctions.net/invokeBifrostAsync';
+const BIFROST_API_KEY = 'pk_4623e09a8ce9659991fe8d13501efd37';
+
+// Helper to invoke Bifrost functions (fire and forget)
+function invokeBifrost(functionId, payload) {
+  fetch(BIFROST_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': BIFROST_API_KEY,
+    },
+    body: JSON.stringify({ functionId, payload }),
+  }).catch(() => {}); // Fire and forget
+}
 
 // Session detection (temporary - only for this browser session)
 function isNewSession() {
@@ -517,32 +528,61 @@ function getReferrerSource() {
   }
 }
 
-// Track a page view - all done server-side via Cloud Function
+// Get geolocation from IP (client-side, cached in session)
+async function getGeoLocation() {
+  // Check session cache first
+  const cached = sessionStorage.getItem('portfolio_geo');
+  if (cached) {
+    try {
+      return JSON.parse(cached);
+    } catch {
+      // Invalid cache, continue to fetch
+    }
+  }
+
+  try {
+    // Use ip-api.com for free geolocation (no API key needed)
+    const response = await fetch('http://ip-api.com/json/?fields=status,country,city');
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      const geo = {
+        country: data.country || 'Unknown',
+        city: data.city || null,
+      };
+      // Cache for this session
+      sessionStorage.setItem('portfolio_geo', JSON.stringify(geo));
+      return geo;
+    }
+  } catch (e) {
+    console.debug('Geo lookup failed:', e.message);
+  }
+
+  return { country: 'Unknown', city: null };
+}
+
+// Track a page view - via Bifrost function
 async function trackPageView(pageId) {
   try {
-    // Track page view via Cloud Function
-    fetch(TRACK_PAGE_VIEW_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ page: pageId }),
-    }).catch(() => {}); // Fire and forget
+    // Track page view
+    invokeBifrost('track-page-view', { page: pageId });
 
     // Track session data (only on new session)
     if (isNewSession()) {
       const device = getDeviceType();
       const referrer = getReferrerSource();
 
-      // Send to Cloud Function for aggregation
-      // No visitor IDs, no personal data - just aggregated counts
-      fetch(TRACK_VISIT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      // Get geolocation (async but we don't wait for page view)
+      getGeoLocation().then(geo => {
+        // Send to Bifrost for aggregation
+        // No visitor IDs, no personal data - just aggregated counts
+        invokeBifrost('track-visit', {
           device,
           referrer,
-          isNewSession: true,
-        }),
-      }).catch(() => {}); // Fire and forget
+          country: geo.country,
+          city: geo.city,
+        });
+      }).catch(() => {});
     }
   } catch (e) {
     console.debug('Page view tracking failed:', e.message);
@@ -552,17 +592,13 @@ async function trackPageView(pageId) {
 // Export for router
 window.trackPageView = trackPageView;
 
-// Track a photo view (when opened in lightbox) - via Cloud Function
+// Track a photo view (when opened in lightbox) - via Bifrost function
 async function trackPhotoView(photoSrc, collectionTitle) {
   try {
-    fetch(TRACK_PHOTO_VIEW_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        photoSrc,
-        collection: collectionTitle || 'unknown',
-      }),
-    }).catch(() => {}); // Fire and forget
+    invokeBifrost('track-photo-view', {
+      photoSrc,
+      collection: collectionTitle || 'unknown',
+    });
   } catch (e) {
     console.debug('Photo view tracking failed:', e.message);
   }
