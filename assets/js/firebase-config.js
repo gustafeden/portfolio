@@ -463,6 +463,122 @@ async function renderOurArchiveStats() {
 window.getOurArchiveStats = getOurArchiveStats;
 window.renderOurArchiveStats = renderOurArchiveStats;
 
+// ============ Bifrost Stats ============
+
+// Get Bifrost platform stats from public_stats collection
+async function getBifrostStats() {
+  if (!firebaseReady || !db) {
+    initFirebase();
+    if (!firebaseReady || !db) return null;
+  }
+
+  try {
+    const doc = await db.collection('public_stats').doc('bifrost').get();
+    if (!doc.exists) return null;
+    return doc.data();
+  } catch (e) {
+    console.warn('Failed to load Bifrost stats:', e.message);
+    return null;
+  }
+}
+
+// Render Bifrost stats into the project page
+async function renderBifrostStats() {
+  const container = document.getElementById('bifrost-live-stats');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="stats-loading">
+      <span class="text-gray-400">Loading live stats...</span>
+    </div>
+  `;
+
+  const stats = await getBifrostStats();
+
+  if (!stats) {
+    container.innerHTML = `
+      <div class="stats-error text-gray-500 text-sm">
+        Unable to load live stats
+      </div>
+    `;
+    return;
+  }
+
+  const lastUpdated = stats.lastUpdated?.toDate
+    ? formatTimeAgo(stats.lastUpdated.toDate())
+    : stats.lastUpdated
+      ? formatTimeAgo(new Date(stats.lastUpdated))
+      : 'Unknown';
+
+  const lastInvocation = stats.lastInvocationAt?.toDate
+    ? formatTimeAgo(stats.lastInvocationAt.toDate())
+    : stats.lastInvocationAt
+      ? formatTimeAgo(new Date(stats.lastInvocationAt))
+      : 'N/A';
+
+  // Agent status indicator
+  const agentStatus = stats.agentCount > 0
+    ? `<span class="text-green-400">${stats.agentCount} online</span>`
+    : `<span class="text-red-400">offline</span>`;
+
+  // Success rate color
+  const successRateColor = stats.successRate >= 95
+    ? 'text-green-400'
+    : stats.successRate >= 80
+      ? 'text-yellow-400'
+      : 'text-red-400';
+
+  container.innerHTML = `
+    <div class="live-stats bg-shadow-black/50 border border-porcelain-white/10 rounded-lg p-4 my-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="inline-block w-2 h-2 ${stats.agentCount > 0 ? 'bg-green-500' : 'bg-red-500'} rounded-full ${stats.agentCount > 0 ? 'animate-pulse' : ''}"></span>
+        <span class="text-porcelain-white/60 text-sm uppercase tracking-wider">Live from Bifrost</span>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="stat">
+          <div class="text-3xl font-bold text-amber-glow">${stats.enabledFunctions || 0}</div>
+          <div class="text-porcelain-white/60 text-sm">Functions</div>
+        </div>
+        <div class="stat">
+          <div class="text-3xl font-bold text-amber-glow">${stats.runningServices || 0}</div>
+          <div class="text-porcelain-white/60 text-sm">Services</div>
+        </div>
+        <div class="stat">
+          <div class="text-3xl font-bold text-amber-glow">${stats.activeSchedules || 0}</div>
+          <div class="text-porcelain-white/60 text-sm">Schedules</div>
+        </div>
+        <div class="stat">
+          <div class="text-3xl font-bold ${successRateColor}">${stats.successRate || 100}%</div>
+          <div class="text-porcelain-white/60 text-sm">Success Rate</div>
+        </div>
+      </div>
+      <div class="mt-4 pt-4 border-t border-porcelain-white/10">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+          <div>
+            <span class="text-porcelain-white/50">Agents:</span>
+            <span class="ml-1">${agentStatus}</span>
+          </div>
+          <div>
+            <span class="text-porcelain-white/50">Invocations (24h):</span>
+            <span class="ml-1 text-porcelain-white">${stats.invocations24h || 0}</span>
+          </div>
+          <div>
+            <span class="text-porcelain-white/50">Last run:</span>
+            <span class="ml-1 text-porcelain-white">${lastInvocation}</span>
+          </div>
+        </div>
+      </div>
+      <div class="mt-3 text-porcelain-white/40 text-xs">
+        Updated ${lastUpdated}
+      </div>
+    </div>
+  `;
+}
+
+// Export for use in router
+window.getBifrostStats = getBifrostStats;
+window.renderBifrostStats = renderBifrostStats;
+
 // ============ Silent Page View Tracking (Privacy-Focused) ============
 // All tracking done via Bifrost functions - no direct Firestore writes
 // No persistent visitor IDs stored (GDPR compliant)

@@ -297,6 +297,9 @@ class Router {
             if (projectSlug === 'ourarchive' && window.renderOurArchiveStats) {
                 window.renderOurArchiveStats();
             }
+            if (projectSlug === 'bifrost' && window.renderBifrostStats) {
+                window.renderBifrostStats();
+            }
 
             // Track project page view
             if (window.trackPageView) {
