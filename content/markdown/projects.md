@@ -30,6 +30,17 @@ A portfolio photo CMS for photographers. Upload photos from your phone, anywhere
 
 ---
 
+### Bifrost
+*Personal Project | 2025 | Built with Claude Code*
+
+A self-hosted compute platform for running functions and services on your own hardware. Deploy code, schedule jobs, manage services—all without cloud vendor lock-in. Like a lightweight Cloud Functions that runs on your Mac mini.
+
+**Tech:** Go, Firebase, Firestore, React, TypeScript, launchd
+
+[View Project →](projects/bifrost)
+
+---
+
 ### OurArchive
 *Personal Project | 2025 | Built with Claude Code*
 
