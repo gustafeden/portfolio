@@ -124,11 +124,12 @@
     }
 
     var h2s = Array.prototype.slice.call(docEl.querySelectorAll('h2'));
-    // insert the wide figure right before the 2nd h2 ("How It Works") — end of the first section
-    var wideFig = makeFigure(wide, 'wide', 'The Mamiya night set, uploaded from a phone on the way home.');
+    // both sit in the right margin as sidenotes, like the markdown screenshots (figure.side)
+  // insert the first figure right before the 2nd h2 ("How It Works") — end of the first section
+    var wideFig = makeFigure(wide, 'side', 'The Mamiya night set, uploaded from a phone on the way home.');
     if (h2s[1] && wideFig) docEl.insertBefore(wideFig, h2s[1]);
     // insert the inline figure before the 4th h2 ("Multi-User Ready") — later in the doc
-    var inlineFig = makeFigure(inlinePhoto, '', 'A frame from the same pipeline, at column width.');
+    var inlineFig = makeFigure(inlinePhoto, 'side', 'A frame from the same pipeline.');
     if (h2s[3] && inlineFig) docEl.insertBefore(inlineFig, h2s[3]);
   }
 
