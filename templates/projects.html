@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Projects — gustaf edén{% endblock title %}
+{% block description %}Personal projects by Gustaf Edén: Atelier, Bifrost, The Great Exit, OurArchive.{% endblock description %}
+{% block og_title %}Projects — gustaf edén{% endblock og_title %}
+{% block og_description %}Personal projects by Gustaf Edén: Atelier, Bifrost, The Great Exit, OurArchive.{% endblock og_description %}
+{% block og_url %}{{ config.base_url }}/projects/{% endblock og_url %}
+
+{% block main %}
+<main class="page" data-page="projects" data-crt="full">
+  <nav class="path" data-t data-role="structure" data-nav>
+    <a href="/">gustaf edén</a><span class="sep">/</span>projects
+  </nav>
+  <section class="ledger">
+    <div data-ledger>
+      {% for page in section.pages %}
+      <a class="lrow" href="{{ page.path }}">
+        <span class="ln" data-t data-role="head">{{ page.title }}</span>
+        <span class="ld" data-t data-role="body">{{ page.extra.line }}</span>
+        <span class="ls" data-t data-role="body">{{ page.extra.stack }}</span>
+        <span class="ly" data-t data-role="body">{{ page.extra.year }}</span></a>
+      {% if not loop.last %}<div class="rule" data-rule></div>{% endif %}
+      {% endfor %}
+      <div class="rule" data-rule></div>
+    </div>
+  </section>
+</main>
+{% endblock main %}

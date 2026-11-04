@@ -16,5 +16,4 @@ Thumbs.db
 .idea/
 
 # Build
-.quartz-cache/
 public/

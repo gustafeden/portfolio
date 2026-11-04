@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}About — gustaf edén{% endblock title %}
+{% block description %}About Gustaf Edén: embedded application developer at Electrolux, photography, making, and hi-fi.{% endblock description %}
+{% block og_title %}About — gustaf edén{% endblock og_title %}
+{% block og_description %}About Gustaf Edén: embedded application developer at Electrolux, photography, making, and hi-fi.{% endblock og_description %}
+{% block og_url %}{{ config.base_url }}/about/{% endblock og_url %}
+
+{% block main %}
+<main class="page" data-page="about" data-crt="read">
+  <nav class="path" data-t data-role="structure" data-nav>
+    <a href="/">gustaf edén</a><span class="sep">/</span>about
+  </nav>
+  <div class="about-wrap">
+    <article class="doc" data-article><h1 data-t data-role="head">{{ page.title }}</h1>{{ page.content | safe }}</article>
+  </div>
+</main>
+{% endblock main %}

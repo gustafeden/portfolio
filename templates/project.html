@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} — gustaf edén{% endblock title %}
+{% block description %}{{ page.extra.line }}{% endblock description %}
+{% block og_title %}{{ page.title }} — gustaf edén{% endblock og_title %}
+{% block og_description %}{{ page.extra.line }}{% endblock og_description %}
+{% block og_url %}{{ config.base_url }}{{ page.path }}{% endblock og_url %}
+
+{% block main %}
+{% set raw_file = load_data(path="content/projects/" ~ page.slug ~ ".md", format="plain") %}
+{% set raw_parts = raw_file | split(pat="+++\n") %}
+<main class="page" data-page="project" data-slug="{{ page.slug }}" data-crt="read">
+  <nav class="path" data-t data-role="structure" data-nav>
+    <a href="/">gustaf edén</a><span class="sep">/</span><a href="/projects/">projects</a><span class="sep">/</span>{{ page.title }}
+  </nav>
+  <div class="doc-wrap">
+    <dl class="doc-meta" data-meta>
+      <dt>year</dt><dd data-t data-role="body">{{ page.extra.year }}</dd>
+      <dt>stack</dt><dd data-t data-role="body">{{ page.extra.stack }}</dd>
+      {% if page.extra.status %}<dt>status</dt><dd data-t data-role="body">{{ page.extra.status }}</dd>{% endif %}
+      {% if page.extra.source %}<dt>source</dt><dd data-t data-role="body"><a href="{{ page.extra.source }}">github</a></dd>{% endif %}
+      <dt>this page</dt><dd data-t data-role="body"><a href="#" data-toggle-raw>view as .md</a></dd>
+    </dl>
+    <article class="doc" data-doc><h1 data-t data-role="head">{{ page.title }}</h1>{{ page.content | safe }}</article>
+    <pre class="raw" data-raw data-t data-role="body" data-nosplit>{{ "# " ~ page.title ~ "\n\n" ~ raw_parts[2] }}</pre>
+  </div>
+</main>
+{% endblock main %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}gustaf edén{% endblock title %}
+{% block description %}Gustaf Edén — embedded application developer. Photographs and personal projects.{% endblock description %}
+{% block og_title %}gustaf edén{% endblock og_title %}
+{% block og_description %}Gustaf Edén — embedded application developer. Photographs and personal projects.{% endblock og_description %}
+{% block og_url %}{{ config.base_url }}/{% endblock og_url %}
+
+{% block main %}
+<main class="page" data-page="home" data-crt="full">
+  <div class="home-main">
+    <h1 class="home-name" data-t data-role="head" data-fx-idle>gustaf edén</h1>
+    <nav class="doors">
+      <a href="/photographs/" data-t data-role="structure" data-nav>photographs</a>
+      <a href="/projects/" data-t data-role="structure" data-nav>projects</a>
+    </nav>
+  </div>
+  <footer class="home-foot">
+    <a href="/about/" data-t data-role="structure" data-nav>about</a>
+    <a href="https://github.com/gustafeden" data-t data-role="structure" data-nav>github</a>
+    <a href="mailto:gustafeden@gmail.com" data-t data-role="structure" data-nav>email</a>
+  </footer>
+</main>
+{% endblock main %}

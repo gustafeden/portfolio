@@ -1,0 +1,209 @@
+/* site.css — gustaf edén, carbon palette. Styling only: fx.js owns the WebGL canvas and CRT glass. */
+
+:root {
+  --bg: #0E0E0E; --surface: #181818; --border: #262626;
+  --text: #EDEDED; --soft: #BDBDBD; --dim: #8A8A8A; --faint: #5A5A5A;
+  --sage: #A3B18A;
+  --mono: 'Red Hat Mono', ui-monospace, monospace;
+  --prose: 'Red Hat Text', system-ui, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { background: var(--bg); }
+body {
+  font-family: var(--mono); background: var(--bg); color: var(--text);
+  font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+a { color: var(--sage); text-decoration: none; position: relative; --fx-glow-color: var(--sage); }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+:focus-visible { outline: 1px solid var(--sage); outline-offset: 3px; }
+::selection { background: var(--sage); color: var(--bg); }
+
+/* colour tokens fx.js's injected hover CSS reads to glow/underline a link in its own colour
+   (task 2) — kept here, not in fx.js, since these are plain design-system colours. */
+button { --fx-glow-color: var(--sage); }
+.path a, .lrow { --fx-glow-color: var(--text); }
+.home-foot a { --fx-glow-color: var(--dim); }
+.ph-head button { --fx-glow-color: var(--dim); }
+.ph-head button.on { --fx-glow-color: var(--sage); }
+
+.page[hidden] { display: none !important; }
+
+/* a 1px horizontal rule; fx.js fills its contents with segments and paints them */
+.rule[data-rule] { height: 1px; background: var(--border); }
+.rule[data-fx-ruled] { background: none; }
+
+/* ---------- home ---------- */
+.page[data-page="home"] { display: flex; flex-direction: column; min-height: 100vh; padding: 32px; }
+.home-main { margin-top: auto; margin-bottom: 9vh; max-width: 760px; padding-left: 6vw; }
+.home-name { font-size: clamp(44px, 8vw, 96px); font-weight: 400; letter-spacing: -0.035em; line-height: 1; }
+.doors { margin-top: 40px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.doors a { font-size: 22px; font-weight: 500; }
+.home-foot { display: flex; gap: 24px; font-size: 13px; color: var(--dim); }
+.home-foot a { color: var(--dim); }
+html:not(.fx-measuring) .home-foot a:hover { color: var(--text); }
+
+/* ---------- sticky path line on every inner page ---------- */
+.path {
+  position: sticky; top: 0; z-index: 40;
+  background: linear-gradient(to bottom, var(--bg) 0%, var(--bg) 55%, rgba(14, 14, 14, 0) 100%);
+  padding: 28px 32px 24px; font-size: 14px; color: var(--dim);
+}
+.path a { color: var(--text); }
+.path .sep { color: var(--faint); margin: 0 8px; }
+
+/* ---------- projects ledger ---------- */
+.ledger { max-width: 1104px; margin: 0 auto; padding: 36px 32px 120px; }
+.lrow {
+  display: grid; grid-template-columns: 200px 1fr 230px 48px; gap: 24px;
+  align-items: baseline; padding: 18px 10px; margin: 0 -10px; color: var(--text);
+}
+/* no hover box: a flat rect can't follow the CRT barrel warp. The divider under the row lights
+   instead — fx.js splits it into warped .fx-rseg segments, so it bends with the text. */
+.lrow:hover { text-decoration: none; }
+.lrow:hover + .rule .fx-rseg, .lrow:focus-visible + .rule .fx-rseg,
+.lrow:hover + .rule:not([data-fx-ruled]), .lrow:focus-visible + .rule:not([data-fx-ruled]) { background: var(--dim); }
+.ln { font-weight: 500; }
+.ld { color: var(--soft); font-family: var(--prose); font-size: 14px; }
+.ls { color: var(--dim); font-size: 13px; }
+.ly { color: var(--dim); font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---------- project detail: a README you can read ---------- */
+.doc-wrap { display: grid; grid-template-columns: 1fr minmax(0, 66ch) 1.6fr; padding: 48px 32px 160px; }
+.doc-meta {
+  grid-column: 1; justify-self: end; padding-right: 48px; font-size: 13px; color: var(--dim);
+  position: sticky; top: 80px; align-self: start; width: 200px;
+}
+.doc-meta dt { color: var(--faint); margin-top: 14px; }
+.doc-meta dt:first-child { margin-top: 0; }
+.doc-meta dd { color: var(--soft); }
+
+.doc-wrap .doc { grid-column: 2; }
+.doc-wrap .raw { grid-column: 2; }
+.doc { font-family: var(--prose); color: var(--soft); font-size: 16px; line-height: 1.72; }
+.doc h1 {
+  font-family: var(--mono); color: var(--text); font-size: 30px; font-weight: 500;
+  letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 20px;
+}
+.doc h2 { font-family: var(--mono); color: var(--text); font-size: 17px; font-weight: 500; margin: 48px 0 12px; position: relative; }
+.doc h3 { font-family: var(--mono); color: var(--text); font-size: 15px; font-weight: 500; margin: 32px 0 8px; position: relative; }
+.doc h2::before {
+  content: '##'; position: absolute; right: 100%; margin-right: 14px; color: var(--faint); font-weight: 400;
+}
+.doc h3::before {
+  content: '###'; position: absolute; transform: translateX(calc(-100% - 14px)); color: var(--faint); font-weight: 400;
+}
+.doc p, .doc ul, .doc ol, .doc pre, .doc figure, .doc table { margin-bottom: 18px; }
+.doc ul, .doc ol { padding-left: 2ch; list-style: none; }
+.doc li { position: relative; }
+.doc ul li::before { content: '-'; position: absolute; left: -2ch; color: var(--faint); }
+.doc strong { color: var(--text); font-weight: 500; }
+.doc code { font-family: var(--mono); font-size: 0.9em; color: var(--text); background: var(--surface); padding: 1px 5px; border-radius: 3px; }
+.doc pre { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; }
+.doc pre code { background: none; padding: 0; color: var(--soft); }
+.doc .rule[data-rule] { margin: 40px 0; }
+.doc em { color: var(--dim); }
+.doc figure { margin: 32px 0; }
+.doc figure img { width: 100%; display: block; border-radius: 2px; }
+.doc figure.wide { margin-right: -22ch; }
+.doc figcaption { font-family: var(--mono); font-size: 12.5px; color: var(--dim); margin-top: 10px; }
+
+/* ---------- live stats (Atelier/Bifrost/OurArchive project pages) ----------
+   ledger-style rows, no card/box/shadow/colour fill — matches .doc-meta, not a widget. */
+.live-stats-container:empty { display: none; }
+.live-stats { margin-bottom: 18px; font-size: 13px; }
+.live-stats .ls-head {
+  display: flex; align-items: center; gap: 8px; color: var(--faint);
+  text-transform: uppercase; letter-spacing: 0.04em; font-size: 11px; margin-bottom: 10px;
+}
+.live-stats .ls-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--faint); }
+.live-stats .ls-dot.on { background: var(--sage); }
+.live-stats dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; }
+.live-stats dt { color: var(--faint); }
+.live-stats dd { color: var(--soft); font-variant-numeric: tabular-nums; }
+.live-stats .ls-empty { color: var(--faint); }
+.doc table { border-collapse: collapse; font-size: 14px; width: 100%; }
+.doc th, .doc td { text-align: left; padding: 6px 12px 6px 0; border-bottom: 1px solid var(--border); }
+.doc th { color: var(--text); font-family: var(--mono); font-weight: 500; }
+
+.raw { display: none; font-size: 13.5px; line-height: 1.6; color: var(--soft); white-space: pre-wrap; }
+.page.show-raw .doc { display: none; }
+.page.show-raw .raw { display: block; }
+
+/* ---------- about: a reading page, no sidebar ---------- */
+.about-wrap { max-width: 66ch; margin: 0 auto; padding: 48px 32px 160px; }
+
+/* ---------- photographs ---------- */
+.ph-head { padding: 10px 32px 0; display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: baseline; font-size: 14px; }
+.ph-head .grp { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.ph-head button { font: inherit; background: none; border: 0; color: var(--dim); cursor: pointer; padding: 0; }
+html:not(.fx-measuring) .ph-head button:hover { color: var(--text); }
+.ph-head button.on { color: var(--sage); }
+.ph-head button sup { font-size: 10px; color: var(--faint); margin-left: 2px; }
+.ph-head .keys { margin-left: auto; color: var(--faint); font-size: 12.5px; }
+kbd { font-family: var(--mono); color: var(--dim); border: 1px solid var(--border); border-radius: 3px; padding: 0 5px; margin-right: 4px; }
+
+.masonry { display: flex; gap: 12px; padding: 28px 32px 120px; align-items: flex-start; }
+.col { flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.tile { display: block; cursor: zoom-in; background: none; border: 0; padding: 0; text-align: left; color: inherit; font: inherit; }
+/* .frame reserves the box (aspect-ratio set inline by photos.js) and hosts fx.js's ::before
+   reveal-stage visuals (queued/loading/revealed — see CONTRACT.md "Photos: loading"); overflow
+   hidden keeps those and the interlaced reveal's clip-path from bleeding past the tile. */
+.frame { position: relative; display: block; overflow: hidden; }
+.frame img { width: 100%; height: 100%; display: block; }
+
+/* task 10: a soft phosphor glow bleeding off the photo on hover/focus, like light off a CRT.
+   box-shadow only — fx.js owns filter/transform on these images, this never touches either. */
+.tile img, .doc figure img {
+  box-shadow: 0 0 18px 2px rgba(237, 237, 237, 0); transition: box-shadow 180ms ease-out;
+}
+.tile:hover img, .doc figure:hover img, .tile:focus-visible img, .doc figure:has(img):focus-within img {
+  box-shadow: 0 0 18px 2px rgba(237, 237, 237, .10), 0 0 4px rgba(237, 237, 237, .12);
+}
+html.fx-transitioning .tile img, html.fx-transitioning .doc figure img,
+.tile img[style*="opacity: 0"] { box-shadow: none !important; transition: none; }
+.tile .ex { display: none; padding: 7px 2px 2px; font-size: 11.5px; color: var(--dim); background: var(--bg); line-height: 1.45; }
+.page.info .tile .ex { display: block; }
+.tile .ex b { font-weight: 400; color: var(--soft); }
+.empty-note { padding: 0 32px; color: var(--dim); font-size: 13px; }
+
+/* ---------- viewer overlay ---------- */
+.viewer { position: fixed; inset: 0; background: #080808; z-index: 50; display: none; grid-template-columns: 1fr 260px; }
+.viewer.on { display: grid; }
+.viewer .stage { display: flex; align-items: center; justify-content: center; padding: 32px; min-width: 0; min-height: 0; position: relative; }
+.viewer .stage img { max-width: 100%; max-height: calc(100vh - 64px); object-fit: contain; display: block; }
+.viewer aside { border-left: 1px solid var(--border); padding: 32px 24px; font-size: 13px; color: var(--dim); display: flex; flex-direction: column; }
+.viewer aside .count { color: var(--faint); margin-bottom: 24px; font-variant-numeric: tabular-nums; }
+.viewer aside .coll { color: var(--text); font-size: 15px; margin-bottom: 20px; }
+.viewer dl { display: grid; grid-template-columns: 76px 1fr; row-gap: 6px; }
+.viewer dt { color: var(--faint); }
+.viewer dd { color: var(--soft); font-variant-numeric: tabular-nums; }
+.viewer .noexif { color: var(--faint); line-height: 1.5; }
+.viewer .vfoot { margin-top: auto; display: flex; flex-direction: column; gap: 6px; }
+.viewer .vfoot .k { color: var(--faint); font-size: 12px; margin-top: 14px; }
+.viewer.noaside { grid-template-columns: 1fr; }
+.viewer.noaside aside { display: none; }
+.viewer .nav { position: absolute; top: 0; bottom: 0; width: 30%; cursor: pointer; }
+.viewer .nav.l { left: 0; cursor: w-resize; }
+.viewer .nav.r { right: 0; cursor: e-resize; }
+/* top-left of the whole overlay, so it stays put when the panel is hidden (i) or stacked (mobile) */
+.viewer .vclose { position: absolute; top: 22px; left: 22px; z-index: 2; padding: 10px; background: none; border: 0;
+  font: inherit; font-size: 13px; color: var(--dim); cursor: pointer; }
+.viewer .vclose:hover, .viewer .vclose:focus-visible { color: var(--text); }
+
+@media (max-width: 860px) {
+  .lrow { grid-template-columns: 1fr auto; gap: 4px 16px; }
+  .lrow .ld { grid-column: 1 / -1; grid-row: 2; }
+  .lrow .ls { display: none; }
+  .doc-wrap { grid-template-columns: minmax(0, 1fr); padding: 40px 20px 140px; }
+  .doc-meta { grid-column: 1; grid-row: 2; position: static; justify-self: start; width: auto; padding: 40px 0 0; border-top: 1px solid var(--border); margin-top: 40px; }
+  .doc-wrap .doc, .doc-wrap .raw { grid-column: 1; }
+  .doc figure.wide { margin-right: 0; }
+  .doc h2::before, .doc h3::before { display: none; }
+  .home-main { padding-left: 0; }
+  .viewer { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+  .viewer aside { border-left: 0; border-top: 1px solid var(--border); padding: 16px 20px; }
+  .viewer aside .vfoot .k { display: none; }
+  .ph-head .keys { display: none; }
+}

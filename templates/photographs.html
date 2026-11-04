@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Photographs — gustaf edén{% endblock title %}
+{% block description %}Photographs by Gustaf Edén.{% endblock description %}
+{% block og_title %}Photographs — gustaf edén{% endblock og_title %}
+{% block og_description %}Photographs by Gustaf Edén.{% endblock og_description %}
+{% block og_url %}{{ config.base_url }}/photographs/{% endblock og_url %}
+
+{% block main %}
+<main class="page" data-page="photographs" data-crt="photos">
+  <nav class="path" data-t data-role="structure" data-nav>
+    <a href="/">gustaf edén</a><span class="sep">/</span>photographs
+  </nav>
+  <div class="ph-head">
+    <div class="grp" id="colls"></div>
+    <div class="grp">
+      <button data-info data-t data-role="structure">exif</button>
+    </div>
+    <span class="keys" data-t data-role="structure" data-nosplit><kbd>i</kbd>exif <kbd>2</kbd>–<kbd>6</kbd>columns <kbd>←</kbd><kbd>→</kbd>in viewer</span>
+  </div>
+  <div class="masonry" id="masonry"></div>
+</main>
+{% endblock main %}
