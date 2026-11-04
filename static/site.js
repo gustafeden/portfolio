@@ -32,6 +32,7 @@
       if (!em || em.nodeType !== 1 || em.tagName !== 'EM') return;
 
       var fig = doc.createElement('figure');
+      fig.className = 'side'; // markdown image+caption = a screenshot: sits in the right margin (site.css)
       img.setAttribute('data-i', '');
       img.setAttribute('loading', 'lazy');
       img.setAttribute('decoding', 'async');
