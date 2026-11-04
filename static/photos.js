@@ -227,6 +227,7 @@
       : `<p class="noexif">no exif on this one${/mamiya/i.test(c?.title || '') ? ', it is a film scan' : ''}.</p>`;
     viewerEl.querySelector('#v-orig').href = p.src;
     viewerEl.classList.add('on');
+    document.documentElement.classList.add('viewer-open');
     window.FX.frame(imgEl, p.src);
     // Zola: the photographs page itself is a real route (/photographs/); a deep link to one
     // frame is just the hash on that page, not a route of its own (see CONTRACT.md).
@@ -235,6 +236,7 @@
   function closeViewer() {
     if (vi < 0) return;
     viewerEl.classList.remove('on');
+    document.documentElement.classList.remove('viewer-open');
     vi = -1;
     history.replaceState(null, '', location.pathname + location.search);
   }
@@ -242,6 +244,20 @@
   // ---------- events (bound once) ----------
   function bindOnce() {
     if (bound) return; bound = true;
+    // phone: swipe left/right on the photo = next/previous, swipe down = close. A tap still
+    // reaches the .nav zones as a click (the browser only fires click when the finger didn't move).
+    let tx = 0, ty = 0, tracking = false;
+    viewerEl.addEventListener('touchstart', e => {
+      if (e.touches.length !== 1 || !e.target.closest('.stage')) { tracking = false; return; }
+      tracking = true; tx = e.touches[0].clientX; ty = e.touches[0].clientY;
+    }, { passive: true });
+    viewerEl.addEventListener('touchend', e => {
+      if (!tracking || vi < 0) return;
+      tracking = false;
+      const t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.3) openViewer(vi + (dx < 0 ? 1 : -1));
+      else if (dy > 80 && dy > Math.abs(dx) * 1.3) closeViewer();
+    }, { passive: true });
     document.addEventListener('click', e => {
       const t = e.target;
       const c = t.closest('[data-c]');

@@ -178,6 +178,9 @@ html.fx-transitioning .tile img, html.fx-transitioning .doc figure img,
 /* ---------- viewer overlay ---------- */
 .viewer { position: fixed; inset: 0; background: #080808; z-index: 50; display: none; grid-template-columns: 1fr 260px; }
 .viewer.on { display: grid; }
+/* the page behind the viewer must not scroll (touch-scroll on phones went straight through) */
+html.viewer-open, html.viewer-open body { overflow: hidden; }
+.viewer { overscroll-behavior: contain; }
 .viewer .stage { display: flex; align-items: center; justify-content: center; padding: 32px; min-width: 0; min-height: 0; position: relative; }
 .viewer .stage img { max-width: 100%; max-height: calc(100vh - 64px); object-fit: contain; display: block; }
 .viewer aside { border-left: 1px solid var(--border); padding: 32px 24px; font-size: 13px; color: var(--dim); display: flex; flex-direction: column; }
@@ -209,8 +212,17 @@ html.fx-transitioning .tile img, html.fx-transitioning .doc figure img,
   .doc figure.wide { margin-right: 0; }
   .doc h2::before, .doc h3::before { display: none; }
   .home-main { padding-left: 0; }
-  .viewer { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
-  .viewer aside { border-left: 0; border-top: 1px solid var(--border); padding: 16px 20px; }
+  /* phone: photo + info must fit the VISIBLE screen (dvh, not vh — iOS's 100vh is taller than
+     what's shown), so the photo takes whatever the info panel leaves and never pushes it off. */
+  .viewer { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; height: 100vh; height: 100dvh; }
+  .viewer .stage { padding: 60px 12px 12px; touch-action: pinch-zoom; } /* swipes are ours (photos.js) */
+  .viewer .stage img { max-height: 100%; }
+  .viewer aside { border-left: 0; border-top: 1px solid var(--border); padding: 14px 20px calc(14px + env(safe-area-inset-bottom));
+    max-height: 34vh; max-height: 34dvh; overflow-y: auto; overscroll-behavior: contain; }
+  .viewer aside .count { margin-bottom: 8px; }
+  .viewer aside .coll { margin-bottom: 12px; }
+  .viewer aside .vfoot { margin-top: 14px; flex-direction: row; flex-wrap: wrap; gap: 6px 20px; }
   .viewer aside .vfoot .k { display: none; }
+  .viewer .vclose { top: calc(10px + env(safe-area-inset-top)); left: 10px; }
   .ph-head .keys { display: none; }
 }

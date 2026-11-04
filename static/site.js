@@ -244,6 +244,9 @@
       return;
     }
 
+    // leaving the page with the photo viewer open (e.g. phone back button): close it first, or
+    // its scroll lock (html.viewer-open) would stay on the next page
+    if (window.Photos && window.Photos.close) window.Photos.close();
     var newMain = document.adoptNode(result.main.cloneNode(true));
     newMain.hidden = true;
     var fromMain = currentMain;
