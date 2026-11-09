@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Great Exit — gustaf edén</title>
+<meta name="description" content="Multiplayer trading game for a room full of phones, inside a collapsing megacorp.">
+<meta property="og:title" content="The Great Exit — gustaf edén">
+<meta property="og:description" content="Multiplayer trading game for a room full of phones, inside a collapsing megacorp.">
+<meta property="og:url" content="https://www.gustafeden.com/projects/the-great-exit/">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Red+Hat+Text:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/fx.css">
+</head>
+<body>
+
+
+
+
+<main class="page" data-page="project" data-slug="the-great-exit" data-crt="read">
+  <nav class="path" data-t data-role="structure" data-nav>
+    <a href="/">gustaf edén</a><span class="sep">/</span><a href="/projects/">projects</a><span class="sep">/</span>The Great Exit
+  </nav>
+  <div class="doc-wrap">
+    <dl class="doc-meta" data-meta>
+      <dt>year</dt><dd data-t data-role="body">2025</dd>
+      <dt>stack</dt><dd data-t data-role="body">Dart, WebSockets</dd>
+
+      <dt>source</dt><dd data-t data-role="body"><a href="https://github.com/gustafeden/great-exit">github</a></dd>
+      <dt>this page</dt><dd data-t data-role="body"><a href="#" data-toggle-raw>view as .md</a></dd>
+    </dl>
+    <article class="doc" data-doc><h1 data-t data-role="head">The Great Exit</h1><p><em>Personal Project | 2025 | Built with Claude Code</em></p>
+<p>A real-time multiplayer stock trading game set inside a collapsing, unnamed megacorp. Players race to accumulate wealth before the organization implodes.</p>
+<h2 id="project-overview">Project Overview</h2>
+<p>THE GREAT EXIT started as a workshop game concept—something quick and engaging for corporate events. It evolved into a full real-time trading platform where players join via QR code, trade fictional corporate divisions, and watch their fortunes rise and fall on a big screen.</p>
+<p>The unnamed megacorp represents every company drowning in strategic initiatives, alignment workshops, reorgs, and PowerPoints with more animations than meaning. Perfectly safe satire. Universally funny.</p>
+<h2 id="how-it-works">How It Works</h2>
+<p><strong>Players scan a QR code</strong> on the big screen, which loads the trading interface on their phones. No app install required—just a web browser.</p>
+<p><strong>The game runs on a laptop</strong> with a rich terminal UI. The admin controls game phases, triggers events, and watches all players trade in real-time.</p>
+<p><strong>Corporate events fire randomly</strong>, affecting stock prices: "Leadership announces Strategic Vision Framework 3.0 — confusion spikes." Players must react fast, buying dips and selling peaks.</p>
+<p><strong>Four phases of collapse</strong> from Stability through Crisis to The Great Exit—each phase brings more volatility, more events, and more chaos.</p>
+<h2 id="technical-highlights">Technical Highlights</h2>
+<p><strong>Zero cloud game state.</strong> All real-time data flows through WebSockets directly from the laptop to players' phones. Firebase only hosts the static frontend. This means zero latency overhead and zero server costs during gameplay.</p>
+<p><strong>Dart everywhere.</strong> The server runs on Dart with nocterm for a rich terminal UI. The frontend is Flutter Web. One language, both ends.</p>
+<p><strong>Smart price simulation.</strong> Stocks follow random walks with mean reversion, sector correlations, and event-driven shocks. Each division has its own personality—SYNC is volatile, PIVT is stable, FLRC has momentum.</p>
+<p><strong>Hold-to-trade.</strong> Players can hold the buy/sell button to rapidly accumulate or dump shares. In the final minutes, this becomes crucial.</p>
+<h2 id="the-architecture">The Architecture</h2>
+<pre><code>┌─────────────────────────────────────────┐
+│           ADMIN LAPTOP                  │
+│  Terminal UI ◄─► Game Engine ◄─► WebSocket│
+└─────────────────────────────────────────┘
+                     │
+         Fast WebSocket (local network)
+                     ▼
+┌─────────────────────────────────────────┐
+│  Players (phones) + Big Screen (TV)     │
+│  Flutter Web via Firebase Hosting       │
+└─────────────────────────────────────────┘
+</code></pre>
+<h2 id="what-i-learned">What I Learned</h2>
+<p>Building a real-time multiplayer system from scratch taught me a lot about WebSocket architecture, tick-based game loops, and the importance of latency visibility. Players need to trust their trades are instant—so we show live ping times.</p>
+<p>The TUI work with nocterm was particularly satisfying. Building a complex dashboard with menus, live charts, and keyboard controls entirely in the terminal felt like going back to fundamentals.</p>
+<h2 id="the-satire">The Satire</h2>
+<p>The event texts are the heart of the game's humor:</p>
+<ul>
+<li>"Mandatory alignment workshop scheduled; sell-off begins."</li>
+<li>"Transformation committee releases 200-page slide deck; no one reads it."</li>
+<li>"New initiative launched to investigate initiative overload."</li>
+<li>"Team Marvel deploys without meeting; innovation briefly witnessed."</li>
+</ul>
+<p>Safe enough for any workplace. Accurate enough to hurt.</p>
+<p><strong>Tech Stack:</strong> Dart, Flutter Web, WebSockets, Firebase Hosting, nocterm</p>
+<hr />
+<ul>
+<li><a rel="external" href="https://great-exit-game.web.app">Live Demo →</a></li>
+<li><a rel="external" href="https://github.com/gustafeden/great-exit">GitHub Repository →</a></li>
+</ul>
+</article>
+    <pre class="raw" data-raw data-t data-role="body" data-nosplit># The Great Exit
+
+*Personal Project | 2025 | Built with Claude Code*
+
+A real-time multiplayer stock trading game set inside a collapsing, unnamed megacorp. Players race to accumulate wealth before the organization implodes.
+
+## Project Overview
+
+THE GREAT EXIT started as a workshop game concept—something quick and engaging for corporate events. It evolved into a full real-time trading platform where players join via QR code, trade fictional corporate divisions, and watch their fortunes rise and fall on a big screen.
+
+The unnamed megacorp represents every company drowning in strategic initiatives, alignment workshops, reorgs, and PowerPoints with more animations than meaning. Perfectly safe satire. Universally funny.
+
+## How It Works
+
+**Players scan a QR code** on the big screen, which loads the trading interface on their phones. No app install required—just a web browser.
+
+**The game runs on a laptop** with a rich terminal UI. The admin controls game phases, triggers events, and watches all players trade in real-time.
+
+**Corporate events fire randomly**, affecting stock prices: &quot;Leadership announces Strategic Vision Framework 3.0 — confusion spikes.&quot; Players must react fast, buying dips and selling peaks.
+
+**Four phases of collapse** from Stability through Crisis to The Great Exit—each phase brings more volatility, more events, and more chaos.
+
+## Technical Highlights
+
+**Zero cloud game state.** All real-time data flows through WebSockets directly from the laptop to players&#39; phones. Firebase only hosts the static frontend. This means zero latency overhead and zero server costs during gameplay.
+
+**Dart everywhere.** The server runs on Dart with nocterm for a rich terminal UI. The frontend is Flutter Web. One language, both ends.
+
+**Smart price simulation.** Stocks follow random walks with mean reversion, sector correlations, and event-driven shocks. Each division has its own personality—SYNC is volatile, PIVT is stable, FLRC has momentum.
+
+**Hold-to-trade.** Players can hold the buy/sell button to rapidly accumulate or dump shares. In the final minutes, this becomes crucial.
+
+## The Architecture
+
+```
+┌─────────────────────────────────────────┐
+│           ADMIN LAPTOP                  │
+│  Terminal UI ◄─► Game Engine ◄─► WebSocket│
+└─────────────────────────────────────────┘
+                     │
+         Fast WebSocket (local network)
+                     ▼
+┌─────────────────────────────────────────┐
+│  Players (phones) + Big Screen (TV)     │
+│  Flutter Web via Firebase Hosting       │
+└─────────────────────────────────────────┘
+```
+
+## What I Learned
+
+Building a real-time multiplayer system from scratch taught me a lot about WebSocket architecture, tick-based game loops, and the importance of latency visibility. Players need to trust their trades are instant—so we show live ping times.
+
+The TUI work with nocterm was particularly satisfying. Building a complex dashboard with menus, live charts, and keyboard controls entirely in the terminal felt like going back to fundamentals.
+
+## The Satire
+
+The event texts are the heart of the game&#39;s humor:
+
+- &quot;Mandatory alignment workshop scheduled; sell-off begins.&quot;
+- &quot;Transformation committee releases 200-page slide deck; no one reads it.&quot;
+- &quot;New initiative launched to investigate initiative overload.&quot;
+- &quot;Team Marvel deploys without meeting; innovation briefly witnessed.&quot;
+
+Safe enough for any workplace. Accurate enough to hurt.
+
+**Tech Stack:** Dart, Flutter Web, WebSockets, Firebase Hosting, nocterm
+
+---
+
+- [Live Demo →](https://great-exit-game.web.app)
+- [GitHub Repository →](https://github.com/gustafeden/great-exit)
+</pre>
+  </div>
+</main>
+
+
+<!-- ================= photo viewer (overlay, not a page) ================= -->
+<div class="viewer" id="viewer" role="dialog" aria-label="photo viewer" data-fx-glass>
+  <button class="vclose" id="v-close" type="button" aria-label="close viewer">close</button>
+  <div class="stage">
+    <img id="v-img" alt="">
+    <div class="nav l" data-step="-1"></div><div class="nav r" data-step="1"></div>
+  </div>
+  <aside>
+    <div class="count" id="v-count"></div>
+    <div class="coll" id="v-coll"></div>
+    <div id="v-exif"></div>
+    <div class="vfoot">
+      <a id="v-orig" href="#" target="_blank" rel="noopener">open full size</a>
+      <a href="#" id="v-link">copy link to this frame</a>
+      <div class="k"><kbd>esc</kbd>close <kbd>i</kbd>hide panel</div>
+    </div>
+  </aside>
+</div>
+
+<!-- FX settings are embedded to avoid an initialization fetch. -->
+<script type="application/json" id="fx-settings">
+{
+ "outMs": 350,
+ "holdMs": 0,
+ "inMs": 640,
+ "outEase": "in quad",
+ "inEase": "out cubic",
+ "grainScale": 1,
+ "grainMix": 0.45,
+ "coarse": 140,
+ "patchRel": true,
+ "soft": 0.07,
+ "smooth": false,
+ "sweep": 0,
+ "sweepAngle": 90,
+ "blurOut": 4,
+ "blurIn": 6,
+ "textBlur": 1,
+ "imgBlur": 1,
+ "fade": 0,
+ "drift": 0,
+ "scale": 1,
+ "mode": "element",
+ "split": "word",
+ "spread": 0.45,
+ "order": "structure → text → images",
+ "mirrorOut": true,
+ "orderRand": 0.35,
+ "jitter": 0.35,
+ "sizeSpeed": 0,
+ "halo": 0.5,
+ "tail": 0.45,
+ "seed": 7,
+ "tint": "#A3B18A",
+ "tintAmt": 0,
+ "vcr": 0,
+ "vcrCol": "#D02BD6",
+ "vcrWidth": 1.5,
+ "vcrJag": 0,
+ "vcrPeak": "mid-transition",
+ "chroma": 3.2,
+ "chromaPair": "red / cyan",
+ "scan": 0.72,
+ "scanGap": 5,
+ "roll": 0,
+ "rollH": 70,
+ "rollSpeed": 380,
+ "snow": 0.43,
+ "tear": 13,
+ "textBlurHow": "text-shadow",
+ "noCssBlur": false,
+ "noGrain": false,
+ "scene": "home → page",
+ "crt": "always",
+ "crtCurve": 0.57,
+ "crtRadius": 0,
+ "crtWarp": 0.02,
+ "crtScan": 0.15,
+ "crtScanGap": 2,
+ "crtMask": 0.78,
+ "crtMaskType": "aperture grille",
+ "crtGlow": 0.92,
+ "crtFlicker": 0,
+ "crtRead": 0.25,
+ "photosClean": true,
+ "photoReveal": "interlaced",
+ "touch": false,
+ "touchBloom": 0.09,
+ "touchRing": 0.05,
+ "touchStatic": 0.12,
+ "touchRadius": 38,
+ "touchRadiusImg": 70,
+ "idleGlitch": true,
+ "idleMin": 9000,
+ "idleMax": 24000,
+ "idleAmt": 1
+}
+</script>
+
+
+<!-- Keep instant navigation available if the effects script fails to load. -->
+<script>
+if (!window.FX) {
+  function __stubPaintRules() {
+    document.querySelectorAll('[data-rule]').forEach(function (r) {
+      if (!r.hasChildNodes()) r.style.background = 'var(--border)';
+    });
+  }
+  window.FX = {
+    lite: true,
+    __isStub: true,
+    init: function () { return Promise.resolve(); },
+    show: function (pageEl) { __stubPaintRules(); },
+    transition: function (fromEl, toEl, swap) {
+      return Promise.resolve(swap()).then(function () { __stubPaintRules(); });
+    },
+    refresh: function (pageEl) { __stubPaintRules(); },
+    develop: function (imgEl) {},
+    frame: function (imgEl, src) {
+      if (!src) return Promise.resolve();
+      imgEl.src = src;
+      return imgEl.decode ? imgEl.decode().catch(function () {}) : Promise.resolve();
+    },
+  };
+}
+</script>
+
+<script src="/photos.js"></script>
+<script src="/fx.js"></script>
+<script src="/stats.js"></script>
+<script src="/site.js"></script>
+</body>
+</html>

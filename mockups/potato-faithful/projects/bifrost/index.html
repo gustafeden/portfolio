@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bifrost — gustaf edén</title>
+<meta name="description" content="Cloud-functions-style jobs and services on a Mac mini at home.">
+<meta property="og:title" content="Bifrost — gustaf edén">
+<meta property="og:description" content="Cloud-functions-style jobs and services on a Mac mini at home.">
+<meta property="og:url" content="https://www.gustafeden.com/projects/bifrost/">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Red+Hat+Text:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/fx.css">
+</head>
+<body>
+
+
+
+
+<main class="page" data-page="project" data-slug="bifrost" data-crt="read">
+  <nav class="path" data-t data-role="structure" data-nav>
+    <a href="/">gustaf edén</a><span class="sep">/</span><a href="/projects/">projects</a><span class="sep">/</span>Bifrost
+  </nav>
+  <div class="doc-wrap">
+    <dl class="doc-meta" data-meta>
+      <dt>year</dt><dd data-t data-role="body">2025</dd>
+      <dt>stack</dt><dd data-t data-role="body">Go, React, launchd</dd>
+
+      <dt>source</dt><dd data-t data-role="body"><a href="https://github.com/gustafeden/bifrost">github</a></dd>
+      <dt>this page</dt><dd data-t data-role="body"><a href="#" data-toggle-raw>view as .md</a></dd>
+    </dl>
+    <article class="doc" data-doc><h1 data-t data-role="head">Bifrost</h1><p><strong>Tech Stack</strong>: Go | Firebase | Firestore | Cloud Storage | React | TypeScript | launchd</p>
+<p><strong>Built with</strong>: Claude Code AI-assisted development</p>
+<p>A self-hosted compute platform for running functions and services on your own hardware. Deploy code, schedule jobs, manage services—all without cloud vendor lock-in. Firebase acts as the control plane, accessible from anywhere.</p>
+<div id="bifrost-live-stats" class="live-stats-container"></div>
+<h2 id="the-problem">The Problem</h2>
+<p>Cloud functions are great until you see the bill. Or realize your simple cron job needs a VPC, IAM roles, and three YAML files just to run. And if you already have a Mac mini sitting under your desk, why pay for compute you don't need?</p>
+<p>I wanted something that feels like Cloud Functions but runs on hardware I own. No public API to secure, no cold starts, no egress charges. Just deploy from anywhere, execute on my machine, see logs in real-time.</p>
+<h2 id="how-it-works">How It Works</h2>
+<p>Bifrost has two parts: a CLI for developers and an agent that runs on your hardware.</p>
+<p>The <strong>CLI</strong> handles deployments, scheduling, and monitoring:</p>
+<pre><code data-lang="bash"># Deploy a function
+bifrost deploy function daily-backup ./src
+
+# Schedule it
+bifrost schedule add nightly daily-backup &quot;0 3 * * *&quot;
+
+# Check what&#39;s running
+bifrost status
+</code></pre>
+<p>The <strong>Agent</strong> runs as a daemon on your Mac mini (or Raspberry Pi, or Linux server). It watches Firestore for work, downloads artifacts, executes functions, and streams logs back.</p>
+<pre><code>┌─────────────────────────────────────────┐
+│              Firebase Cloud             │
+│  ┌───────────┐  ┌───────────────────┐  │
+│  │ Firestore │  │ Firebase Storage  │  │
+│  │ (control  │  │  (artifacts)      │  │
+│  │  plane)   │  │                   │  │
+│  └─────┬─────┘  └────────┬──────────┘  │
+└────────┼─────────────────┼─────────────┘
+         │                 │
+ ┌───────┴─────────────────┴───────┐
+ │         Firestore SDK           │
+ └───────┬─────────────────┬───────┘
+         │                 │
+ ┌───────┴───────┐ ┌───────┴───────┐
+ │  bifrost CLI  │ │ bifrost-agent │
+ │  (developer)  │ │   (Mac mini)  │
+ └───────────────┘ └───────────────┘
+</code></pre>
+<p>Firebase is the control plane—Firestore stores function definitions, schedules, events, and logs. Storage holds compiled artifacts. The CLI and agent never talk directly; everything flows through Firebase.</p>
+<h2 id="functions-and-services">Functions and Services</h2>
+<p>Bifrost supports two execution models:</p>
+<p><strong>Functions</strong> are run-to-completion jobs. Deploy a compiled Dart binary or Python script, trigger it manually or via schedule, capture the output. Great for backups, data sync, notifications.</p>
+<p><strong>Services</strong> are long-running processes. The agent supervises them—health checks, auto-restart on crash, rolling updates when you deploy a new version. Like a tiny version of systemd that syncs across machines.</p>
+<p>Both support environment variables, encrypted secrets (AES-256-GCM), and per-target public API keys for external invocation.</p>
+<h2 id="scheduling">Scheduling</h2>
+<p>Cron schedules live in Firestore. The agent checks every minute, creates events for due schedules, processes them. Simple and reliable.</p>
+<pre><code data-lang="bash"># Run every hour
+bifrost schedule add hourly-check my-function &quot;0 * * * *&quot;
+
+# Run at 9am Stockholm time
+bifrost schedule add morning-report my-function &quot;0 9 * * *&quot; --timezone Europe/Stockholm
+</code></pre>
+<h2 id="the-admin-ui">The Admin UI</h2>
+<p>A React web app for managing everything without the CLI. See agents online, enable/disable functions, view logs, manage schedules. Deployed to GitHub Pages, talks directly to Firestore.</p>
+<p>The dashboard shows at a glance: which agents are online, what functions exist, recent invocations and their status, upcoming scheduled runs.</p>
+<h2 id="technical-architecture">Technical Architecture</h2>
+<p>The agent is built in Go—single binary, cross-compiles to macOS and Linux. It runs multiple goroutines:</p>
+<ul>
+<li><strong>Heartbeat</strong>: Updates Firestore every 30s with instance status</li>
+<li><strong>Deployment watcher</strong>: Polls for pending deploys, downloads artifacts, installs them</li>
+<li><strong>Scheduler</strong>: Creates events from cron schedules</li>
+<li><strong>Worker</strong>: Processes events, executes functions, captures logs</li>
+<li><strong>Service manager</strong>: Supervises long-running services</li>
+</ul>
+<p>Leases prevent multiple agents from processing the same work. If an agent crashes mid-execution, the lease expires and another agent (or the same one after restart) picks it up.</p>
+<p>Log batching keeps Firestore costs down—lines are collected and written in batches rather than one document per line.</p>
+<h2 id="built-with-claude-code">Built with Claude Code</h2>
+<p>This was an ambitious project for AI-assisted development. Multi-package Go codebase, Firestore integration, cross-platform builds, daemon management, React admin UI.</p>
+<p>Started with "I want my own serverless platform" and built incrementally. Claude handled the boilerplate (Firestore CRUD, CLI scaffolding, React components) while I focused on the tricky parts—lease logic, graceful shutdown, artifact versioning.</p>
+<p>The codebase grew to ~15,000 lines of Go and ~3,000 lines of TypeScript. Would have taken months solo. Instead, it was a week of evenings, with an AI partner that never forgets the codebase structure.</p>
+<h2 id="what-i-learned">What I Learned</h2>
+<p><strong>Firestore is surprisingly good for this.</strong> Real-time listeners, transactions, TTL policies—it handles the control plane elegantly. The query limitations force you to think about data modeling upfront.</p>
+<p><strong>Leases are hard to get right.</strong> Race conditions, stale leases, agent crashes mid-processing. Had to think carefully about what happens when things fail halfway through.</p>
+<p><strong>Services are harder than functions.</strong> Functions run and exit. Services need supervision—what happens when they crash, how do you update them without downtime, how do you handle orphaned processes after agent restart.</p>
+<p><strong>Go's simplicity pays off.</strong> Single binary, fast compilation, great concurrency primitives. The agent is ~500KB and starts instantly.</p>
+<h2 id="what-s-next">What's Next</h2>
+<ul>
+<li>Traffic splitting and canary deployments</li>
+<li>Firestore/Storage triggers (run functions on document changes)</li>
+<li>Webhook triggers with signature validation (Stripe, GitHub events)</li>
+<li>Container isolation via Podman for untrusted code</li>
+<li>ESP32 edge agents for IoT (WASM functions on microcontrollers)</li>
+</ul>
+<p>I'm also working on <strong>Bifrost Server</strong>—a Rust-based backend that replaces Firebase entirely. PostgreSQL for state, MinIO for artifacts, WebSockets for real-time. One <code>docker-compose up</code> and you're fully self-hosted, no Google account needed.</p>
+<h2 id="links">Links</h2>
+<ul>
+<li><a rel="external" href="https://github.com/gustafeden/bifrost">GitHub Repository</a></li>
+<li><a rel="external" href="https://bifrost-admin-ui.web.app">Admin UI</a></li>
+<li><a href="https://www.gustafeden.com/projects/atelier/">Atelier</a> - Uses Bifrost for scheduled tasks</li>
+<li><a rel="external" href="https://claude.com/claude-code">Claude Code</a> - AI-assisted development</li>
+</ul>
+<hr />
+<p><em>Your own little corner of the cloud, running on hardware you actually own.</em></p>
+</article>
+    <pre class="raw" data-raw data-t data-role="body" data-nosplit># Bifrost
+
+**Tech Stack**: Go | Firebase | Firestore | Cloud Storage | React | TypeScript | launchd
+
+**Built with**: Claude Code AI-assisted development
+
+A self-hosted compute platform for running functions and services on your own hardware. Deploy code, schedule jobs, manage services—all without cloud vendor lock-in. Firebase acts as the control plane, accessible from anywhere.
+
+&lt;div id=&quot;bifrost-live-stats&quot; class=&quot;live-stats-container&quot;&gt;&lt;/div&gt;
+
+## The Problem
+
+Cloud functions are great until you see the bill. Or realize your simple cron job needs a VPC, IAM roles, and three YAML files just to run. And if you already have a Mac mini sitting under your desk, why pay for compute you don&#39;t need?
+
+I wanted something that feels like Cloud Functions but runs on hardware I own. No public API to secure, no cold starts, no egress charges. Just deploy from anywhere, execute on my machine, see logs in real-time.
+
+## How It Works
+
+Bifrost has two parts: a CLI for developers and an agent that runs on your hardware.
+
+The **CLI** handles deployments, scheduling, and monitoring:
+```bash
+# Deploy a function
+bifrost deploy function daily-backup ./src
+
+# Schedule it
+bifrost schedule add nightly daily-backup &quot;0 3 * * *&quot;
+
+# Check what&#39;s running
+bifrost status
+```
+
+The **Agent** runs as a daemon on your Mac mini (or Raspberry Pi, or Linux server). It watches Firestore for work, downloads artifacts, executes functions, and streams logs back.
+
+```
+┌─────────────────────────────────────────┐
+│              Firebase Cloud             │
+│  ┌───────────┐  ┌───────────────────┐  │
+│  │ Firestore │  │ Firebase Storage  │  │
+│  │ (control  │  │  (artifacts)      │  │
+│  │  plane)   │  │                   │  │
+│  └─────┬─────┘  └────────┬──────────┘  │
+└────────┼─────────────────┼─────────────┘
+         │                 │
+ ┌───────┴─────────────────┴───────┐
+ │         Firestore SDK           │
+ └───────┬─────────────────┬───────┘
+         │                 │
+ ┌───────┴───────┐ ┌───────┴───────┐
+ │  bifrost CLI  │ │ bifrost-agent │
+ │  (developer)  │ │   (Mac mini)  │
+ └───────────────┘ └───────────────┘
+```
+
+Firebase is the control plane—Firestore stores function definitions, schedules, events, and logs. Storage holds compiled artifacts. The CLI and agent never talk directly; everything flows through Firebase.
+
+## Functions and Services
+
+Bifrost supports two execution models:
+
+**Functions** are run-to-completion jobs. Deploy a compiled Dart binary or Python script, trigger it manually or via schedule, capture the output. Great for backups, data sync, notifications.
+
+**Services** are long-running processes. The agent supervises them—health checks, auto-restart on crash, rolling updates when you deploy a new version. Like a tiny version of systemd that syncs across machines.
+
+Both support environment variables, encrypted secrets (AES-256-GCM), and per-target public API keys for external invocation.
+
+## Scheduling
+
+Cron schedules live in Firestore. The agent checks every minute, creates events for due schedules, processes them. Simple and reliable.
+
+```bash
+# Run every hour
+bifrost schedule add hourly-check my-function &quot;0 * * * *&quot;
+
+# Run at 9am Stockholm time
+bifrost schedule add morning-report my-function &quot;0 9 * * *&quot; --timezone Europe/Stockholm
+```
+
+## The Admin UI
+
+A React web app for managing everything without the CLI. See agents online, enable/disable functions, view logs, manage schedules. Deployed to GitHub Pages, talks directly to Firestore.
+
+The dashboard shows at a glance: which agents are online, what functions exist, recent invocations and their status, upcoming scheduled runs.
+
+## Technical Architecture
+
+The agent is built in Go—single binary, cross-compiles to macOS and Linux. It runs multiple goroutines:
+
+- **Heartbeat**: Updates Firestore every 30s with instance status
+- **Deployment watcher**: Polls for pending deploys, downloads artifacts, installs them
+- **Scheduler**: Creates events from cron schedules
+- **Worker**: Processes events, executes functions, captures logs
+- **Service manager**: Supervises long-running services
+
+Leases prevent multiple agents from processing the same work. If an agent crashes mid-execution, the lease expires and another agent (or the same one after restart) picks it up.
+
+Log batching keeps Firestore costs down—lines are collected and written in batches rather than one document per line.
+
+## Built with Claude Code
+
+This was an ambitious project for AI-assisted development. Multi-package Go codebase, Firestore integration, cross-platform builds, daemon management, React admin UI.
+
+Started with &quot;I want my own serverless platform&quot; and built incrementally. Claude handled the boilerplate (Firestore CRUD, CLI scaffolding, React components) while I focused on the tricky parts—lease logic, graceful shutdown, artifact versioning.
+
+The codebase grew to ~15,000 lines of Go and ~3,000 lines of TypeScript. Would have taken months solo. Instead, it was a week of evenings, with an AI partner that never forgets the codebase structure.
+
+## What I Learned
+
+**Firestore is surprisingly good for this.** Real-time listeners, transactions, TTL policies—it handles the control plane elegantly. The query limitations force you to think about data modeling upfront.
+
+**Leases are hard to get right.** Race conditions, stale leases, agent crashes mid-processing. Had to think carefully about what happens when things fail halfway through.
+
+**Services are harder than functions.** Functions run and exit. Services need supervision—what happens when they crash, how do you update them without downtime, how do you handle orphaned processes after agent restart.
+
+**Go&#39;s simplicity pays off.** Single binary, fast compilation, great concurrency primitives. The agent is ~500KB and starts instantly.
+
+## What&#39;s Next
+
+- Traffic splitting and canary deployments
+- Firestore/Storage triggers (run functions on document changes)
+- Webhook triggers with signature validation (Stripe, GitHub events)
+- Container isolation via Podman for untrusted code
+- ESP32 edge agents for IoT (WASM functions on microcontrollers)
+
+I&#39;m also working on **Bifrost Server**—a Rust-based backend that replaces Firebase entirely. PostgreSQL for state, MinIO for artifacts, WebSockets for real-time. One `docker-compose up` and you&#39;re fully self-hosted, no Google account needed.
+
+## Links
+
+- [GitHub Repository](https://github.com/gustafeden/bifrost)
+- [Admin UI](https://bifrost-admin-ui.web.app)
+- [Atelier](@/projects/atelier.md) - Uses Bifrost for scheduled tasks
+- [Claude Code](https://claude.com/claude-code) - AI-assisted development
+
+---
+
+*Your own little corner of the cloud, running on hardware you actually own.*
+</pre>
+  </div>
+</main>
+
+
+<!-- ================= photo viewer (overlay, not a page) ================= -->
+<div class="viewer" id="viewer" role="dialog" aria-label="photo viewer" data-fx-glass>
+  <button class="vclose" id="v-close" type="button" aria-label="close viewer">close</button>
+  <div class="stage">
+    <img id="v-img" alt="">
+    <div class="nav l" data-step="-1"></div><div class="nav r" data-step="1"></div>
+  </div>
+  <aside>
+    <div class="count" id="v-count"></div>
+    <div class="coll" id="v-coll"></div>
+    <div id="v-exif"></div>
+    <div class="vfoot">
+      <a id="v-orig" href="#" target="_blank" rel="noopener">open full size</a>
+      <a href="#" id="v-link">copy link to this frame</a>
+      <div class="k"><kbd>esc</kbd>close <kbd>i</kbd>hide panel</div>
+    </div>
+  </aside>
+</div>
+
+<!-- FX settings are embedded to avoid an initialization fetch. -->
+<script type="application/json" id="fx-settings">
+{
+ "outMs": 350,
+ "holdMs": 0,
+ "inMs": 640,
+ "outEase": "in quad",
+ "inEase": "out cubic",
+ "grainScale": 1,
+ "grainMix": 0.45,
+ "coarse": 140,
+ "patchRel": true,
+ "soft": 0.07,
+ "smooth": false,
+ "sweep": 0,
+ "sweepAngle": 90,
+ "blurOut": 4,
+ "blurIn": 6,
+ "textBlur": 1,
+ "imgBlur": 1,
+ "fade": 0,
+ "drift": 0,
+ "scale": 1,
+ "mode": "element",
+ "split": "word",
+ "spread": 0.45,
+ "order": "structure → text → images",
+ "mirrorOut": true,
+ "orderRand": 0.35,
+ "jitter": 0.35,
+ "sizeSpeed": 0,
+ "halo": 0.5,
+ "tail": 0.45,
+ "seed": 7,
+ "tint": "#A3B18A",
+ "tintAmt": 0,
+ "vcr": 0,
+ "vcrCol": "#D02BD6",
+ "vcrWidth": 1.5,
+ "vcrJag": 0,
+ "vcrPeak": "mid-transition",
+ "chroma": 3.2,
+ "chromaPair": "red / cyan",
+ "scan": 0.72,
+ "scanGap": 5,
+ "roll": 0,
+ "rollH": 70,
+ "rollSpeed": 380,
+ "snow": 0.43,
+ "tear": 13,
+ "textBlurHow": "text-shadow",
+ "noCssBlur": false,
+ "noGrain": false,
+ "scene": "home → page",
+ "crt": "always",
+ "crtCurve": 0.57,
+ "crtRadius": 0,
+ "crtWarp": 0.02,
+ "crtScan": 0.15,
+ "crtScanGap": 2,
+ "crtMask": 0.78,
+ "crtMaskType": "aperture grille",
+ "crtGlow": 0.92,
+ "crtFlicker": 0,
+ "crtRead": 0.25,
+ "photosClean": true,
+ "photoReveal": "interlaced",
+ "touch": false,
+ "touchBloom": 0.09,
+ "touchRing": 0.05,
+ "touchStatic": 0.12,
+ "touchRadius": 38,
+ "touchRadiusImg": 70,
+ "idleGlitch": true,
+ "idleMin": 9000,
+ "idleMax": 24000,
+ "idleAmt": 1
+}
+</script>
+
+
+<!-- Keep instant navigation available if the effects script fails to load. -->
+<script>
+if (!window.FX) {
+  function __stubPaintRules() {
+    document.querySelectorAll('[data-rule]').forEach(function (r) {
+      if (!r.hasChildNodes()) r.style.background = 'var(--border)';
+    });
+  }
+  window.FX = {
+    lite: true,
+    __isStub: true,
+    init: function () { return Promise.resolve(); },
+    show: function (pageEl) { __stubPaintRules(); },
+    transition: function (fromEl, toEl, swap) {
+      return Promise.resolve(swap()).then(function () { __stubPaintRules(); });
+    },
+    refresh: function (pageEl) { __stubPaintRules(); },
+    develop: function (imgEl) {},
+    frame: function (imgEl, src) {
+      if (!src) return Promise.resolve();
+      imgEl.src = src;
+      return imgEl.decode ? imgEl.decode().catch(function () {}) : Promise.resolve();
+    },
+  };
+}
+</script>
+
+<script src="/photos.js"></script>
+<script src="/fx.js"></script>
+<script src="/stats.js"></script>
+<script src="/site.js"></script>
+</body>
+</html>

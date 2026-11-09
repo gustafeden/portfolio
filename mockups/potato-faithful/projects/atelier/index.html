@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atelier — gustaf edén</title>
+<meta name="description" content="Phone-to-website photo CMS. The photos on this site come through it.">
+<meta property="og:title" content="Atelier — gustaf edén">
+<meta property="og:description" content="Phone-to-website photo CMS. The photos on this site come through it.">
+<meta property="og:url" content="https://www.gustafeden.com/projects/atelier/">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Red+Hat+Text:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/fx.css">
+</head>
+<body>
+
+
+
+
+<main class="page" data-page="project" data-slug="atelier" data-crt="read">
+  <nav class="path" data-t data-role="structure" data-nav>
+    <a href="/">gustaf edén</a><span class="sep">/</span><a href="/projects/">projects</a><span class="sep">/</span>Atelier
+  </nav>
+  <div class="doc-wrap">
+    <dl class="doc-meta" data-meta>
+      <dt>year</dt><dd data-t data-role="body">2025</dd>
+      <dt>stack</dt><dd data-t data-role="body">Flutter, Firebase</dd>
+      <dt>status</dt><dd data-t data-role="body">in use, runs this site&#39;s photos</dd>
+      <dt>source</dt><dd data-t data-role="body"><a href="https://github.com/gustafeden/atelier">github</a></dd>
+      <dt>this page</dt><dd data-t data-role="body"><a href="#" data-toggle-raw>view as .md</a></dd>
+    </dl>
+    <article class="doc" data-doc><h1 data-t data-role="head">Atelier</h1><p><strong>Tech Stack</strong>: Flutter | Dart | Firebase | Riverpod | Apple Sign-In | Cloud Firestore | Firebase Storage</p>
+<p><strong>Built with</strong>: Claude Code AI-assisted development</p>
+<p>A portfolio photo CMS for photographers. Manage your portfolio collections and photos from your phone, with real-time sync to your website. Upload a photo, and it's live—no Git, no deploys, no friction.</p>
+<div id="atelier-live-stats" class="live-stats-container"></div>
+<h2 id="the-problem">The Problem</h2>
+<p>There was no good way to update my portfolio. Every photo meant: optimize the image, add it to the assets folder in GitHub, write the metadata, commit, push. For a single photo. The friction was enough that I'd take photos worth sharing and just... never upload them.</p>
+<p>I wanted something dead simple from the start: pull out my phone, pick a photo, upload. Done. Wherever I am—on a train, at a café, waiting for a friend. No laptop, no Git commits, no build pipelines. Just photos to website, instantly.</p>
+<h2 id="how-it-works">How It Works</h2>
+<p>The app is deliberately simple. You have <strong>collections</strong> (like "Street Photography" or "Portraits") and <strong>photos</strong> within them. Each collection gets a cover, a slug for URLs, and a visibility toggle.</p>
+<p>Upload photos from your camera roll or snap new ones directly. The app automatically:</p>
+<ul>
+<li>Optimizes images to 2000px (keeping quality high but file sizes reasonable)</li>
+<li>Extracts EXIF data (camera, lens, aperture, shutter speed, ISO, focal length)</li>
+<li>Creates cover thumbnails at 600px</li>
+<li>Syncs everything to Firebase in real-time</li>
+</ul>
+<p>Every photo can have a caption, location, and notes. Toggle whether EXIF data shows on your website—sometimes the technical details add to the story, sometimes they're just noise.</p>
+<h2 id="apple-sign-in">Apple Sign-In</h2>
+<p>Went with Apple Sign-In as the only auth method. No passwords to forget, no email verification flows. Just Face ID and you're in.</p>
+<p>The implementation was trickier than expected—needed to handle the nonce correctly and pass the <code>authorizationCode</code> as <code>accessToken</code> to Firebase. A bug that took some internet searching to figure out after Flutter 3.24 updates broke the standard approach.</p>
+<h2 id="multi-user-ready">Multi-User Ready</h2>
+<p>Each user manages their own portfolio. The app doesn't assume you're the only photographer in the world—data is scoped by userId, security rules enforce ownership, storage paths are user-prefixed.</p>
+<p>Could easily become a platform where multiple photographers manage their portfolios through the same app, all syncing to their own websites.</p>
+<h2 id="the-portfolio-website-connection">The Portfolio Website Connection</h2>
+<p>This website you're reading now pulls directly from the same Firebase database Atelier writes to. Upload a photo in the app, refresh the portfolio page, it's there. No build step, no deployment, no waiting.</p>
+<p>The website queries <code>portfolio_collections</code> and <code>portfolio_photos</code> from Firestore, falling back to static data if Firebase is unavailable. Public read access means the website works without authentication.</p>
+<h2 id="technical-architecture">Technical Architecture</h2>
+<pre><code>Atelier App (Flutter)
+    ↓ writes to
+Firebase (Firestore + Storage)
+    ↓ reads from
+Portfolio Website (Vanilla JS)
+</code></pre>
+<p>Clean separation. The app handles creation and management. Firebase handles storage and sync. The website handles display. Each part does one thing well.</p>
+<p>Built with Riverpod for state management—same pattern as OurArchive but stripped down to just what's needed. Repository pattern for data access, user-scoped queries everywhere.</p>
+<h2 id="built-with-claude-code">Built with Claude Code</h2>
+<p>Like OurArchive, this was a Claude Code collaboration. But faster this time—patterns were established, Firebase setup was familiar, the architecture decisions were clearer.</p>
+<p>Started as "extract portfolio from OurArchive into its own app" at 9am, had a working app with Apple Sign-In, photo uploads, and full CRUD by end of day. Same day: app icon generated, splash screen configured, TestFlight build submitted.</p>
+<p>That's the power of AI-assisted development with established patterns. The boring parts (boilerplate, Firebase rules, icon generation) happen in minutes. More time for the interesting problems.</p>
+<h2 id="what-i-learned">What I Learned</h2>
+<p><strong>Apple Sign-In is particular.</strong> Small details matter—the nonce hash, the authorization code flow, the entitlements file. Firebase docs assume you know iOS development. You'll be reading Stack Overflow.</p>
+<p><strong>Indexes are your friend (and enemy).</strong> Forgot a composite index? Firestore helpfully tells you which query failed. But you'll deploy indexes multiple times before you get them all right.</p>
+<p><strong>Splitting apps is freeing.</strong> OurArchive was getting heavy. Atelier is light. Single purpose apps are easier to maintain and more pleasant to use.</p>
+<h2 id="what-s-next">What's Next</h2>
+<ul>
+<li><strong>Project management</strong> - Write and edit these project posts directly from the app</li>
+<li>Drag-and-drop reordering on the website</li>
+<li>Bulk photo operations (delete multiple, move between collections)</li>
+<li>Blog post support (the markdown parser is ready)</li>
+<li>Maybe Android, if there's demand</li>
+</ul>
+<h2 id="links">Links</h2>
+<ul>
+<li><a rel="external" href="https://github.com/gustafeden/atelier">GitHub Repository →</a></li>
+<li><a href="https://www.gustafeden.com/projects/ourarchive/">OurArchive →</a> - The app this was extracted from</li>
+<li><a rel="external" href="https://claude.com/claude-code">Claude Code →</a> - AI-assisted development</li>
+</ul>
+<hr />
+<p><em>Built in a day through human-AI collaboration. Now manages the photos you see on this very website.</em></p>
+</article>
+    <pre class="raw" data-raw data-t data-role="body" data-nosplit># Atelier
+
+**Tech Stack**: Flutter | Dart | Firebase | Riverpod | Apple Sign-In | Cloud Firestore | Firebase Storage
+
+**Built with**: Claude Code AI-assisted development
+
+A portfolio photo CMS for photographers. Manage your portfolio collections and photos from your phone, with real-time sync to your website. Upload a photo, and it&#39;s live—no Git, no deploys, no friction.
+
+&lt;div id=&quot;atelier-live-stats&quot; class=&quot;live-stats-container&quot;&gt;&lt;/div&gt;
+
+## The Problem
+
+There was no good way to update my portfolio. Every photo meant: optimize the image, add it to the assets folder in GitHub, write the metadata, commit, push. For a single photo. The friction was enough that I&#39;d take photos worth sharing and just... never upload them.
+
+I wanted something dead simple from the start: pull out my phone, pick a photo, upload. Done. Wherever I am—on a train, at a café, waiting for a friend. No laptop, no Git commits, no build pipelines. Just photos to website, instantly.
+
+## How It Works
+
+The app is deliberately simple. You have **collections** (like &quot;Street Photography&quot; or &quot;Portraits&quot;) and **photos** within them. Each collection gets a cover, a slug for URLs, and a visibility toggle.
+
+Upload photos from your camera roll or snap new ones directly. The app automatically:
+- Optimizes images to 2000px (keeping quality high but file sizes reasonable)
+- Extracts EXIF data (camera, lens, aperture, shutter speed, ISO, focal length)
+- Creates cover thumbnails at 600px
+- Syncs everything to Firebase in real-time
+
+Every photo can have a caption, location, and notes. Toggle whether EXIF data shows on your website—sometimes the technical details add to the story, sometimes they&#39;re just noise.
+
+## Apple Sign-In
+
+Went with Apple Sign-In as the only auth method. No passwords to forget, no email verification flows. Just Face ID and you&#39;re in.
+
+The implementation was trickier than expected—needed to handle the nonce correctly and pass the `authorizationCode` as `accessToken` to Firebase. A bug that took some internet searching to figure out after Flutter 3.24 updates broke the standard approach.
+
+## Multi-User Ready
+
+Each user manages their own portfolio. The app doesn&#39;t assume you&#39;re the only photographer in the world—data is scoped by userId, security rules enforce ownership, storage paths are user-prefixed.
+
+Could easily become a platform where multiple photographers manage their portfolios through the same app, all syncing to their own websites.
+
+## The Portfolio Website Connection
+
+This website you&#39;re reading now pulls directly from the same Firebase database Atelier writes to. Upload a photo in the app, refresh the portfolio page, it&#39;s there. No build step, no deployment, no waiting.
+
+The website queries `portfolio_collections` and `portfolio_photos` from Firestore, falling back to static data if Firebase is unavailable. Public read access means the website works without authentication.
+
+## Technical Architecture
+
+```
+Atelier App (Flutter)
+    ↓ writes to
+Firebase (Firestore + Storage)
+    ↓ reads from
+Portfolio Website (Vanilla JS)
+```
+
+Clean separation. The app handles creation and management. Firebase handles storage and sync. The website handles display. Each part does one thing well.
+
+Built with Riverpod for state management—same pattern as OurArchive but stripped down to just what&#39;s needed. Repository pattern for data access, user-scoped queries everywhere.
+
+## Built with Claude Code
+
+Like OurArchive, this was a Claude Code collaboration. But faster this time—patterns were established, Firebase setup was familiar, the architecture decisions were clearer.
+
+Started as &quot;extract portfolio from OurArchive into its own app&quot; at 9am, had a working app with Apple Sign-In, photo uploads, and full CRUD by end of day. Same day: app icon generated, splash screen configured, TestFlight build submitted.
+
+That&#39;s the power of AI-assisted development with established patterns. The boring parts (boilerplate, Firebase rules, icon generation) happen in minutes. More time for the interesting problems.
+
+## What I Learned
+
+**Apple Sign-In is particular.** Small details matter—the nonce hash, the authorization code flow, the entitlements file. Firebase docs assume you know iOS development. You&#39;ll be reading Stack Overflow.
+
+**Indexes are your friend (and enemy).** Forgot a composite index? Firestore helpfully tells you which query failed. But you&#39;ll deploy indexes multiple times before you get them all right.
+
+**Splitting apps is freeing.** OurArchive was getting heavy. Atelier is light. Single purpose apps are easier to maintain and more pleasant to use.
+
+## What&#39;s Next
+
+- **Project management** - Write and edit these project posts directly from the app
+- Drag-and-drop reordering on the website
+- Bulk photo operations (delete multiple, move between collections)
+- Blog post support (the markdown parser is ready)
+- Maybe Android, if there&#39;s demand
+
+## Links
+
+- [GitHub Repository →](https://github.com/gustafeden/atelier)
+- [OurArchive →](@/projects/ourarchive.md) - The app this was extracted from
+- [Claude Code →](https://claude.com/claude-code) - AI-assisted development
+
+---
+
+*Built in a day through human-AI collaboration. Now manages the photos you see on this very website.*
+</pre>
+  </div>
+</main>
+
+
+<!-- ================= photo viewer (overlay, not a page) ================= -->
+<div class="viewer" id="viewer" role="dialog" aria-label="photo viewer" data-fx-glass>
+  <button class="vclose" id="v-close" type="button" aria-label="close viewer">close</button>
+  <div class="stage">
+    <img id="v-img" alt="">
+    <div class="nav l" data-step="-1"></div><div class="nav r" data-step="1"></div>
+  </div>
+  <aside>
+    <div class="count" id="v-count"></div>
+    <div class="coll" id="v-coll"></div>
+    <div id="v-exif"></div>
+    <div class="vfoot">
+      <a id="v-orig" href="#" target="_blank" rel="noopener">open full size</a>
+      <a href="#" id="v-link">copy link to this frame</a>
+      <div class="k"><kbd>esc</kbd>close <kbd>i</kbd>hide panel</div>
+    </div>
+  </aside>
+</div>
+
+<!-- FX settings are embedded to avoid an initialization fetch. -->
+<script type="application/json" id="fx-settings">
+{
+ "outMs": 350,
+ "holdMs": 0,
+ "inMs": 640,
+ "outEase": "in quad",
+ "inEase": "out cubic",
+ "grainScale": 1,
+ "grainMix": 0.45,
+ "coarse": 140,
+ "patchRel": true,
+ "soft": 0.07,
+ "smooth": false,
+ "sweep": 0,
+ "sweepAngle": 90,
+ "blurOut": 4,
+ "blurIn": 6,
+ "textBlur": 1,
+ "imgBlur": 1,
+ "fade": 0,
+ "drift": 0,
+ "scale": 1,
+ "mode": "element",
+ "split": "word",
+ "spread": 0.45,
+ "order": "structure → text → images",
+ "mirrorOut": true,
+ "orderRand": 0.35,
+ "jitter": 0.35,
+ "sizeSpeed": 0,
+ "halo": 0.5,
+ "tail": 0.45,
+ "seed": 7,
+ "tint": "#A3B18A",
+ "tintAmt": 0,
+ "vcr": 0,
+ "vcrCol": "#D02BD6",
+ "vcrWidth": 1.5,
+ "vcrJag": 0,
+ "vcrPeak": "mid-transition",
+ "chroma": 3.2,
+ "chromaPair": "red / cyan",
+ "scan": 0.72,
+ "scanGap": 5,
+ "roll": 0,
+ "rollH": 70,
+ "rollSpeed": 380,
+ "snow": 0.43,
+ "tear": 13,
+ "textBlurHow": "text-shadow",
+ "noCssBlur": false,
+ "noGrain": false,
+ "scene": "home → page",
+ "crt": "always",
+ "crtCurve": 0.57,
+ "crtRadius": 0,
+ "crtWarp": 0.02,
+ "crtScan": 0.15,
+ "crtScanGap": 2,
+ "crtMask": 0.78,
+ "crtMaskType": "aperture grille",
+ "crtGlow": 0.92,
+ "crtFlicker": 0,
+ "crtRead": 0.25,
+ "photosClean": true,
+ "photoReveal": "interlaced",
+ "touch": false,
+ "touchBloom": 0.09,
+ "touchRing": 0.05,
+ "touchStatic": 0.12,
+ "touchRadius": 38,
+ "touchRadiusImg": 70,
+ "idleGlitch": true,
+ "idleMin": 9000,
+ "idleMax": 24000,
+ "idleAmt": 1
+}
+</script>
+
+
+<!-- Keep instant navigation available if the effects script fails to load. -->
+<script>
+if (!window.FX) {
+  function __stubPaintRules() {
+    document.querySelectorAll('[data-rule]').forEach(function (r) {
+      if (!r.hasChildNodes()) r.style.background = 'var(--border)';
+    });
+  }
+  window.FX = {
+    lite: true,
+    __isStub: true,
+    init: function () { return Promise.resolve(); },
+    show: function (pageEl) { __stubPaintRules(); },
+    transition: function (fromEl, toEl, swap) {
+      return Promise.resolve(swap()).then(function () { __stubPaintRules(); });
+    },
+    refresh: function (pageEl) { __stubPaintRules(); },
+    develop: function (imgEl) {},
+    frame: function (imgEl, src) {
+      if (!src) return Promise.resolve();
+      imgEl.src = src;
+      return imgEl.decode ? imgEl.decode().catch(function () {}) : Promise.resolve();
+    },
+  };
+}
+</script>
+
+<script src="/photos.js"></script>
+<script src="/fx.js"></script>
+<script src="/stats.js"></script>
+<script src="/site.js"></script>
+</body>
+</html>

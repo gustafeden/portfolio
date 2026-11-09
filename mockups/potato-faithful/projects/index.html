@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projects — gustaf edén</title>
+<meta name="description" content="Personal projects by Gustaf Edén: Atelier, Bifrost, The Great Exit, OurArchive.">
+<meta property="og:title" content="Projects — gustaf edén">
+<meta property="og:description" content="Personal projects by Gustaf Edén: Atelier, Bifrost, The Great Exit, OurArchive.">
+<meta property="og:url" content="https://www.gustafeden.com/projects/">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Red+Hat+Text:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/fx.css">
+</head>
+<body>
+
+
+<main class="page" data-page="projects" data-crt="full">
+  <nav class="path" data-t data-role="structure" data-nav>
+    <a href="/">gustaf edén</a><span class="sep">/</span>projects
+  </nav>
+  <section class="ledger">
+    <div data-ledger>
+
+      <a class="lrow" href="/projects/atelier/">
+        <span class="ln" data-t data-role="head">Atelier</span>
+        <span class="ld" data-t data-role="body">Phone-to-website photo CMS. The photos on this site come through it.</span>
+        <span class="ls" data-t data-role="body">Flutter, Firebase</span>
+        <span class="ly" data-t data-role="body">2025</span></a>
+      <div class="rule" data-rule></div>
+
+      <a class="lrow" href="/projects/bifrost/">
+        <span class="ln" data-t data-role="head">Bifrost</span>
+        <span class="ld" data-t data-role="body">Cloud-functions-style jobs and services on a Mac mini at home.</span>
+        <span class="ls" data-t data-role="body">Go, React, launchd</span>
+        <span class="ly" data-t data-role="body">2025</span></a>
+      <div class="rule" data-rule></div>
+
+      <a class="lrow" href="/projects/the-great-exit/">
+        <span class="ln" data-t data-role="head">The Great Exit</span>
+        <span class="ld" data-t data-role="body">Multiplayer trading game for a room full of phones, inside a collapsing megacorp.</span>
+        <span class="ls" data-t data-role="body">Dart, WebSockets</span>
+        <span class="ly" data-t data-role="body">2025</span></a>
+      <div class="rule" data-rule></div>
+
+      <a class="lrow" href="/projects/ourarchive/">
+        <span class="ln" data-t data-role="head">OurArchive</span>
+        <span class="ld" data-t data-role="body">Shared household inventory, offline-first, with ISBN scanning.</span>
+        <span class="ls" data-t data-role="body">Flutter, Firestore</span>
+        <span class="ly" data-t data-role="body">2025</span></a>
+
+
+      <div class="rule" data-rule></div>
+    </div>
+  </section>
+</main>
+
+
+<!-- ================= photo viewer (overlay, not a page) ================= -->
+<div class="viewer" id="viewer" role="dialog" aria-label="photo viewer" data-fx-glass>
+  <button class="vclose" id="v-close" type="button" aria-label="close viewer">close</button>
+  <div class="stage">
+    <img id="v-img" alt="">
+    <div class="nav l" data-step="-1"></div><div class="nav r" data-step="1"></div>
+  </div>
+  <aside>
+    <div class="count" id="v-count"></div>
+    <div class="coll" id="v-coll"></div>
+    <div id="v-exif"></div>
+    <div class="vfoot">
+      <a id="v-orig" href="#" target="_blank" rel="noopener">open full size</a>
+      <a href="#" id="v-link">copy link to this frame</a>
+      <div class="k"><kbd>esc</kbd>close <kbd>i</kbd>hide panel</div>
+    </div>
+  </aside>
+</div>
+
+<!-- FX settings are embedded to avoid an initialization fetch. -->
+<script type="application/json" id="fx-settings">
+{
+ "outMs": 350,
+ "holdMs": 0,
+ "inMs": 640,
+ "outEase": "in quad",
+ "inEase": "out cubic",
+ "grainScale": 1,
+ "grainMix": 0.45,
+ "coarse": 140,
+ "patchRel": true,
+ "soft": 0.07,
+ "smooth": false,
+ "sweep": 0,
+ "sweepAngle": 90,
+ "blurOut": 4,
+ "blurIn": 6,
+ "textBlur": 1,
+ "imgBlur": 1,
+ "fade": 0,
+ "drift": 0,
+ "scale": 1,
+ "mode": "element",
+ "split": "word",
+ "spread": 0.45,
+ "order": "structure → text → images",
+ "mirrorOut": true,
+ "orderRand": 0.35,
+ "jitter": 0.35,
+ "sizeSpeed": 0,
+ "halo": 0.5,
+ "tail": 0.45,
+ "seed": 7,
+ "tint": "#A3B18A",
+ "tintAmt": 0,
+ "vcr": 0,
+ "vcrCol": "#D02BD6",
+ "vcrWidth": 1.5,
+ "vcrJag": 0,
+ "vcrPeak": "mid-transition",
+ "chroma": 3.2,
+ "chromaPair": "red / cyan",
+ "scan": 0.72,
+ "scanGap": 5,
+ "roll": 0,
+ "rollH": 70,
+ "rollSpeed": 380,
+ "snow": 0.43,
+ "tear": 13,
+ "textBlurHow": "text-shadow",
+ "noCssBlur": false,
+ "noGrain": false,
+ "scene": "home → page",
+ "crt": "always",
+ "crtCurve": 0.57,
+ "crtRadius": 0,
+ "crtWarp": 0.02,
+ "crtScan": 0.15,
+ "crtScanGap": 2,
+ "crtMask": 0.78,
+ "crtMaskType": "aperture grille",
+ "crtGlow": 0.92,
+ "crtFlicker": 0,
+ "crtRead": 0.25,
+ "photosClean": true,
+ "photoReveal": "interlaced",
+ "touch": false,
+ "touchBloom": 0.09,
+ "touchRing": 0.05,
+ "touchStatic": 0.12,
+ "touchRadius": 38,
+ "touchRadiusImg": 70,
+ "idleGlitch": true,
+ "idleMin": 9000,
+ "idleMax": 24000,
+ "idleAmt": 1
+}
+</script>
+
+
+<!-- Keep instant navigation available if the effects script fails to load. -->
+<script>
+if (!window.FX) {
+  function __stubPaintRules() {
+    document.querySelectorAll('[data-rule]').forEach(function (r) {
+      if (!r.hasChildNodes()) r.style.background = 'var(--border)';
+    });
+  }
+  window.FX = {
+    lite: true,
+    __isStub: true,
+    init: function () { return Promise.resolve(); },
+    show: function (pageEl) { __stubPaintRules(); },
+    transition: function (fromEl, toEl, swap) {
+      return Promise.resolve(swap()).then(function () { __stubPaintRules(); });
+    },
+    refresh: function (pageEl) { __stubPaintRules(); },
+    develop: function (imgEl) {},
+    frame: function (imgEl, src) {
+      if (!src) return Promise.resolve();
+      imgEl.src = src;
+      return imgEl.decode ? imgEl.decode().catch(function () {}) : Promise.resolve();
+    },
+  };
+}
+</script>
+
+<script src="/photos.js"></script>
+<script src="/fx.js"></script>
+<script src="/stats.js"></script>
+<script src="/site.js"></script>
+</body>
+</html>
