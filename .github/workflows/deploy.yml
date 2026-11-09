@@ -20,13 +20,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install build dependency
+        run: npm ci
+
       - name: Install Zola
         uses: taiki-e/install-action@v2
         with:
           tool: zola@0.23.6
 
       - name: Build
-        run: zola build
+        run: npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

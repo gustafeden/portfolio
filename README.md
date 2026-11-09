@@ -16,15 +16,25 @@ Serves on `127.0.0.1:1111` with live reload.
 ## Build
 
 ```
-zola build
+npm ci
+npm run build
 ```
 
-Outputs the static site to `public/` (gitignored). CI runs this on every push.
+Outputs the static site to `public/` (gitignored). Zola builds the pages, then a pinned
+esbuild minifies the shipped JS and CSS in that directory only. `static/` remains readable;
+`zola serve` serves those sources without requiring Node. `npm run check` checks syntax.
+
+The FX canvas uses at most 750,000 pixels and DPR 1; grain is generated locally with no
+texture request. Reading-page transitions group body blocks while preserving word-level
+resting phosphor styling. Motion reduction and missing WebGL keep content readable.
+
+Compare transfer sizes using the same gzip/Brotli settings for both builds, including
+`fx.css` in the optimized FX total and the former grain image in the original total.
 
 ## Deploy
 
 Push to `main`. `.github/workflows/deploy.yml` builds with Zola and deploys `public/` to GitHub
-Pages. There is no manual deploy step.
+Pages, using `npm ci` and `npm run build`. There is no manual deploy step.
 
 ## Photos
 

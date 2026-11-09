@@ -1,0 +1,12 @@
+{
+  "name": "gustaf-portfolio",
+  "private": true,
+  "scripts": {
+    "build": "zola build && npm run minify",
+    "minify": "node scripts/minify.mjs",
+    "check": "node --check static/fx.js && node --check static/site.js && node --check scripts/minify.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
+  }
+}

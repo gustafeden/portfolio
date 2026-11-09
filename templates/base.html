@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="fx-boot">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,13 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Red+Hat+Text:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/site.css">
-<style>html.fx-boot body { visibility: hidden; }</style>
-<noscript><style>html.fx-boot body { visibility: visible; }</style></noscript>
-<script>
-// safety valve (task 6): if boot() never removes fx-boot (JS error, slow network, FX stuck),
-// never leave the page permanently invisible.
-setTimeout(function () { document.documentElement.classList.remove('fx-boot'); }, 2500);
-</script>
+<link rel="stylesheet" href="/fx.css">
 </head>
 <body>
 
@@ -44,10 +38,9 @@ setTimeout(function () { document.documentElement.classList.remove('fx-boot'); }
   </aside>
 </div>
 
-{% include "partials/fx-settings.html" %}
+<script src="/photos.js"></script>
+<script src="/fx.js"></script>
 
-<!-- fx stub: used only if fx.js hasn't loaded (standalone testing / fx.js not shipped yet).
-     Gives every page a working, instant-swap experience with the same window.FX API. -->
 <script>
 if (!window.FX) {
   function __stubPaintRules() {
@@ -60,7 +53,6 @@ if (!window.FX) {
     __isStub: true,
     init: function () { return Promise.resolve(); },
     show: function (pageEl) { __stubPaintRules(); },
-    coldStart: function (pageEl) { __stubPaintRules(); return Promise.resolve(); },
     transition: function (fromEl, toEl, swap) {
       return Promise.resolve(swap()).then(function () { __stubPaintRules(); });
     },
@@ -75,8 +67,6 @@ if (!window.FX) {
 }
 </script>
 
-<script src="/photos.js"></script>
-<script src="/fx.js"></script>
 <script src="/stats.js"></script>
 <script src="/site.js"></script>
 </body>
